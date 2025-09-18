@@ -7,8 +7,8 @@
     @if(empty($this->lines))
         <div class="text-gray-500">Your cart is empty.</div>
     @else
-        <div class="bg-white border rounded">
-            <table class="w-full text-left">
+        <div class="bg-white border rounded overflow-x-auto">
+            <table class="min-w-[720px] w-full text-left">
                 <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-600">
                     <tr>
                         <th class="px-4 py-2">Item</th>

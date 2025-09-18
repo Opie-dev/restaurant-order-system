@@ -14,7 +14,7 @@
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Default Address</th>
                     <th class="px-4 py-3"></th>
                 </tr>
             </thead>
@@ -23,7 +23,16 @@
                     <tr>
                         <td class="px-4 py-3">{{ $user->name }}</td>
                         <td class="px-4 py-3">{{ $user->email }}</td>
-                        <td class="px-4 py-3">{{ $user->role }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700">
+                            @if($user->defaultAddress)
+                                <div>{{ $user->defaultAddress->recipient_name }}</div>
+                                <div class="text-gray-600">{{ $user->defaultAddress->line1 }}@if($user->defaultAddress->line2), {{ $user->defaultAddress->line2 }}@endif</div>
+                                <div class="text-gray-600">{{ $user->defaultAddress->postal_code }} {{ $user->defaultAddress->city }}@if($user->defaultAddress->state), {{ $user->defaultAddress->state }}@endif, {{ $user->defaultAddress->country }}</div>
+                                @if($user->defaultAddress->phone)<div class="text-gray-500">{{ $user->defaultAddress->phone }}</div>@endif
+                            @else
+                                <span class="text-gray-500">—</span>
+                            @endif
+                        </td>
                         <td class="px-4 py-3 text-right">
                             <a href="{{ route('admin.orders.index', ['user' => $user->id]) }}" class="text-purple-600 hover:text-purple-700">View orders</a>
                         </td>

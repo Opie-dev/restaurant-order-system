@@ -25,6 +25,7 @@ class ListUsers extends Component
     {
         return User::query()
             ->where('role', 'customer')
+            ->with(['defaultAddress'])
             ->when($this->search, function ($q) {
                 $q->where('name', 'like', "%{$this->search}%")
                     ->orWhere('email', 'like', "%{$this->search}%");

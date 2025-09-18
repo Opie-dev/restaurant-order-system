@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -49,8 +50,8 @@ class User extends Authenticatable
         return $this->hasMany(UserAddress::class);
     }
 
-    public function defaultAddress()
+    public function defaultAddress(): HasOne
     {
-        return $this->addresses()->where('is_default', true)->first();
+        return $this->hasOne(UserAddress::class)->where('is_default', true);
     }
 }

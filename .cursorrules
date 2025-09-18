@@ -1,0 +1,114 @@
+# Cursor Rules for Restaurant Order System (Laravel 11 + Livewire 3 + Alpine 3 + Tailwind)
+
+## Project Goals
+- Build an Admin/Customer restaurant ordering app.
+- Tech stack: Laravel 11, Livewire v3, Alpine.js v3, Tailwind CSS.
+- Payments via Stripe with webhooks; roles: `admin`, `customer`.
+
+## Architecture & Conventions
+- Authentication: use `laravel/breeze` with `users.role` field (`admin`, `customer`).
+- Authorization: middleware/policies; restrict admin routes to `role:admin`.
+- Database: MySQL/PostgreSQL. Use Eloquent models with standard Laravel naming.
+- Queues: `database` driver initially. Cache: `redis` if available, otherwise `file`.
+- File storage: use `public` disk for images (`storage/app/public`).
+
+## Directory Layout (must follow)
+- Livewire components (PHP classes): `app/Livewire/**`. Blade views: `resources/views/livewire/**`.
+- Blade base layout: `resources/views/layouts/app.blade.php`.
+- Public pages: `/`, `/menu`, `/cart`, `/checkout`, `/order/{code}`, `/receipt/{code}`.
+- Auth pages: `/login`, `/register`, `/orders` (customer history).
+- Admin pages (middleware `role:admin`):
+  - `/admin`, `/admin/menu`, `/admin/menu/create`, `/admin/menu/{id}/edit`
+  - `/admin/categories`, `/admin/availability`, `/admin/orders`, `/admin/orders/{id}`, `/admin/payments`
+
+## Eloquent Models (fields)
+- User: `id, name, email, password, role` (string enum: `admin|customer`).
+- Category: `id, name, is_active`.
+- MenuItem: `id, category_id, name, description, price` (decimal(10,2)), `image_path`, `is_active`.
+- DailyMenuAvailability: `id, menu_item_id, date`, `is_enabled`.
+- Order: `id, user_id (nullable), code` (ULID/unique), `status`, `subtotal`, `tax`, `total`, `payment_status`, `payment_provider`, `payment_ref`, `notes` (nullable).
+- OrderItem: `id, order_id, menu_item_id, name_snapshot`, `unit_price`, `qty`, `line_total`.
+- Payment: `id, order_id, provider`, `amount`, `currency`, `status`, `external_id`, `payload` (json).
+
+## State Machines
+- Order status: `pending -> confirmed -> preparing -> ready -> completed` or `cancelled`.
+- Payment status: `unpaid -> processing -> paid -> refunded -> failed`.
+- Guard transitions in domain methods (avoid arbitrary status updates).
+
+## Coding Standards
+- Follow PSR-12. Use Laravel 11 conventions. No unsafe casts.
+- PHP type-hinting for method signatures and DTOs. Avoid `mixed`/`array` where possible.
+- Prefer early returns; handle errors/edge cases first; avoid deep nesting.
+- Keep comments minimal; explain "why" not "how". No inline noise.
+- Naming: meaningful, full words, no unclear abbreviations. Variables capture intent.
+
+## Livewire and Blade
+- Livewire v3: use `render()` returning Blade view. Use validation rules on components.
+- Blade views use Tailwind classes; Alpine.js for modals, dropdowns, steppers, confirmations.
+- Flash notifications via Alpine store pattern.
+- Do not place business logic in Blade. Keep logic in Livewire classes/services.
+
+## Payments (Stripe)
+- Create PaymentIntent during checkout; store `payment_ref` and `payments` row.
+- Webhook route: `/webhooks/stripe` with signature verification.
+  - `payment_intent.succeeded`: set `payments.status=paid`, `orders.payment_status=paid`, `orders.status=confirmed`.
+  - `payment_intent.payment_failed`: mark failed.
+- Use idempotency keys for outbound calls. No secrets in repo.
+
+## Security
+- Enforce CSRF on forms (except verified webhooks). Validate webhook signatures.
+- Rate-limit add-to-cart and checkout. Validate item `is_active` and availability today.
+- Restrict admin routes via `role:admin` middleware; consider policies for models.
+
+## Migrations & Seeding
+- Migrations list (in order):
+  1) `create_categories_table`
+  2) `create_menu_items_table`
+  3) `create_daily_menu_availability_table`
+  4) `create_orders_table`
+  5) `create_order_items_table`
+  6) `create_payments_table`
+  7) add `role` to `users`
+- Seeders: admin user; sample categories/items with images; enable today’s availability.
+
+## Testing
+- Feature: catalog visibility, add-to-cart, checkout, webhook updates.
+- Unit: order totals, state transitions.
+- Browser: happy path purchase.
+- Prefer PHPUnit (default) with Laravel test helpers; Pest optional.
+
+## Tooling
+- Static analysis: consider `phpstan` (level 6+) and `laravel/pint` for formatting.
+- Env: `.env` must include Stripe keys, queue connection, cache, filesystem.
+- Do not commit secrets or large binaries.
+
+## Commit & PR Guidance
+- Small, focused edits. Use imperative messages: "Add X", "Fix Y".
+- Include migration/seed/run steps in PR description when relevant.
+
+## What to Generate by Default
+- When asked to implement a feature:
+  - Eloquent models, factories, migrations, policies as needed.
+  - Livewire components under `app/Livewire/...` and Blade views under `resources/views/livewire/...`.
+  - Routes in `routes/web.php`, controllers only when helpful; prefer Livewire pages.
+  - Tailwind/Alpine snippets for UI interactions.
+  - Tests covering the happy path and key guards.
+
+## Things to Avoid
+- Avoid putting secrets in code or tests.
+- Avoid deep logic in controllers or Blade; keep in services/Livewire.
+- Avoid changing indentation style; match existing files.
+
+## Plan Alignment Checklist (auto-reference)
+- Roles and auth via Breeze.
+- Catalog shows only active + available-today items.
+- Cart supports guests (session) and authed users (DB).
+- Checkout creates Order + OrderItems, computes totals, and initiates payment.
+- Order tracking page updates in real time (poll or events).
+- Admin can CRUD menu, manage availability, view orders and payments.
+
+## Cursor Behavior
+- Prefer creating/editing files directly rather than dumping code in chat.
+- Show only relevant code excerpts with file paths when citing existing code.
+- When multiple changes are needed, propose atomic edits per file.
+- After edits, check for linter/static analysis errors and fix before concluding.

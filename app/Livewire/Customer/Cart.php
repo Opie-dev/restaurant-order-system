@@ -7,7 +7,7 @@ use Livewire\Component;
 use App\Services\CartService;
 use App\Models\CartItem;
 
-#[Layout('layouts.app')]
+#[Layout('layouts.customer')]
 class Cart extends Component
 {
     public function increment(int $id): void

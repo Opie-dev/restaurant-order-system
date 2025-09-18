@@ -16,6 +16,7 @@ class ListOrders extends Component
 
     public string $search = '';
     public string $status = 'all';
+    public ?int $user = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -52,6 +53,9 @@ class ListOrders extends Component
             })
             ->when($this->status !== 'all', function ($q) {
                 $q->where('payment_status', $this->status);
+            })
+            ->when($this->user !== null, function ($q) {
+                $q->where('user_id', $this->user);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10);

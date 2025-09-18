@@ -116,18 +116,20 @@
             @endforeach
         </table>
 
-        <div class="px-4 py-3 bg-white border-t border-gray-200 flex items-center justify-between">
-            <div class="text-sm text-gray-600">
-                @if($this->orders->total() > 0)
-                    Showing {{ $this->orders->firstItem() }} to {{ $this->orders->lastItem() }} of {{ $this->orders->total() }} results
-                @else
-                    Showing 0 results
-                @endif
+        @if($this->orders->hasPages())
+            <div class="px-4 py-3 bg-white border-t border-gray-200 flex items-center justify-between">
+                <div class="text-sm text-gray-600">
+                    @if($this->orders->total() > 0)
+                        Showing {{ $this->orders->firstItem() }} to {{ $this->orders->lastItem() }} of {{ $this->orders->total() }} results
+                    @else
+                        Showing 0 results
+                    @endif
+                </div>
+                <div>
+                    {{ $this->orders->links('vendor.pagination.custom') }}
+                </div>
             </div>
-            <div>
-                {{ $this->orders->links('vendor.pagination.custom') }}
-            </div>
-        </div>
+        @endif
 
         @if($this->orders->count() === 0)
             <div class="p-6 text-center text-gray-500">No orders yet.</div>

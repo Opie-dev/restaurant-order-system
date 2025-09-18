@@ -16,6 +16,7 @@
                     <a href="{{ route('admin.menu.index') }}" class="hover:underline">Menu</a>
                     <a href="{{ route('admin.categories.index') }}" class="hover:underline">Categories</a>
                     <a href="{{ route('admin.orders.index') }}" class="hover:underline">Orders</a>
+                    <a href="{{ route('admin.customers.index') }}" class="hover:underline">Customers</a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="hover:underline">Logout</button>

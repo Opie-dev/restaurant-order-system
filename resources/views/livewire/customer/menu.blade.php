@@ -257,7 +257,7 @@
                         </svg>
                         Proceed to Checkout
                     </button>
-                    <button wire:click="clear" class="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors cursor-pointer">
+                    <button x-data @click.prevent="if (confirm('Clear all items from your order?')) { $wire.clear() }" class="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors cursor-pointer">
                         Clear Order
                     </button>
                 </div>

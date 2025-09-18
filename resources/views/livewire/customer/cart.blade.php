@@ -1,4 +1,4 @@
-<div class="p-6 space-y-6">
+<div class="p-6 space-y-6" x-data>
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-semibold">Your Cart</h1>
         <a href="{{ route('menu') }}" class="text-sm underline">Continue order</a>
@@ -68,7 +68,7 @@
         </div>
 
         <div class="flex items-center justify-end gap-3">
-            <button wire:click="clear" class="px-4 py-2 border rounded">Clear</button>
+            <button @click.prevent="if (confirm('Clear all items from your cart?')) { $wire.clear() }" class="px-4 py-2 border rounded cursor-pointer">Clear</button>
             <a href="{{ route('checkout') }}" class="px-4 py-2 bg-indigo-600 text-white rounded">Checkout</a>
         </div>
     @endif

@@ -24,7 +24,7 @@
                 <a href="{{ route('addresses') }}" class="text-sm text-purple-600 hover:text-purple-700">Manage addresses</a>
             </div>
             @if($deliver)
-                @php $default = auth()->user()->defaultAddress(); @endphp
+                @php $default = auth()->user()->defaultAddress; @endphp
                 @if(!$default)
                     <div class="text-gray-600 text-sm">No default address yet. <a href="{{ route('addresses') }}" class="text-purple-600">Add one</a> to proceed.</div>
                 @else

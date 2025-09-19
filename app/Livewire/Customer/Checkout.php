@@ -24,7 +24,7 @@ class Checkout extends Component
     public function mount(): void
     {
         if (Auth::check()) {
-            $default = Auth::user()->defaultAddress();
+            $default = Auth::user()->defaultAddress;
             $this->addressId = $default?->id;
         }
     }
@@ -32,7 +32,7 @@ class Checkout extends Component
     public function updatedDeliver(): void
     {
         if ($this->deliver && Auth::check()) {
-            $this->addressId = Auth::user()->defaultAddress()?->id;
+            $this->addressId = Auth::user()->defaultAddress?->id;
         }
     }
 

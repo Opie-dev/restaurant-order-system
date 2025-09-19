@@ -63,8 +63,16 @@
                                 <div class="font-medium">{{ $item->name }}</div>
                                 <div class="text-sm text-gray-500">{{ $item->category?->name ?? 'Uncategorized' }}</div>
                                 <div class="text-xs text-gray-500">Stock: {{ (int)($item->stock ?? 0) }}</div>
+                                @if($item->type)
+                                    <div class="text-xs text-blue-600">{{ ucfirst($item->type) }}</div>
+                                @endif
                             </div>
-                            <div class="font-semibold">RM {{ number_format($item->price, 2) }}</div>
+                            <div class="text-right">
+                                <div class="font-semibold">RM {{ number_format($item->price, 2) }}</div>
+                                @if($item->base_price && $item->type === 'set')
+                                    <div class="text-xs text-gray-500">Base: RM {{ number_format($item->base_price, 2) }}</div>
+                                @endif
+                            </div>
                         </div>
                         <div class="flex items-center justify-between text-sm">
                             <span class="px-2 py-1 rounded {{ $item->is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">

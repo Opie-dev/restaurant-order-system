@@ -22,13 +22,73 @@ class Menu extends Component
         $this->cartService = $cartService;
     }
 
+    public array $config = [];
+    public ?int $configItemId = null;
+
+    public function startConfigure(int $menuItemId): void
+    {
+        $item = MenuItem::findOrFail($menuItemId);
+        $this->configItemId = $menuItemId;
+
+        // Reset configuration for new item
+        $this->config = [
+            'type' => $item->type ?? 'ala_carte',
+            'options' => [],
+            'addons' => [],
+        ];
+
+        $this->dispatch('open-config');
+    }
+
+    public function resetConfig(): void
+    {
+        $this->config = [
+            'type' => 'ala_carte',
+            'options' => [],
+            'addons' => [],
+        ];
+        $this->configItemId = null;
+    }
+
+    public function addConfiguredToCart(int $qty = 1): void
+    {
+        if (!Auth::check()) {
+            $this->redirectRoute('login');
+            return;
+        }
+        $item = MenuItem::findOrFail((int)$this->configItemId);
+        $selections = [];
+
+        // Add selected options (if any)
+        if (!empty($this->config['options'])) {
+            $selections['options'] = $this->config['options'];
+        }
+
+        // Add selected addons (if any)
+        if (!empty($this->config['addons'])) {
+            $selections['addons'] = $this->config['addons'];
+        }
+
+        $this->cartService->add($item->id, $qty, $selections);
+        $this->dispatch('flash', ['type' => 'success', 'message' => 'Added to cart']);
+        $this->dispatch('close-config');
+        $this->config = [];
+        $this->configItemId = null;
+    }
+
     public function addToCart(int $menuItemId): void
     {
         if (!Auth::check()) {
             $this->redirectRoute('login');
             return;
         }
-        $this->cartService->add($menuItemId, 1);
+        // For items with options/addons, open configurator instead
+        $item = MenuItem::findOrFail($menuItemId);
+        if (!empty($item->options) || !empty($item->addons)) {
+            $this->startConfigure($menuItemId);
+            return;
+        }
+        $this->cartService->add($menuItemId, 1, []);
         $this->dispatch('flash', ['type' => 'success', 'message' => 'Added to cart']);
     }
 
@@ -57,7 +117,7 @@ class Menu extends Component
             ->orderByRaw('(CASE WHEN COALESCE(stock, 0) > 0 THEN 0 ELSE 1 END)')
             ->orderBy('position');
 
-        return $query->get(['id', 'category_id', 'name', 'description', 'price', 'image_path', 'is_active', 'stock']);
+        return $query->get(['id', 'category_id', 'name', 'description', 'price', 'base_price', 'type', 'options', 'addons', 'image_path', 'is_active', 'stock', 'tag']);
     }
 
     public function render()
@@ -75,6 +135,50 @@ class Menu extends Component
     {
         $cart = $this->cartService->current();
         return $this->cartService->getLines($cart);
+    }
+
+    public function getTotalPrice(): float
+    {
+        if (!$this->configItemId) {
+            return 0.0;
+        }
+
+        $item = MenuItem::find($this->configItemId);
+        if (!$item) {
+            return 0.0;
+        }
+
+        $subtotal = 0.0;
+
+        // Base price
+        if ($item->type === 'set') {
+            $subtotal += (float) ($item->base_price ?? 0);
+        } else {
+            $subtotal += (float) ($item->price ?? 0);
+        }
+
+        // Add selected option price (if any) - Options don't have individual pricing
+        // Options are just choices, no additional cost
+
+        // Add selected addon prices (if any)
+        if (!empty($this->config['addons'])) {
+            foreach ($this->config['addons'] as $addonGroup) {
+                if (isset($addonGroup['options'])) {
+                    foreach ($addonGroup['options'] as $option) {
+                        $subtotal += (float) ($option['price'] ?? 0);
+                    }
+                }
+            }
+        }
+
+        return round($subtotal, 2);
+    }
+
+    public function getTotalWithTax(): float
+    {
+        $subtotal = $this->getTotalPrice();
+        $tax = $subtotal * 0.1;
+        return round($subtotal + $tax, 2);
     }
 
     public function getCartTotalsProperty(): array

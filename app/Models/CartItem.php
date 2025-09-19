@@ -10,11 +10,12 @@ class CartItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['cart_id', 'menu_item_id', 'qty', 'unit_price'];
+    protected $fillable = ['cart_id', 'menu_item_id', 'qty', 'unit_price', 'selections'];
 
     protected $casts = [
         'qty' => 'integer',
         'unit_price' => 'decimal:2',
+        'selections' => 'array',
     ];
 
     public function cart(): BelongsTo

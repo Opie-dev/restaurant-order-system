@@ -20,97 +20,182 @@ class MenuItemSeeder extends Seeder
 
         // Ensure storage/app/public/menu exists (served via public/storage/menu after storage:link)
         Storage::disk('public')->makeDirectory('menu');
-
-        $data = [
-            'Main Dishes' => [
-                'Pizzas' => [
-                    ['Margherita', 9.99, 'Classic tomato and mozzarella pizza'],
-                    ['Pepperoni', 11.49, 'Spicy pepperoni with melted cheese'],
-                    ['Hawaiian', 12.99, 'Ham and pineapple pizza'],
-                ],
-                'Burgers' => [
-                    ['Classic Burger', 8.49, 'Beef patty with lettuce and tomato'],
-                    ['Cheese Burger', 8.99, 'Classic burger with cheddar cheese'],
-                    ['Bacon Burger', 10.99, 'Burger with crispy bacon and cheese'],
-                ],
-                'Pasta' => [
-                    ['Spaghetti Bolognese', 11.99, 'Classic meat sauce pasta'],
-                    ['Fettuccine Alfredo', 12.99, 'Creamy parmesan sauce pasta'],
-                ]
+        $optionGroups = [
+            'ikan' => [
+                ['name' => 'Talapia Merah Bakar', 'enabled' => true],
+                ['name' => 'Cencaru Bakar', 'enabled' => true],
+                ['name' => 'Kembung Bakar', 'enabled' => true],
+                ['name' => 'Pari Bakar', 'enabled' => true],
             ],
-            'Sides' => [
-                'Salads' => [
-                    ['Caesar Salad', 7.49, 'Romaine lettuce with caesar dressing'],
-                    ['Greek Salad', 7.99, 'Mixed vegetables with feta cheese'],
-                    ['Garden Salad', 6.99, 'Fresh mixed greens with vinaigrette'],
-                ],
-                'Appetizers' => [
-                    ['Garlic Bread', 4.99, 'Toasted bread with garlic butter'],
-                    ['Mozzarella Sticks', 5.99, 'Breaded and fried cheese sticks'],
-                ]
+            'sayur' => [
+                ['name' => 'Terung', 'enabled' => true],
+                ['name' => 'Kobis', 'enabled' => true],
+                ['name' => 'Kangkung', 'enabled' => true],
+                ['name' => 'Bendi', 'enabled' => true],
+                ['name' => 'Ulam', 'enabled' => true],
+                ['name' => 'Tauge', 'enabled' => true],
+                ['name' => 'Peria', 'enabled' => true],
+                ['name' => 'Kacang Panjang', 'enabled' => true],
             ],
-            'Beverages' => [
-                'Soft Drinks' => [
-                    ['Cola', 1.99, 'Classic cola drink'],
-                    ['Sprite', 1.99, 'Lemon-lime soda'],
-                ],
-                'Juices' => [
-                    ['Orange Juice', 2.49, 'Fresh squeezed orange juice'],
-                    ['Apple Juice', 2.49, 'Pure apple juice'],
-                ]
-            ]
+            'side' => [
+                ['name' => 'Bergedil', 'enabled' => true],
+                ['name' => 'Tempe Goreng', 'enabled' => true],
+                ['name' => 'Tauhu Goreng', 'enabled' => true],
+                ['name' => 'Air Asam', 'enabled' => true],
+                ['name' => 'Air Asam Bekas', 'enabled' => true],
+                ['name' => 'Sambal Belacan', 'enabled' => true],
+                ['name' => 'Telor Dadar', 'enabled' => true],
+                ['name' => 'Nasi Putih', 'enabled' => true],
+            ],
+            'ayam_bahagian' => [
+                ['name' => 'Peha / Thigh', 'enabled' => true],
+                ['name' => 'Kepak / Wing', 'enabled' => true],
+                ['name' => 'Dada / Breast', 'enabled' => true],
+            ],
+            'ayam_jenis' => [
+                ['name' => 'Ayam Goreng', 'enabled' => true],
+                ['name' => 'Ayam Kari', 'enabled' => true],
+            ],
         ];
 
-        foreach ($data as $categoryName => $subcategories) {
-            // Create main category
-            $mainCategory = Category::firstOrCreate(
-                ['name' => $categoryName],
-                ['is_active' => true]
-            );
-
-            foreach ($subcategories as $subcategoryName => $items) {
-                // Create subcategory under main category
-                $subcategory = Category::firstOrCreate(
-                    ['name' => $subcategoryName],
+        $menu = [
+            //set
+            [
+                'name' => 'Set Nasi Ikan Bakar',
+                'description' => 'Set lengkap dengan nasi putih, ikan bakar dan pilihan sayur.',
+                'enabled' => true,
+                'base_price' => 10.00,
+                'type' => 'set', // or ala_carte
+                'addons' => [
                     [
-                        'is_active' => true,
-                        'parent_id' => $mainCategory->id,
+                        'name' => 'Pilih Ikan',
+                        'enabled' => true,
+                        'rules' => ['required', 'one'],
+                        'options' => $optionGroups['ikan']
+                    ],
+                    [
+                        'name' => 'Pilih Sayur',
+                        'enabled' => true,
+                        'rules' => ['required', 'multiple'],
+                        'options' => $optionGroups['sayur']
+                    ],
+                    [
+                        'name' => 'AddOns Side',
+                        'enabled' => true,
+                        'rules' => ['optional', 'multiple'],
+                        'options' => $optionGroups['side']
                     ]
-                );
+                ]
+            ],
+            [
+                'name' => 'Set Nasi Ayam',
+                'description' => 'Set lengkap dengan nasi putih, ikan bakar dan pilihan sayur.',
+                'base_price' => 10.00,
+                'type' => 'set', // or ala_carte
+                'addons' => [
+                    [
+                        'name' => 'Pilih Jenis Ayam',
+                        'enabled' => true,
+                        'rules' => ['required', 'one'],
+                        'options' => $optionGroups['ayam_jenis']
+                    ],
+                    [
+                        'name' => 'Pilih Sayur',
+                        'enabled' => true,
+                        'rules' => ['required', 'multiple'],
+                        'options' => $optionGroups['sayur']
+                    ],
+                    [
+                        'name' => 'AddOns Side',
+                        'enabled' => true,
+                        'rules' => ['optional', 'multiple'],
+                        'options' => $optionGroups['side']
+                    ]
+                ]
+            ],
+            //ala carte
+            [
+                'name' => 'Ayam',
+                'description' => 'Ayam pilihan',
+                'enabled' => true,
+                'type' => 'ala_carte',
+                'options' => [
+                    [
+                        'name' => 'Choose Type',
+                        'rules' => ['required', 'one'],
+                        'options' => $optionGroups['ayam_jenis']
+                    ],
+                    [
+                        'name' => 'Choose Part',
+                        'rules' => ['required', 'one'],
+                        'options' => $optionGroups['ayam_bahagian']
+                    ]
+                ],
+            ],
+            [
+                'name' => 'Ikan',
+                'description' => 'Ikan pilihan',
+                'enabled' => true,
+                'type' => 'ala_carte',
+                'options' => [
+                    [
+                        'name' => 'Choose Fish',
+                        'rules' => ['required', 'one'],
+                        'options' => $optionGroups['ikan']
+                    ]
+                ]
+            ],
+            [
+                'name' => 'Sayur',
+                'description' => 'Sayur pilihan',
+                'enabled' => true,
+                'type' => 'ala_carte',
+                'options' => [
+                    [
+                        'name' => 'Choose Vegetables',
+                        'rules' => ['required', 'multiple'],
+                        'options' => $optionGroups['sayur']
+                    ]
+                ]
+            ],
+            [
+                'name' => 'Side',
+                'description' => 'Side pilihan',
+                'enabled' => true,
+                'type' => 'ala_carte',
+                'options' => [
+                    [
+                        'name' => 'Choose Sides',
+                        'rules' => ['optional', 'multiple'],
+                        'options' => $optionGroups['side']
+                    ]
+                ]
+            ],
 
-                $position = (int) (MenuItem::where('category_id', $subcategory->id)->max('position') ?? 0);
+        ];
 
-                foreach ($items as [$name, $price, $description]) {
-                    $position++;
-                    $seed = Str::slug($name . '-' . $subcategoryName);
+        // Create a default category for the new items
+        $category = Category::firstOrCreate(
+            ['name' => 'Ikan Bakar Temoh'],
+            ['is_active' => true]
+        );
 
-                    $imagePath = null;
-                    try {
-                        $bytes = @file_get_contents("https://picsum.photos/seed/{$seed}/640/360");
-                        if ($bytes !== false) {
-                            $relative = 'menu/' . $seed . '.jpg';
-                            Storage::disk('public')->put($relative, $bytes);
-                            $imagePath = $relative;
-                        }
-                    } catch (\Throwable $e) {
-                        // Ignore image download errors; keep image_path null
-                    }
-
-                    MenuItem::firstOrCreate(
-                        [
-                            'name' => $name,
-                            'category_id' => $subcategory->id,
-                        ],
-                        [
-                            'description' => $description,
-                            'price' => $price,
-                            'is_active' => true,
-                            'image_path' => $imagePath,
-                            'position' => $position,
-                        ]
-                    );
-                }
-            }
+        foreach ($menu as $itemData) {
+            $item = MenuItem::firstOrCreate(
+                ['name' => $itemData['name']],
+                [
+                    'category_id' => $category->id,
+                    'description' => $itemData['description'] ?? '',
+                    'price' => $itemData['base_price'] ?? 0,
+                    'base_price' => $itemData['base_price'] ?? null,
+                    'type' => $itemData['type'] ?? 'ala_carte',
+                    'options' => $itemData['options'] ?? null,
+                    'addons' => $itemData['addons'] ?? null,
+                    'is_active' => $itemData['enabled'] ?? true,
+                    'enabled' => $itemData['enabled'] ?? true,
+                    'stock' => 100, // Default stock
+                ]
+            );
         }
     }
 }

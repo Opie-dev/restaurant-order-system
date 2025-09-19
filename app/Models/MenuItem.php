@@ -15,16 +15,25 @@ class MenuItem extends Model
         'name',
         'description',
         'price',
+        'base_price',
         'image_path',
         'is_active',
+        'enabled',
         'position',
         'stock',
         'tag',
+        'type',
+        'options',
+        'addons',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'base_price' => 'decimal:2',
         'is_active' => 'boolean',
+        'enabled' => 'boolean',
+        'options' => 'array',
+        'addons' => 'array',
         'position' => 'integer',
         'stock' => 'integer',
     ];

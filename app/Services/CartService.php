@@ -23,15 +23,30 @@ class CartService
         return Cart::firstOrCreate(['guest_token' => $token]);
     }
 
-    public function add(int $menuItemId, int $qty = 1): void
+    public function add(int $menuItemId, int $qty = 1, array $selections = []): void
     {
         $item = MenuItem::where('is_active', true)->findOrFail($menuItemId);
         $cart = $this->current();
-        $line = CartItem::firstOrNew([
-            'cart_id' => $cart->id,
-            'menu_item_id' => $item->id,
-        ]);
-        $line->unit_price = $line->exists ? $line->unit_price : $item->price;
+        // Find existing line with same selections; else create new
+        $line = CartItem::where('cart_id', $cart->id)
+            ->where('menu_item_id', $item->id)
+            ->where(function ($q) use ($selections) {
+                if (empty($selections)) {
+                    $q->whereNull('selections');
+                } else {
+                    $q->where('selections', json_encode($selections));
+                }
+            })->first();
+
+        if (!$line) {
+            $line = new CartItem([
+                'cart_id' => $cart->id,
+                'menu_item_id' => $item->id,
+                'qty' => 0,
+            ]);
+            $line->selections = !empty($selections) ? $selections : null;
+            $line->unit_price = $this->computeUnitPrice($item, $selections);
+        }
 
         $currentQty = (int) ($line->qty ?? 0);
         $desiredQty = $currentQty + $qty;
@@ -66,6 +81,31 @@ class CartService
         }
 
         $line->save();
+    }
+
+    private function computeUnitPrice(MenuItem $item, array $selections): float
+    {
+        // Default to legacy price
+        $price = (float) ($item->price ?? 0);
+
+        if (($item->type ?? null) === 'ala_carte') {
+            // Expect selections: { option: { name, price } }
+            $selected = $selections['option']['price'] ?? null;
+            return (float) ($selected ?? $price);
+        }
+
+        if (($item->type ?? null) === 'set') {
+            $base = (float) ($item->base_price ?? 0);
+            $addonTotal = 0.0;
+            foreach (($selections['addons'] ?? []) as $group) {
+                foreach (($group['options'] ?? []) as $opt) {
+                    $addonTotal += (float) ($opt['price'] ?? 0);
+                }
+            }
+            return round($base + $addonTotal, 2);
+        }
+
+        return $price;
     }
 
     public function setQty(int $menuItemId, int $qty): void

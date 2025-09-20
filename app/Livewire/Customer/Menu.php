@@ -187,70 +187,45 @@ class Menu extends Component
         return $this->cartService->getTotals($cart);
     }
 
-    public function increment(int $menuItemId): void
+    public function increment(int $menuItemId, ?int $lineId = null): void
     {
         if (!Auth::check()) {
             $this->redirectRoute('login');
             return;
         }
-        // Check stock before trying to increment
-        $cart = $this->cartService->current();
-        $line = $cart->items()->where('menu_item_id', $menuItemId)->first();
-        $item = $line?->menuItem ?? MenuItem::find($menuItemId);
-
-        if ($item && isset($item->stock) && (int) $item->stock <= 0) {
-            $this->dispatch('flash', ['type' => 'error', 'message' => 'Not available: out of stock']);
-            return;
+        if ($lineId) {
+            $this->cartService->incrementLine($lineId);
+        } else {
+            $this->cartService->increment($menuItemId);
         }
-
-        // If at stock cap, no-op with feedback
-        if ($line && $item && isset($item->stock) && $line->qty >= (int) $item->stock) {
-            $this->dispatch('flash', ['type' => 'error', 'message' => 'Reached available stock']);
-            return;
-        }
-
-        $this->cartService->increment($menuItemId);
         $this->dispatch('flash', ['type' => 'success', 'message' => 'Quantity updated']);
     }
 
-    public function decrement(int $menuItemId): void
+    public function decrement(int $menuItemId, ?int $lineId = null): void
     {
         if (!Auth::check()) {
             $this->redirectRoute('login');
             return;
         }
-
-        $cart = $this->cartService->current();
-        $line = $cart->items()->where('menu_item_id', $menuItemId)->first();
-        $item = $line?->menuItem ?? MenuItem::find($menuItemId);
-
-        if (!$line) {
-            $this->dispatch('flash', ['type' => 'error', 'message' => 'Item not found in cart']);
-            return;
+        if ($lineId) {
+            $this->cartService->decrementLine($lineId);
+        } else {
+            $this->cartService->decrement($menuItemId);
         }
-
-        // If out of stock, do not allow decrement or increment actions
-        if ($item && isset($item->stock) && (int) $item->stock <= 0) {
-            $this->dispatch('flash', ['type' => 'error', 'message' => 'Not available: out of stock']);
-            return;
-        }
-
-        if ($line->qty <= 1) {
-            $this->dispatch('flash', ['type' => 'error', 'message' => 'Minimum quantity is 1. Use remove button to delete item.']);
-            return;
-        }
-
-        $this->cartService->decrement($menuItemId);
         $this->dispatch('flash', ['type' => 'success', 'message' => 'Quantity updated']);
     }
 
-    public function remove(int $menuItemId): void
+    public function remove(int $menuItemId, ?int $lineId = null): void
     {
         if (!Auth::check()) {
             $this->redirectRoute('login');
             return;
         }
-        $this->cartService->remove($menuItemId);
+        if ($lineId) {
+            $this->cartService->removeLine($lineId);
+        } else {
+            $this->cartService->remove($menuItemId);
+        }
         $this->dispatch('flash', ['type' => 'success', 'message' => 'Item removed from cart']);
     }
 

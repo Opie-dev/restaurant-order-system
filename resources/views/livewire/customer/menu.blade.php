@@ -155,66 +155,77 @@
             <div class="flex-1 overflow-y-auto p-4 space-y-4">
                 @if($this->cartCount > 0)
                     @foreach($this->cartLines as $line)
-                        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                            <div class="flex items-center gap-4">
-                                <!-- Item Image -->
-                                <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                    @php
-                                        $src = Str::startsWith($line['item']->image_path, ['http://','https://']) ? $line['item']->image_path : ($line['item']->image_path ? asset('storage/' . $line['item']->image_path) : null);
-                                    @endphp
-                                    @if($src)
-                                        <img src="{{ $src }}" class="w-full h-full object-cover" alt="{{ $line['item']->name }}" />
-                                    @else
-                                        <div class="w-full h-full grid place-content-center text-gray-400">
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 relative">
+                            <button wire:click="remove({{ $line['item']->id }}, {{ $line['id'] }})" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-500 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                            @php 
+                                $sel = $line['selections'] ?? []; 
+                                $optionNames = collect($sel['options'] ?? [])->flatMap(fn($g) => collect($g['options'] ?? [])->pluck('name'))->filter()->values()->implode(', ');
+                                $basePrice = ($line['item']->type === 'set') ? (float)($line['item']->base_price ?? 0) : (float)($line['item']->price ?? 0);
+                            @endphp
+
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <div class="font-semibold text-gray-900">{{ $line['item']->name }}</div>
+                                    <div class="text-xs text-gray-600 mt-1">Base Price: RM {{ number_format($basePrice, 2) }}</div>
+
+                                    @if(!empty($sel['options']))
+                                        <div class="mt-2">
+                                            <div class="text-xs text-gray-500 mb-1">Selected:</div>
+                                            <ul class="text-xs text-gray-800 space-y-0.5">
+                                                @foreach($sel['options'] as $g)
+                                                    @foreach(($g['options'] ?? []) as $opt)
+                                                        <li>• {{ $opt['name'] }}</li>
+                                                    @endforeach
+                                                @endforeach
+                                            </ul>
                                         </div>
                                     @endif
-                                </div>
 
-                                <!-- Item Details -->
-                                    <div class="flex-1 min-w-0">
-                                    <h3 class="font-semibold text-gray-800 text-base mb-2">{{ $line['item']->name }}</h3>
-
-                                    @php $outOfStock = isset($line['item']->stock) && ((int)$line['item']->stock <= 0); @endphp
-                                    <!-- Quantity Controls or Out-of-Stock Notice -->
-                                    @if($outOfStock)
-                                        <div class="flex items-center gap-2">
-                                            <span class="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700">Not available</span>
-                                        </div>
-                                    @else
-                                        <div class="flex items-center gap-2">
-                                            <button wire:click="decrement({{ $line['item']->id }})" 
-                                                class="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-600 transition-colors"
-                                                @disabled(isset($line['item']->stock) && $line['qty'] <= 1)>
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
-                                                </svg>
-                                            </button>
-                                            <span class="w-6 text-center font-medium text-sm">{{ $line['qty'] }}</span>
-                                            <button wire:click="increment({{ $line['item']->id }})" 
-                                                class="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-600 transition-colors"
-                                                @disabled(isset($line['item']->stock) && ((int)$line['item']->stock <= 0 || $line['qty'] >= (int)$line['item']->stock))>
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                                </svg>
-                                            </button>
+                                    @if(!empty($sel['addons']))
+                                        <div class="mt-2">
+                                            <div class="text-xs text-gray-500 mb-1">Addons:</div>
+                                            <ul class="text-xs text-gray-800 space-y-0.5">
+                                                @foreach($sel['addons'] as $g)
+                                                    @foreach(($g['options'] ?? []) as $opt)
+                                                        @php $p = (float)($opt['price'] ?? 0); @endphp
+                                                        <li class="flex items-center justify-between">
+                                                            <span>• {{ $opt['name'] }}</span>
+                                                            @if($p > 0)
+                                                                <span class="ml-2 px-2 py-0.5 rounded bg-gray-100 text-gray-700">+RM {{ number_format($p, 2) }}</span>
+                                                            @endif
+                                                        </li>
+                                                    @endforeach
+                                                @endforeach
+                                            </ul>
                                         </div>
                                     @endif
-                                </div>
 
-                                <!-- Price and Remove Button -->
-                                <div class="flex flex-col items-end gap-2 pr-2 pb-2">
-                                    <span class="font-bold text-gray-800 text-base">RM {{ number_format($line['line_total'], 2) }}</span>
-                                    
-                                    <!-- Remove Button -->
-                                    <button wire:click="remove({{ $line['item']->id }})" 
-                                        class="w-6 h-6 rounded bg-red-100 hover:bg-red-200 flex items-center justify-center text-red-500 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                    </button>
+                                    <div class="flex items-center justify-between mt-3">
+                                        @php $outOfStock = isset($line['item']->stock) && ((int)$line['item']->stock <= 0); @endphp
+                                        <div>
+                                            @if($outOfStock)
+                                                <span class="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700">Not available</span>
+                                            @else
+                                                <div class="flex items-center gap-3">
+                                                    <button wire:click="decrement({{ $line['item']->id }}, {{ $line['id'] }})" class="w-7 h-7 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-600 transition-colors" @disabled(isset($line['item']->stock) && $line['qty'] <= 1)>
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                                                    </button>
+                                                    <span class="min-w-[1.5rem] text-center font-medium text-sm px-2 py-0.5 rounded bg-gray-50">{{ $line['qty'] }}</span>
+                                                    <button wire:click="increment({{ $line['item']->id }}, {{ $line['id'] }})" class="w-7 h-7 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-600 transition-colors" @disabled(isset($line['item']->stock) && ((int)$line['item']->stock <= 0 || $line['qty'] >= (int)$line['item']->stock))>
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        
+                                    </div>
+
+                                    <div class="border-t border-gray-200 mt-3 pt-2 flex items-center justify-between">
+                                        <span class="text-xs text-gray-500">Item Total</span>
+                                        <span class="font-bold text-gray-900">RM {{ number_format($line['line_total'], 2) }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

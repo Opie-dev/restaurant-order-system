@@ -85,27 +85,20 @@ class CartService
 
     private function computeUnitPrice(MenuItem $item, array $selections): float
     {
-        // Default to legacy price
-        $price = (float) ($item->price ?? 0);
+        // Base price depends on type
+        $base = ($item->type === 'set')
+            ? (float) ($item->base_price ?? 0)
+            : (float) ($item->price ?? 0);
 
-        if (($item->type ?? null) === 'ala_carte') {
-            // Expect selections: { option: { name, price } }
-            $selected = $selections['option']['price'] ?? null;
-            return (float) ($selected ?? $price);
-        }
-
-        if (($item->type ?? null) === 'set') {
-            $base = (float) ($item->base_price ?? 0);
-            $addonTotal = 0.0;
-            foreach (($selections['addons'] ?? []) as $group) {
-                foreach (($group['options'] ?? []) as $opt) {
-                    $addonTotal += (float) ($opt['price'] ?? 0);
-                }
+        // Options have no price; only addons add cost
+        $addonTotal = 0.0;
+        foreach (($selections['addons'] ?? []) as $group) {
+            foreach (($group['options'] ?? []) as $opt) {
+                $addonTotal += (float) ($opt['price'] ?? 0);
             }
-            return round($base + $addonTotal, 2);
         }
 
-        return $price;
+        return round($base + $addonTotal, 2);
     }
 
     public function setQty(int $menuItemId, int $qty): void
@@ -152,12 +145,43 @@ class CartService
     {
         return $cart->items()->with('menuItem')->get()->map(function ($item) {
             return [
+                'id' => $item->id,
                 'item' => $item->menuItem,
                 'qty' => $item->qty,
                 'unit_price' => $item->unit_price,
                 'line_total' => $item->qty * $item->unit_price,
+                'selections' => $item->selections ?? null,
             ];
         })->toArray();
+    }
+
+    public function incrementLine(int $lineId): void
+    {
+        $cart = $this->current();
+        $line = CartItem::where('cart_id', $cart->id)->where('id', $lineId)->with('menuItem')->first();
+        if (!$line) return;
+        $item = $line->menuItem;
+        if ($item && isset($item->stock)) {
+            $cap = max(0, (int) $item->stock);
+            if ($line->qty >= $cap) return;
+        }
+        $line->qty = $line->qty + 1;
+        $line->save();
+    }
+
+    public function decrementLine(int $lineId): void
+    {
+        $cart = $this->current();
+        $line = CartItem::where('cart_id', $cart->id)->where('id', $lineId)->first();
+        if (!$line) return;
+        $line->qty = max(1, $line->qty - 1);
+        $line->save();
+    }
+
+    public function removeLine(int $lineId): void
+    {
+        $cart = $this->current();
+        CartItem::where('cart_id', $cart->id)->where('id', $lineId)->delete();
     }
 
     public function getTotals(Cart $cart): array

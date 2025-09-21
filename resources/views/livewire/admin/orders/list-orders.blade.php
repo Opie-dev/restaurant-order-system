@@ -44,7 +44,7 @@
 
     <!-- Filters -->
     <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Search Orders</label>
                 <input type="text" 
@@ -60,12 +60,6 @@
                         <option value="{{ $statusOption }}">{{ ucfirst($statusOption) }}</option>
                     @endforeach
                 </select>
-            </div>
-            
-            <div class="flex items-end">
-                <button wire:click="clearFilters" class="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
-                    Clear Filters
-                </button>
             </div>
         </div>
     </div>
@@ -89,7 +83,9 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($this->orders as $order)
-                            <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-gray-50 cursor-pointer" 
+                                @click="document.getElementById('details-{{ $order->id }}').classList.toggle('hidden'); open = !open"
+                                x-data="{ open: false }">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">{{ $order->code }}</div>
                                 </td>
@@ -119,7 +115,7 @@
                                     <div class="flex items-center justify-end space-x-2">
                                         @if(!$order->isCompleted())
                                             <div x-data="{ open: false }" class="relative inline-block">
-                                            <button @click="open = !open" class="inline-flex items-center px-3 py-2 bg-purple-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+                                            <button @click.stop="open = !open" class="inline-flex items-center px-3 py-2 bg-purple-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                                 </svg>
@@ -149,12 +145,11 @@
                                             </span>
                                         @endif
                                         
-                                        <button @click="document.getElementById('details-{{ $order->id }}').classList.toggle('hidden')" class="inline-flex items-center px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        <button @click.stop 
+                                                class="inline-flex items-center px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+                                            <svg class="w-4 h-4 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                             </svg>
-                                            Details
                                         </button>
                                     </div>
                                 </td>
@@ -246,7 +241,7 @@
                         @endif
                     </div>
                     <div>
-                        {{ $this->orders->links() }}
+                        {{ $this->orders->links('vendor.pagination.custom') }}
                     </div>
                 </div>
             @endif

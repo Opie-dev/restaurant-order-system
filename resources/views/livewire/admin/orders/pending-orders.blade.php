@@ -43,21 +43,21 @@
     </div>
 
     <!-- Status Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-3">
         <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
+            <div class="p-3">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-5 h-5 bg-yellow-100 rounded-full flex items-center justify-center">
+                            <svg class="w-3 h-3 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-5 w-0 flex-1">
+                    <div class="ml-2 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">New Orders</dt>
-                            <dd class="text-lg font-medium text-gray-900">{{ $this->pendingCount }}</dd>
+                            <dt class="text-base font-medium text-gray-500 truncate">New Orders</dt>
+                            <dd class="text-base font-medium text-gray-900">{{ $this->pendingCount }}</dd>
                         </dl>
                     </div>
                 </div>
@@ -65,19 +65,19 @@
         </div>
 
         <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
+            <div class="p-3">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-5 h-5 bg-orange-100 rounded-full flex items-center justify-center">
+                            <svg class="w-3 h-3 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-5 w-0 flex-1">
+                    <div class="ml-2 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Preparing Orders</dt>
-                            <dd class="text-lg font-medium text-gray-900">{{ $this->preparingCount }}</dd>
+                            <dt class="text-base font-medium text-gray-500 truncate">Preparing Orders</dt>
+                            <dd class="text-base font-medium text-gray-900">{{ $this->preparingCount }}</dd>
                         </dl>
                     </div>
                 </div>
@@ -120,7 +120,7 @@
                                 <div x-data="{ open: false }" class="relative">
                                     <button @click="open = !open" class="inline-flex items-center px-3 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
                                         </svg>
                                         <svg class="ml-1 h-4 w-4 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />

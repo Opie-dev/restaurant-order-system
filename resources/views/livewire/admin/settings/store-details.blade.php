@@ -14,6 +14,49 @@
             @error('description')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
         </div>
 
+        <!-- Logo Upload Section -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Store Logo</label>
+            <div class="space-y-4">
+                <!-- Current Logo Display -->
+                @if($logo_path)
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <img src="{{ Storage::url($logo_path) }}" alt="Current logo" class="h-16 w-16 object-contain border border-gray-300 rounded-lg">
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            Current logo
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Logo Upload Input -->
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                    <input type="file" wire:model="logo" accept="image/*" class="hidden" id="logo-upload">
+                    <label for="logo-upload" class="cursor-pointer">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="mt-2">
+                            <span class="text-sm font-medium text-purple-600 hover:text-purple-500">
+                                {{ $logo_path ? 'Change logo' : 'Upload a logo' }}
+                            </span>
+                            <span class="text-sm text-gray-500"> or drag and drop</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 2MB</p>
+                    </label>
+                </div>
+
+                <!-- Upload Progress -->
+                @if($logo)
+                    <div class="text-sm text-gray-600">
+                        Selected: {{ $logo->getClientOriginalName() }}
+                    </div>
+                @endif
+            </div>
+            @error('logo')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
+        </div>
+
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Address Line 1</label>
             <input type="text" wire:model.blur="address_line1" class="w-full rounded-lg border-2 border-gray-300 px-3 py-2.5 focus:border-purple-500 focus:ring-purple-500" placeholder="Street address, building number" />

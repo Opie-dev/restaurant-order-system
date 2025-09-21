@@ -6,6 +6,7 @@ use App\Models\StoreSetting;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use Illuminate\Support\Facades\Storage;
 
 #[Layout('layouts.admin')]
 class StoreDetails extends Component
@@ -37,6 +38,11 @@ class StoreDetails extends Component
     #[Validate('required|email')]
     public string $email = '';
 
+    #[Validate('nullable|image|max:2048')]
+    public $logo;
+
+    public ?string $logo_path = null;
+
     public function mount()
     {
         // Load existing store details from database
@@ -52,6 +58,7 @@ class StoreDetails extends Component
             $this->postal_code = $settings->postal_code;
             $this->phone = $settings->phone;
             $this->email = $settings->email;
+            $this->logo_path = $settings->logo_path;
         } else {
             // Default values if no settings exist
             $this->store_name = 'Restaurant Admin';
@@ -70,8 +77,7 @@ class StoreDetails extends Component
     {
         $this->validate();
 
-        // Save to database
-        StoreSetting::updateSettings([
+        $data = [
             'store_name' => $this->store_name,
             'description' => $this->description,
             'address_line1' => $this->address_line1,
@@ -81,7 +87,23 @@ class StoreDetails extends Component
             'postal_code' => $this->postal_code,
             'phone' => $this->phone,
             'email' => $this->email,
-        ]);
+        ];
+
+        // Handle logo upload
+        if ($this->logo) {
+            // Delete old logo if exists
+            if ($this->logo_path && Storage::disk('public')->exists($this->logo_path)) {
+                Storage::disk('public')->delete($this->logo_path);
+            }
+
+            // Store new logo
+            $logoPath = $this->logo->store('logos', 'public');
+            $data['logo_path'] = $logoPath;
+            $this->logo_path = $logoPath;
+        }
+
+        // Save to database
+        StoreSetting::updateSettings($data);
 
         session()->flash('success', 'Store details updated successfully.');
     }

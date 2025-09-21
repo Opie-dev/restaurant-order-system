@@ -19,6 +19,7 @@ class StoreSetting extends Model
         'postal_code',
         'phone',
         'email',
+        'logo_path',
     ];
 
     /**

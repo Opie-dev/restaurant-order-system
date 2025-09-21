@@ -15,7 +15,7 @@ class ListOrders extends Component
     protected string $paginationTheme = 'tailwind';
 
     public string $search = '';
-    public string $status = 'pending';
+    public string $status = 'all';
     public ?int $user = null;
 
     protected $queryString = [
@@ -36,7 +36,7 @@ class ListOrders extends Component
     public function clearFilters(): void
     {
         $this->search = '';
-        $this->status = 'pending';
+        $this->status = 'all';
         $this->resetPage();
     }
 
@@ -51,12 +51,16 @@ class ListOrders extends Component
 
         if (!$order->canTransitionTo($newStatus)) {
             session()->flash('error', 'Invalid status transition from ' . $order->status . ' to ' . $newStatus);
+            $this->dispatch('flash', 'Invalid status transition from ' . $order->status . ' to ' . $newStatus);
             return;
         }
 
         $order->update(['status' => $newStatus]);
 
         session()->flash('success', 'Order status updated to ' . ucfirst($newStatus));
+
+        // Dispatch flash event for Alpine.js
+        $this->dispatch('flash', 'Order status updated to ' . ucfirst($newStatus));
     }
 
     public function getOrdersProperty()

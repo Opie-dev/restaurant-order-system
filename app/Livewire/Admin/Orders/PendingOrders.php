@@ -37,12 +37,16 @@ class PendingOrders extends Component
 
         if (!$order->canTransitionTo($newStatus)) {
             session()->flash('error', 'Invalid status transition from ' . $order->status . ' to ' . $newStatus);
+            $this->dispatch('flash', 'Invalid status transition from ' . $order->status . ' to ' . $newStatus);
             return;
         }
 
         $order->update(['status' => $newStatus]);
 
         session()->flash('success', 'Order status updated to ' . ucfirst($newStatus));
+
+        // Dispatch flash event for Alpine.js
+        $this->dispatch('flash', 'Order status updated to ' . ucfirst($newStatus));
     }
 
     public function getPendingOrdersProperty()

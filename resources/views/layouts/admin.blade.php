@@ -14,7 +14,25 @@
           flash: null 
       }" 
       x-init="
-          window.addEventListener('flash', e => flash = e.detail);
+          // Check initial screen size and set sidebar state
+          if (window.innerWidth < 1024) {
+              sidebarOpen = false;
+          }
+          
+          // Listen for window resize events
+          window.addEventListener('resize', () => {
+              if (window.innerWidth < 1024) {
+                  sidebarOpen = false;
+              } else {
+                  sidebarOpen = true;
+              }
+          });
+          
+          window.addEventListener('flash', e => {
+              flash = e.detail;
+              // Auto-dismiss after 3 seconds
+              setTimeout(() => flash = null, 3000);
+          });
           // Close sidebar on mobile when clicking outside
           $watch('sidebarOpen', value => {
               if (value && window.innerWidth < 1024) {
@@ -33,13 +51,13 @@
          x-transition:leave="transition-opacity ease-linear duration-300"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
+         class="fixed inset-0 z-40 bg-opacity-75 lg:hidden"
          @click="sidebarOpen = false">
     </div>
 
     <!-- Sidebar -->
     <div class="fixed inset-y-0 left-0 z-50 bg-white shadow-lg transform transition-all duration-300 ease-in-out"
-         :class="sidebarOpen ? 'translate-x-0 w-64' : 'translate-x-0 w-16'">
+         :class="sidebarOpen ? (window.innerWidth < 1024 ? 'translate-x-0 w-64' : 'translate-x-0 w-64') : (window.innerWidth < 1024 ? '-translate-x-full w-64' : 'translate-x-0 w-16')">
         
         <!-- Sidebar Header -->
         <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200">
@@ -77,7 +95,7 @@
                 <svg class="h-5 w-5 flex-shrink-0" :class="sidebarOpen ? 'mr-3' : 'mx-auto'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <span x-show="sidebarOpen">Pending Orders</span>
+                <span x-show="sidebarOpen">Kitchen</span>
             </a>
 
             <a href="{{ route('admin.orders.index') }}" 
@@ -157,7 +175,7 @@
     </div>
 
     <!-- Main content -->
-    <div class="flex flex-col min-h-screen" :class="sidebarOpen ? 'ml-64' : 'ml-16'">
+    <div class="flex flex-col min-h-screen" :class="sidebarOpen ? (window.innerWidth < 1024 ? 'ml-0' : 'ml-64') : (window.innerWidth < 1024 ? 'ml-0' : 'ml-16')">
         <!-- Topbar -->
         <div class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
             <!-- Sidebar toggle button -->
@@ -341,8 +359,22 @@
             </div>
         @endif
 
+        <!-- Mobile header with menu button -->
+        <div class="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between transition-opacity duration-300"
+             :class="sidebarOpen && window.innerWidth < 1024 ? 'opacity-50' : 'opacity-100'">
+            <h1 class="text-lg font-semibold text-gray-900">Restaurant Admin</h1>
+            <button @click="sidebarOpen = !sidebarOpen" 
+                    class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500">
+                <span class="sr-only">Open sidebar</span>
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+
         <!-- Main content area -->
-        <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8 transition-opacity duration-300"
+              :class="sidebarOpen && window.innerWidth < 1024 ? 'opacity-50' : 'opacity-100'">
             <div class="max-w-none">
                 {{ $slot }}
             </div>
@@ -351,7 +383,8 @@
 
     <!-- Flash notifications -->
     <template x-if="flash">
-        <div class="fixed bottom-4 right-4 bg-black text-white px-4 py-2 rounded shadow-lg z-50" 
+        <div class="fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg z-50" 
+             :class="flash.includes('Invalid') ? 'bg-red-500 text-white' : 'bg-green-500 text-white'"
              x-text="flash" 
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="transform translate-y-2 opacity-0"

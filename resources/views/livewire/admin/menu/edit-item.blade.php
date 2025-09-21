@@ -96,7 +96,7 @@
                             <div class="space-y-4">
                                 @foreach(($options ?? []) as $gIndex => $group)
                                     @if(true)
-                                        <div class="border rounded-lg p-3 {{ ($group['enabled'] ?? false) ? '' : 'opacity-60' }}">
+                                        <div class="border rounded-lg p-3 {{ ($group['enabled'] ?? true) ? '' : 'opacity-60' }}">
                                             <div class="flex items-center justify-between mb-3">
                                                 <div>
                                                     <h4 class="font-semibold text-gray-900">{{ $group['name'] ?: 'Option Group' }}</h4>
@@ -110,12 +110,12 @@
                                             </div>
                                             <div class="space-y-2">
                                                 @foreach(($group['options'] ?? []) as $oIndex => $opt)
-                                                    <label wire:key="preview-opt-{{ $gIndex }}-{{ $oIndex }}" class="flex items-center gap-3 p-2 border rounded {{ !($opt['enabled'] ?? false) || !($group['enabled'] ?? true) ? 'opacity-60 bg-gray-50 text-gray-400 cursor-not-allowed' : 'hover:bg-gray-50' }}">
+                                                    <label wire:key="preview-opt-{{ $gIndex }}-{{ $oIndex }}" class="flex items-center gap-3 p-2 border rounded {{ !($opt['enabled'] ?? true) || !($group['enabled'] ?? true) ? 'opacity-60 bg-gray-50 text-gray-400 cursor-not-allowed' : 'hover:bg-gray-50' }}">
                                                         @php $multiple = ($group['rules'][1] ?? 'one') === 'multiple'; @endphp
                                                         @if($multiple)
-                                                            <input type="checkbox" class="w-4 h-4 text-purple-600" @disabled(!($opt['enabled'] ?? false) || !($group['enabled'] ?? true)) />
+                                                            <input type="checkbox" class="w-4 h-4 text-purple-600" @disabled(!($opt['enabled'] ?? true) || !($group['enabled'] ?? true)) />
                                                         @else
-                                                            <input type="radio" name="preview-opt-{{ $gIndex }}" class="w-4 h-4 text-purple-600" @disabled(!($opt['enabled'] ?? false) || !($group['enabled'] ?? true)) />
+                                                            <input type="radio" name="preview-opt-{{ $gIndex }}" class="w-4 h-4 text-purple-600" @disabled(!($opt['enabled'] ?? true) || !($group['enabled'] ?? true)) />
                                                         @endif
                                                         <span class="flex-1 font-medium text-sm">{{ $opt['name'] ?? '' }}</span>
                                                     </label>
@@ -135,7 +135,7 @@
                             <div class="space-y-4 mt-4">
                                 @foreach(($addons ?? []) as $gIndex => $group)
                                     @if(true)
-                                        <div class="border rounded-lg p-3 {{ ($group['enabled'] ?? false) ? '' : 'opacity-60' }}">
+                                        <div class="border rounded-lg p-3 {{ ($group['enabled'] ?? true) ? '' : 'opacity-60' }}">
                                             <div class="flex items-center justify-between mb-3">
                                                 <div>
                                                     <h4 class="font-semibold text-gray-900">{{ $group['name'] ?: 'Addon Group' }}</h4>
@@ -150,12 +150,12 @@
                                             <div class="space-y-2">
                                                 @foreach(($group['options'] ?? []) as $oIndex => $opt)
                                                     @php if (empty(trim($opt['name'] ?? ''))) { continue; } @endphp
-                                                    <label wire:key="preview-addon-{{ $gIndex }}-{{ $oIndex }}" class="flex items-center gap-3 p-2 border rounded {{ !($opt['enabled'] ?? false) || !($group['enabled'] ?? true) ? 'opacity-60 bg-gray-50 text-gray-400 cursor-not-allowed' : 'hover:bg-gray-50' }}">
+                                                    <label wire:key="preview-addon-{{ $gIndex }}-{{ $oIndex }}" class="flex items-center gap-3 p-2 border rounded {{ !($opt['enabled'] ?? true) || !($group['enabled'] ?? true) ? 'opacity-60 bg-gray-50 text-gray-400 cursor-not-allowed' : 'hover:bg-gray-50' }}">
                                                         @php $multiple = ($group['rules'][1] ?? 'one') === 'multiple'; @endphp
                                                         @if($multiple)
-                                                            <input type="checkbox" class="w-4 h-4 text-purple-600" @disabled(!($opt['enabled'] ?? false) || !($group['enabled'] ?? true)) />
+                                                            <input type="checkbox" class="w-4 h-4 text-purple-600" @disabled(!($opt['enabled'] ?? true) || !($group['enabled'] ?? true)) />
                                                         @else
-                                                            <input type="radio" name="preview-addon-{{ $gIndex }}" class="w-4 h-4 text-purple-600" @disabled(!($opt['enabled'] ?? false) || !($group['enabled'] ?? true)) />
+                                                            <input type="radio" name="preview-addon-{{ $gIndex }}" class="w-4 h-4 text-purple-600" @disabled(!($opt['enabled'] ?? true) || !($group['enabled'] ?? true)) />
                                                         @endif
                                                         <span class="flex-1 font-medium text-sm">{{ $opt['name'] ?? '' }}</span>
                                                         @if(isset($opt['price']))

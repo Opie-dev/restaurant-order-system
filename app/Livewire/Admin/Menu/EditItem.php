@@ -53,6 +53,37 @@ class EditItem extends Component
     public function mount(MenuItem $menuItem): void
     {
         $this->menuItem = $menuItem;
+
+        // Ensure options have proper enabled state
+        $options = $menuItem->options ?? [];
+        foreach ($options as $groupIndex => $group) {
+            if (!isset($group['enabled'])) {
+                $options[$groupIndex]['enabled'] = true;
+            }
+            if (isset($group['options'])) {
+                foreach ($group['options'] as $optionIndex => $option) {
+                    if (!isset($option['enabled'])) {
+                        $options[$groupIndex]['options'][$optionIndex]['enabled'] = true;
+                    }
+                }
+            }
+        }
+
+        // Ensure addons have proper enabled state
+        $addons = $menuItem->addons ?? [];
+        foreach ($addons as $groupIndex => $group) {
+            if (!isset($group['enabled'])) {
+                $addons[$groupIndex]['enabled'] = true;
+            }
+            if (isset($group['options'])) {
+                foreach ($group['options'] as $optionIndex => $option) {
+                    if (!isset($option['enabled'])) {
+                        $addons[$groupIndex]['options'][$optionIndex]['enabled'] = true;
+                    }
+                }
+            }
+        }
+
         $this->fill([
             'name' => $menuItem->name,
             'description' => $menuItem->description,
@@ -64,8 +95,8 @@ class EditItem extends Component
             'stock' => (int) ($menuItem->stock ?? 0),
             'tag' => $menuItem->tag,
             'type' => $menuItem->type ?? 'ala_carte',
-            'options' => $menuItem->options ?? [],
-            'addons' => $menuItem->addons ?? [],
+            'options' => $options,
+            'addons' => $addons,
         ]);
     }
 

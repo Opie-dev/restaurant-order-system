@@ -7,7 +7,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Usernotnull\Toast\Concerns\WireToast;
 
-#[Layout('layouts.app')]
+#[Layout('layouts.admin')]
 class ListCategories extends Component
 {
     use WireToast;

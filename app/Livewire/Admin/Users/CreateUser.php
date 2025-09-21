@@ -9,7 +9,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
-#[Layout('layouts.customer')]
+#[Layout('layouts.admin')]
 class CreateUser extends Component
 {
     #[Validate('required|string|max:120')]

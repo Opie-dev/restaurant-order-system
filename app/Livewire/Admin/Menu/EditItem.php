@@ -10,7 +10,7 @@ use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-#[Layout('layouts.app')]
+#[Layout('layouts.admin')]
 class EditItem extends Component
 {
     use WithFileUploads;
@@ -127,6 +127,24 @@ class EditItem extends Component
         $this->addons[$groupIndex]['options'] = array_values($this->addons[$groupIndex]['options']);
     }
 
+    public function toggleOptionGroupEnabled(int $groupIndex): void
+    {
+        $isEnabled = $this->options[$groupIndex]['enabled'] ?? true;
+        $this->options[$groupIndex]['enabled'] = !$isEnabled;
+
+        // Note: We don't automatically disable individual options anymore
+        // This allows admins to edit disabled groups while seeing preview effect
+    }
+
+    public function toggleAddonGroupEnabled(int $groupIndex): void
+    {
+        $isEnabled = $this->addons[$groupIndex]['enabled'] ?? true;
+        $this->addons[$groupIndex]['enabled'] = !$isEnabled;
+
+        // Note: We don't automatically disable individual addon options anymore
+        // This allows admins to edit disabled groups while seeing preview effect
+    }
+
     public function save(): void
     {
         $rules = [
@@ -205,6 +223,27 @@ class EditItem extends Component
             'categories' => Category::orderBy('name')->get(['id', 'name']),
             'isEdit' => true,
             'menuItem' => $this->menuItem,
+            'navigationBar' => true,
+            'showBackButton' => true,
+            'pageTitle' => 'Edit Menu Item',
+            'breadcrumbs' => [
+                ['label' => 'Menu', 'url' => route('admin.menu.index')],
+                ['label' => 'Edit Item']
+            ],
+            'actionButtons' => [
+                [
+                    'type' => 'link',
+                    'label' => 'View All Items',
+                    'url' => route('admin.menu.index'),
+                    'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>'
+                ],
+                [
+                    'type' => 'button',
+                    'label' => 'Save Changes',
+                    'onclick' => '$wire.save()',
+                    'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>'
+                ]
+            ]
         ]);
     }
 }

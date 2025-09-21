@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto px-6 py-8">
+<div class="w-full px-6 py-8">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-900">Customers</h1>
         <a href="{{ route('admin.customers.create') }}" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">New customer</a>

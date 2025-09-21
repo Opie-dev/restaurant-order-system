@@ -223,7 +223,7 @@
                                     </div>
 
                                     <div class="border-t border-gray-200 mt-3 pt-2 flex items-center justify-between">
-                                        <span class="text-xs text-gray-500">Item Total</span>
+                                        <span class="text-xs text-gray-500">Total</span>
                                         <span class="font-bold text-gray-900">RM {{ number_format($line['line_total'], 2) }}</span>
                                     </div>
                                 </div>

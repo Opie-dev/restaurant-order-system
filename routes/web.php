@@ -6,8 +6,11 @@ use App\Livewire\Admin\Menu\EditItem;
 use App\Livewire\Admin\Menu\CreateItem;
 use App\Livewire\Admin\Categories\ListCategories;
 use App\Livewire\Admin\Orders\ListOrders;
+use App\Livewire\Admin\Orders\PendingOrders;
 use App\Livewire\Admin\Users\ListUsers;
 use App\Livewire\Admin\Users\CreateUser;
+use App\Livewire\Admin\Settings\StoreDetails;
+use App\Livewire\Admin\Settings\Security;
 use App\Livewire\Auth\Login as LoginPage;
 use App\Livewire\Auth\Register as RegisterPage;
 use App\Livewire\Customer\Menu as CustomerMenu;
@@ -40,8 +43,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::get('/categories', ListCategories::class)->name('categories.index');
     Route::get('/orders', ListOrders::class)->name('orders.index');
+    Route::get('/orders/pending', PendingOrders::class)->name('orders.pending');
     Route::get('/customers', ListUsers::class)->name('customers.index');
     Route::get('/customers/create', CreateUser::class)->name('customers.create');
+
+    Route::get('/settings/store-details', StoreDetails::class)->name('settings.store-details');
+    Route::get('/settings/security', Security::class)->name('settings.security');
 });
 
 // Customer-facing pages

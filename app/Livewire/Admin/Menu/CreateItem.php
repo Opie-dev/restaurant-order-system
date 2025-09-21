@@ -10,7 +10,7 @@ use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-#[Layout('layouts.app')]
+#[Layout('layouts.admin')]
 class CreateItem extends Component
 {
     use WithFileUploads;
@@ -156,6 +156,27 @@ class CreateItem extends Component
             'categories' => Category::orderBy('name')->get(['id', 'name']),
             'isEdit' => false,
             'menuItem' => null,
+            'navigationBar' => true,
+            'showBackButton' => true,
+            'pageTitle' => 'Create New Menu Item',
+            'breadcrumbs' => [
+                ['label' => 'Menu', 'url' => route('admin.menu.index')],
+                ['label' => 'Create Item']
+            ],
+            'actionButtons' => [
+                [
+                    'type' => 'link',
+                    'label' => 'View All Items',
+                    'url' => route('admin.menu.index'),
+                    'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>'
+                ],
+                [
+                    'type' => 'button',
+                    'label' => 'Create Item',
+                    'onclick' => '$wire.save()',
+                    'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>'
+                ]
+            ]
         ]);
     }
 }

@@ -8,7 +8,7 @@ use Livewire\Attributes\Url;
 use Livewire\WithPagination;
 use Livewire\Component;
 
-#[Layout('layouts.app')]
+#[Layout('layouts.admin')]
 class ListUsers extends Component
 {
     use WithPagination;

@@ -8,19 +8,16 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('layouts.admin')]
-class ListOrders extends Component
+class PendingOrders extends Component
 {
     use WithPagination;
 
     protected string $paginationTheme = 'tailwind';
 
     public string $search = '';
-    public string $status = 'pending';
-    public ?int $user = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
-        'status' => ['except' => 'pending'],
     ];
 
     public function updatingSearch(): void
@@ -28,21 +25,10 @@ class ListOrders extends Component
         $this->resetPage();
     }
 
-    public function updatingStatus(): void
-    {
-        $this->resetPage();
-    }
-
     public function clearFilters(): void
     {
         $this->search = '';
-        $this->status = 'pending';
         $this->resetPage();
-    }
-
-    public function getStatusesProperty(): array
-    {
-        return ['all', 'pending', 'preparing', 'ready', 'completed', 'cancelled'];
     }
 
     public function updateOrderStatus($orderId, $newStatus): void
@@ -59,24 +45,29 @@ class ListOrders extends Component
         session()->flash('success', 'Order status updated to ' . ucfirst($newStatus));
     }
 
-    public function getOrdersProperty()
+    public function getPendingOrdersProperty()
     {
         return Order::with(['user', 'items'])
+            ->whereIn('status', [Order::STATUS_PENDING, Order::STATUS_PREPARING])
             ->when(strlen($this->search) > 0, function ($q) {
                 $q->where('code', 'like', '%' . trim($this->search) . '%');
             })
-            ->when($this->status !== 'all', function ($q) {
-                $q->where('status', $this->status);
-            })
-            ->when($this->user !== null, function ($q) {
-                $q->where('user_id', $this->user);
-            })
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(15);
+    }
+
+    public function getPendingCountProperty(): int
+    {
+        return Order::where('status', Order::STATUS_PENDING)->count();
+    }
+
+    public function getPreparingCountProperty(): int
+    {
+        return Order::where('status', Order::STATUS_PREPARING)->count();
     }
 
     public function render()
     {
-        return view('livewire.admin.orders.list-orders');
+        return view('livewire.admin.orders.pending-orders');
     }
 }

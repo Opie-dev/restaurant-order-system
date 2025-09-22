@@ -42,10 +42,10 @@ class ListOrders extends Component
 
     public function getStatusesProperty(): array
     {
-        return ['all', 'pending', 'preparing', 'ready', 'completed', 'cancelled'];
+        return ['all', 'pending', 'preparing', 'delivering', 'completed', 'cancelled'];
     }
 
-    public function updateOrderStatus($orderId, $newStatus): void
+    public function updateOrderStatus($orderId, $newStatus, $cancellationRemarks = null, $trackingUrl = null): void
     {
         $order = Order::findOrFail($orderId);
 
@@ -55,12 +55,24 @@ class ListOrders extends Component
             return;
         }
 
-        $order->update(['status' => $newStatus]);
+        $updateData = ['status' => $newStatus];
 
-        session()->flash('success', 'Order status updated to ' . ucfirst($newStatus));
+        // Add cancellation remarks if cancelling
+        if ($newStatus === Order::STATUS_CANCELLED && $cancellationRemarks) {
+            $updateData['cancellation_remarks'] = $cancellationRemarks;
+        }
 
-        // Dispatch flash event for Alpine.js
-        $this->dispatch('flash', 'Order status updated to ' . ucfirst($newStatus));
+        if ($newStatus === Order::STATUS_DELIVERING) {
+            $updateData['tracking_url'] = $trackingUrl;
+        }
+        $order->update($updateData);
+
+        $message = $newStatus === Order::STATUS_CANCELLED
+            ? 'Order cancelled successfully'
+            : 'Order status updated to ' . ucfirst($newStatus);
+
+        session()->flash('success', $message);
+        $this->dispatch('flash', $message);
     }
 
     public function getOrdersProperty()

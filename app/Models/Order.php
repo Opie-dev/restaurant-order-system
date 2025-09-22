@@ -13,9 +13,8 @@ class Order extends Model
 
     // Order status constants
     const STATUS_PENDING = 'pending';
-    const STATUS_CONFIRMED = 'confirmed';
     const STATUS_PREPARING = 'preparing';
-    const STATUS_READY = 'ready';
+    const STATUS_DELIVERING = 'delivering';
     const STATUS_COMPLETED = 'completed';
     const STATUS_CANCELLED = 'cancelled';
 
@@ -28,6 +27,7 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'address_id',
         'code',
         'status',
         'subtotal',
@@ -36,7 +36,17 @@ class Order extends Model
         'payment_status',
         'payment_provider',
         'payment_ref',
+        'tracking_url',
         'notes',
+        'cancellation_remarks',
+        'ship_recipient_name',
+        'ship_phone',
+        'ship_line1',
+        'ship_line2',
+        'ship_city',
+        'ship_state',
+        'ship_postal_code',
+        'ship_country',
     ];
 
     protected $casts = [
@@ -69,8 +79,8 @@ class Order extends Model
     {
         $validTransitions = [
             self::STATUS_PENDING => [self::STATUS_PREPARING, self::STATUS_CANCELLED],
-            self::STATUS_PREPARING => [self::STATUS_READY, self::STATUS_CANCELLED],
-            self::STATUS_READY => [self::STATUS_COMPLETED],
+            self::STATUS_PREPARING => [self::STATUS_DELIVERING, self::STATUS_COMPLETED, self::STATUS_CANCELLED],
+            self::STATUS_DELIVERING => [self::STATUS_COMPLETED, self::STATUS_CANCELLED],
             self::STATUS_COMPLETED => [],
             self::STATUS_CANCELLED => []
         ];
@@ -109,9 +119,8 @@ class Order extends Model
     {
         return match ($this->status) {
             self::STATUS_PENDING => 'bg-yellow-100 text-yellow-800',
-            self::STATUS_CONFIRMED => 'bg-blue-100 text-blue-800',
             self::STATUS_PREPARING => 'bg-orange-100 text-orange-800',
-            self::STATUS_READY => 'bg-purple-100 text-purple-800',
+            self::STATUS_DELIVERING => 'bg-purple-100 text-purple-800',
             self::STATUS_COMPLETED => 'bg-green-100 text-green-800',
             self::STATUS_CANCELLED => 'bg-red-100 text-red-800',
             default => 'bg-gray-100 text-gray-800'

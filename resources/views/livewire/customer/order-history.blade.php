@@ -8,34 +8,27 @@
 
     <!-- Filters: separate container -->
     <div class="mb-8">
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:items-end">
-                <!-- Search by order code -->
-                <div>
-                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search by order #</label>
-                    <div class="relative">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
-                            <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z" />
-                            </svg>
-                        </div>
-                        <input id="search" type="text" placeholder="e.g. ABC123" wire:model.debounce.400ms="search" class="w-full sm:w-72 pl-9 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 shadow-sm focus:border-purple-500 focus:ring-purple-500" />
-                    </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:items-end">
+            <!-- Search by order code -->
+            <div>
+                <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search by order #</label>
+                <div class="relative">
+                    <input id="search" type="text" placeholder="e.g. ABC123" wire:model.debounce.400ms="search" class="w-full p-2 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 shadow-sm focus:border-purple-500 focus:ring-purple-500" />
                 </div>
+            </div>
 
-                <!-- Payment status filter -->
-                <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Filter by payment status</label>
-                    <div class="flex items-center gap-2">
-                        <select id="status" wire:model.live="status" class="rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
-                            @foreach($this->statuses as $s)
-                                <option value="{{ $s }}">{{ ucfirst($s) }}</option>
-                            @endforeach
-                        </select>
-                        @if($this->status !== 'all' || strlen($this->search) > 0)
-                            <button type="button" wire:click="$set('status','all'); $set('search','')" class="text-sm text-gray-600 hover:text-gray-800 underline">Reset</button>
-                        @endif
-                    </div>
+            <!-- Payment status filter -->
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Filter by payment status</label>
+                <div class="flex items-center gap-2">
+                    <select id="status" wire:model.live="status" class="rounded-lg p-2 border border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                        @foreach($this->statuses as $s)
+                            <option value="{{ $s }}">{{ ucfirst($s) }}</option>
+                        @endforeach
+                    </select>
+                    @if($this->status !== 'all' || strlen($this->search) > 0)
+                        <button type="button" wire:click="$set('status','all'); $set('search','')" class="text-sm text-gray-600 hover:text-gray-800 underline">Reset</button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -56,6 +49,17 @@
                             </div>
                             <div class="mt-3 sm:mt-0 flex flex-col sm:items-end">
                                 <div class="flex items-center space-x-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $order->getStatusColorClass() }}">
+                                        {{ ucfirst($order->status) }}
+                                    </span>
+                                    @if($order->status === 'delivering')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0zM13 16V6h3l3 4v6m-6 0H6" />
+                                            </svg>
+                                            On the way
+                                        </span>
+                                    @endif
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                         @if($order->payment_status === 'paid') bg-green-100 text-green-800
                                         @elseif($order->payment_status === 'failed') bg-red-100 text-red-800
@@ -65,9 +69,6 @@
                                         {{ ucfirst($order->payment_status) }}
                                     </span>
                                 </div>
-                                <p class="text-lg font-semibold text-gray-900 mt-2">
-                                    ${{ number_format($order->total, 2) }}
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -162,15 +163,15 @@
 
                         <!-- Order Summary -->
                         <div class="mt-4 pt-2">
-                            <div class="flex justify-between text-sm">
+                            <div class="flex justify-end gap-2 text-sm">
                                 <span class="text-gray-600">Subtotal:</span>
                                 <span class="text-gray-900">RM{{ number_format($order->subtotal, 2) }}</span>
                             </div>
-                            <div class="flex justify-between text-sm mt-1">
+                            <div class="flex justify-end gap-2 text-sm mt-1">
                                 <span class="text-gray-600">Tax:</span>
                                 <span class="text-gray-900">RM{{ number_format($order->tax, 2) }}</span>
                             </div>
-                            <div class="flex justify-between text-lg font-semibold">
+                            <div class="flex justify-end gap-2 text-lg font-semibold">
                                 <span class="text-gray-900">Total:</span>
                                 <span class="text-gray-900">RM{{ number_format($order->total, 2) }}</span>
                             </div>

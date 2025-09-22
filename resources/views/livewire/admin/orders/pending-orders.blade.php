@@ -1,4 +1,9 @@
-<div class="p-6 space-y-6">
+<div class="p-6 space-y-6" x-data="{ 
+    showCancelModal: false, 
+    orderId: null, 
+    cancellationRemarks: '',
+    cancellationError: ''
+}">
     <!-- Flash Messages -->
     @if (session()->has('success'))
         <div class="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -30,8 +35,76 @@
         </div>
     @endif
 
+    <!-- Cancellation Modal -->
+    <div x-show="showCancelModal" x-cloak @keydown.escape.window="showCancelModal = false"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto" 
+         style="display: none;">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-900/40 transition-opacity z-40" @click="showCancelModal = false; cancellationRemarks = ''"></div>
+            
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full relative z-50">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Cancel Order</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">Please provide a reason for cancelling this order.</p>
+                            </div>
+                            <div class="mt-4">
+                                <label for="cancellation-remarks" class="block text-sm font-medium text-gray-700">Cancellation Reason</label>
+                                <textarea 
+                                    x-model="cancellationRemarks"
+                                    @input="cancellationError = ''"
+                                    id="cancellation-remarks"
+                                    rows="3"
+                                    class="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                                    placeholder="e.g., Out of stock, Customer request, Payment failed..."
+                                ></textarea>
+                                <p x-show="cancellationError" x-text="cancellationError" class="mt-1 text-sm text-red-600"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button 
+                        @click="
+                            if (cancellationRemarks.trim()) {
+                                $wire.updateOrderStatus(orderId, 'cancelled', cancellationRemarks);
+                                showCancelModal = false;
+                                cancellationRemarks = '';
+                                cancellationError = '';
+                            } else {
+                                cancellationError = 'Please enter a cancellation reason.';
+                            }
+                        "
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+                    >
+                        Cancel Order
+                    </button>
+                    <button 
+                        @click="showCancelModal = false; cancellationRemarks = ''"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    >
+                        Keep Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold">Pending Orders</h1>
+        <h1 class="text-2xl font-semibold">Active Orders</h1>
         <div class="flex items-center space-x-4">
             <a href="{{ route('admin.orders.index') }}" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
                 <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,8 +156,28 @@
                 </div>
             </div>
         </div>
+
+        
     </div>
 
+    <!-- Search -->
+    <div class="flex items-center justify-between">
+        <div class="flex-1 max-w-lg">
+            <label for="search" class="sr-only">Search orders</label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <input wire:model.live.debounce.300ms="search" 
+                        id="search" 
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm" 
+                        placeholder="Search by order code..." 
+                        type="search">
+            </div>
+        </div>
+    </div>
 
     <!-- Orders Grid -->
     <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
@@ -132,9 +225,28 @@
                                                 Change Status To:
                                             </div>
                                             @foreach($order->getValidTransitions() as $transition)
-                                                <button wire:click="updateOrderStatus({{ $order->id }}, '{{ $transition }}')" class="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                                    Mark as {{ ucfirst($transition) }}
-                                                </button>
+                                                @if($transition === 'cancelled')
+                                                <button 
+                                                    @click="orderId = {{ $order->id }}; showCancelModal = true; open = false; cancellationRemarks=''; cancellationError=''" 
+                                                        class="block w-full text-left px-4 py-3 text-sm text-red-700 hover:bg-red-50 transition-colors"
+                                                    >
+                                                        Cancel Order
+                                                    </button>
+                                                @elseif($transition === 'delivering')
+                                                    <button 
+                                                        @click="orderId = {{ $order->id }}; open = false; $dispatch('open-tracking-modal', { id: {{ $order->id }} })" 
+                                                        class="block w-full text-left px-4 py-3 text-sm text-purple-700 hover:bg-purple-50 transition-colors"
+                                                    >
+                                                        Mark as Delivering
+                                                    </button>
+                                                @else
+                                                    <button 
+                                                        wire:click="updateOrderStatus({{ $order->id }}, '{{ $transition }}')" 
+                                                        class="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                                    >
+                                                        Mark as {{ ucfirst($transition) }}
+                                                    </button>
+                                                @endif
                                             @endforeach
                                         </div>
                                     </div>
@@ -150,51 +262,74 @@
                         </div>
                         
                         <!-- Order Items -->
-                                
                         <div class="space-y-3">
-                                        @foreach($order->items as $item)
-                                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                                                <div class="flex items-start justify-between">
-                                                    <div class="flex-1">
-                                                        <div class="flex items-center space-x-2">
-                                                            <h4 class="text-sm font-medium text-gray-900">{{ $item->name_snapshot }}</h4>
-                                                            <span class="text-xs text-gray-500">×{{ $item->qty }}</span>
-                                                        </div>
-                                                        <div class="text-xs text-gray-500 mt-1">
-                                                            RM{{ number_format($item->unit_price, 2) }} each
-                                                        </div>
-                                                        
-                                                        @if($item->hasSelections())
-                                                            <div class="mt-2 space-y-1">
-                                                                @foreach($item->getSelectionsArray() as $type => $selections)
-                                                                    @if(is_array($selections) && !empty($selections))
-                                                                        <div class="flex items-start space-x-2">
-                                                                            <span class="text-xs font-medium text-gray-600 uppercase tracking-wide min-w-0 flex-shrink-0">
-                                                                                {{ ucfirst($type) }}:
-                                                                            </span>
-                                                                            <div class="flex flex-wrap gap-1">
-                                                                                @foreach($selections as $selection)
-                                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                                                                        {{ $selection }}
-                                                                                    </span>
-                                                                                @endforeach
-                                                                            </div>
-                                                                        </div>
-                                                                    @endif
-                                                                @endforeach
-                                                            </div>
-                                                        @else
-                                                            <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
-                                                        @endif
-                                                    </div>
-                                                    <div class="text-right ml-4">
-                                                        <div class="text-sm font-medium text-gray-900">
-                                                            RM{{ number_format($item->line_total, 2) }}
-                                                        </div>
-                                                    </div>
-                                                </div>
+                            @foreach($order->items as $item)
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1">
+                                            <div class="flex items-center space-x-2">
+                                                <h4 class="text-sm font-medium text-gray-900">{{ $item->name_snapshot }}</h4>
+                                                <span class="text-xs text-gray-500">×{{ $item->qty }}</span>
                                             </div>
-                                        @endforeach
+                                            <div class="text-xs text-gray-500 mt-1">
+                                                RM{{ number_format($item->unit_price, 2) }} each
+                                            </div>
+                                            
+                                            @if($item->hasSelections())
+                                                <div class="mt-2 space-y-1">
+                                                    @if(!empty($item->selections['options']))
+                                                        @foreach($item->selections['options'] as $optionGroup)
+                                                            @if(!empty($optionGroup['options']))
+                                                                <div class="flex items-start space-x-2">
+                                                                    <span class="text-xs font-medium text-gray-600 tracking-wide min-w-0 flex-shrink-0">
+                                                                        {{ $optionGroup['name'] }}:
+                                                                    </span>
+                                                                    <div class="flex flex-wrap gap-1">
+                                                                        @foreach($optionGroup['options'] as $option)
+                                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                                                {{ $option['name'] }}
+                                                                            </span>
+                                                                        @endforeach
+                                                                    </div>
+                                                                </div>
+                                                            @endif
+                                                        @endforeach
+                                                    @endif
+                                                    
+                                                    @if(!empty($item->selections['addons']))
+                                                        @foreach($item->selections['addons'] as $addonGroup)
+                                                            @if(!empty($addonGroup['options']))
+                                                                <div class="flex items-start space-x-2">
+                                                                    <span class="text-xs font-medium text-gray-600 tracking-wide min-w-0 flex-shrink-0">
+                                                                        {{ $addonGroup['name'] }}:
+                                                                    </span>
+                                                                    <div class="flex flex-wrap gap-1">
+                                                                        @foreach($addonGroup['options'] as $addon)
+                                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                                                {{ $addon['name'] }}
+                                                                                @if(isset($addon['price']) && $addon['price'] > 0)
+                                                                                    (+RM {{ number_format($addon['price'], 2) }})
+                                                                                @endif
+                                                                            </span>
+                                                                        @endforeach
+                                                                    </div>
+                                                                </div>
+                                                            @endif
+                                                        @endforeach
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
+                                            @endif
+                                        </div>
+                                        <div class="text-right ml-4">
+                                            <div class="text-sm font-medium text-gray-900">
+                                                RM{{ number_format($item->line_total, 2) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                         
                         @if($order->notes)
@@ -206,6 +341,21 @@
                                     <div>
                                         <span class="text-sm font-medium text-blue-800">Order Notes:</span>
                                         <p class="text-sm text-blue-700 mt-1">{{ $order->notes }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                        
+                        <!-- Cancellation Remarks -->
+                        @if($order->status === 'cancelled' && $order->cancellation_remarks)
+                            <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <div class="flex items-start">
+                                    <svg class="w-4 h-4 text-red-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                    </svg>
+                                    <div>
+                                        <span class="text-sm font-medium text-red-800">Cancellation Reason:</span>
+                                        <p class="text-sm text-red-700 mt-1">{{ $order->cancellation_remarks }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -240,9 +390,35 @@
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                 </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No pending orders</h3>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No active orders</h3>
                 <p class="mt-1 text-sm text-gray-500">All orders are completed or cancelled.</p>
             </div>
         @endif
+    </div>
+    <!-- Tracking URL Modal (embedded to keep single root) -->
+    <div x-data="{ open: false }" 
+         x-on:open-tracking-modal.window="open=true; $wire.trackingOrderId=$event.detail.id; $wire.trackingUrl=''; $wire.clearTrackingValidation()" 
+         x-on:close-tracking-modal.window="open=false"
+         x-show="open" x-cloak @keydown.escape.window="open = false" class="fixed inset-0 z-50 overflow-y-auto" style="display:none;">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-900/40 transition-opacity z-40" @click="open = false"></div>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full relative z-50">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Set Tracking URL</h3>
+                    <p class="mt-1 text-sm text-gray-600">Provide a tracking link for this delivery.</p>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700">Tracking URL</label>
+                        <input type="url" wire:model.live.debounce.300ms="trackingUrl" placeholder="https://..." class="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm" />
+                        @error('trackingUrl')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button wire:click="confirmDelivering" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm">Confirm</button>
+                    <button @click="open=false; $wire.trackingUrl=''; $wire.clearTrackingValidation()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

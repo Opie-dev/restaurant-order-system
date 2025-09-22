@@ -16,6 +16,9 @@ class PendingOrders extends Component
 
     public string $search = '';
 
+    public ?int $trackingOrderId = null;
+    public string $trackingUrl = '';
+
     protected $queryString = [
         'search' => ['except' => ''],
     ];
@@ -31,7 +34,7 @@ class PendingOrders extends Component
         $this->resetPage();
     }
 
-    public function updateOrderStatus($orderId, $newStatus): void
+    public function updateOrderStatus($orderId, $newStatus, $cancellationRemarks = null, $trackingUrl = null): void
     {
         $order = Order::findOrFail($orderId);
 
@@ -41,18 +44,77 @@ class PendingOrders extends Component
             return;
         }
 
-        $order->update(['status' => $newStatus]);
+        // Require cancellation reason when cancelling
+        if ($newStatus === Order::STATUS_CANCELLED && (!is_string($cancellationRemarks) || trim($cancellationRemarks) === '')) {
+            session()->flash('error', 'Cancellation reason is required.');
+            $this->dispatch('flash', 'Cancellation reason is required.');
+            return;
+        }
 
-        session()->flash('success', 'Order status updated to ' . ucfirst($newStatus));
+        $updateData = ['status' => $newStatus];
 
-        // Dispatch flash event for Alpine.js
-        $this->dispatch('flash', 'Order status updated to ' . ucfirst($newStatus));
+        // Add cancellation remarks if cancelling
+        if ($newStatus === Order::STATUS_CANCELLED && $cancellationRemarks) {
+            $updateData['cancellation_remarks'] = $cancellationRemarks;
+        }
+
+        if ($newStatus === Order::STATUS_DELIVERING) {
+            $updateData['tracking_url'] = $trackingUrl;
+        }
+
+        $order->update($updateData);
+
+        $message = $newStatus === Order::STATUS_CANCELLED
+            ? 'Order cancelled successfully'
+            : 'Order status updated to ' . ucfirst($newStatus);
+
+        session()->flash('success', $message);
+        $this->dispatch('flash', $message);
+        if ($newStatus === Order::STATUS_DELIVERING) {
+            $this->dispatch('close-tracking-modal');
+        }
+    }
+
+    public function confirmDelivering(): void
+    {
+        $this->validate([
+            'trackingUrl' => ['required', 'url'],
+            'trackingOrderId' => ['required', 'integer'],
+        ]);
+
+        $order = Order::findOrFail($this->trackingOrderId);
+
+        if (!$order->canTransitionTo(Order::STATUS_DELIVERING)) {
+            session()->flash('error', 'Invalid status transition from ' . $order->status . ' to delivering');
+            return;
+        }
+
+        $order->update([
+            'status' => Order::STATUS_DELIVERING,
+            'tracking_url' => $this->trackingUrl,
+        ]);
+
+        session()->flash('success', 'Order status updated to Delivering');
+        $this->dispatch('flash', 'Order status updated to Delivering');
+        $this->dispatch('close-tracking-modal');
+
+        // Reset form state
+        $this->trackingOrderId = null;
+        $this->trackingUrl = '';
+        $this->resetErrorBag();
+        $this->resetValidation();
+    }
+
+    public function clearTrackingValidation(): void
+    {
+        $this->resetErrorBag();
+        $this->resetValidation();
     }
 
     public function getPendingOrdersProperty()
     {
         return Order::with(['user', 'items'])
-            ->whereIn('status', [Order::STATUS_PENDING, Order::STATUS_PREPARING])
+            ->whereIn('status', [Order::STATUS_PENDING, Order::STATUS_PREPARING, Order::STATUS_DELIVERING])
             ->when(strlen($this->search) > 0, function ($q) {
                 $q->where('code', 'like', '%' . trim($this->search) . '%');
             })
@@ -69,6 +131,8 @@ class PendingOrders extends Component
     {
         return Order::where('status', Order::STATUS_PREPARING)->count();
     }
+
+    // Removed ready/delivered count from pending page per new flow
 
     public function render()
     {

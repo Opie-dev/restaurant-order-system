@@ -117,7 +117,35 @@ class Menu extends Component
             ->orderByRaw('(CASE WHEN COALESCE(stock, 0) > 0 THEN 0 ELSE 1 END)')
             ->orderBy('position');
 
-        return $query->get(['id', 'category_id', 'name', 'description', 'price', 'base_price', 'type', 'options', 'addons', 'image_path', 'is_active', 'stock', 'tag']);
+        $items = $query->get(['id', 'category_id', 'name', 'description', 'price', 'base_price', 'type', 'options', 'addons', 'image_path', 'is_active', 'stock', 'tag']);
+
+        // Sanitize: hide disabled groups, but keep disabled options visible (UI disables inputs)
+        return $items->map(function (MenuItem $item) {
+            $options = is_array($item->options) ? $item->options : [];
+            $addons = is_array($item->addons) ? $item->addons : [];
+
+            // Filter option groups by enabled=true (default true). Keep all options (enabled flag used in view)
+            $options = collect($options)
+                ->filter(fn($group) => ($group['enabled'] ?? true) === true)
+                ->map(function ($group) {
+                    $group['options'] = array_values($group['options'] ?? []);
+                    return $group;
+                })
+                ->values()->all();
+
+            // Filter addon groups by enabled=true (default true). Keep all addon options (enabled flag used in view)
+            $addons = collect($addons)
+                ->filter(fn($group) => ($group['enabled'] ?? true) === true)
+                ->map(function ($group) {
+                    $group['options'] = array_values($group['options'] ?? []);
+                    return $group;
+                })
+                ->values()->all();
+
+            $item->setAttribute('options', $options);
+            $item->setAttribute('addons', $addons);
+            return $item;
+        });
     }
 
     public function render()

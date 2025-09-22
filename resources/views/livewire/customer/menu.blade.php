@@ -181,7 +181,7 @@
                                                     @foreach($selections['options'] as $optionGroup)
                                                         @if(!empty($optionGroup['options']))
                                                             <div class="flex items-start space-x-2">
-                                                                <span class="text-xs font-medium text-gray-600 uppercase tracking-wide min-w-0 flex-shrink-0">
+                                                                <span class="text-xs font-medium text-gray-600 tracking-wide min-w-0 flex-shrink-0">
                                                                     {{ $optionGroup['name'] }}:
                                                                 </span>
                                                                 <div class="flex flex-wrap gap-1">
@@ -200,7 +200,7 @@
                                                     @foreach($selections['addons'] as $addonGroup)
                                                         @if(!empty($addonGroup['options']))
                                                             <div class="flex items-start space-x-2">
-                                                                <span class="text-xs font-medium text-gray-600 uppercase tracking-wide min-w-0 flex-shrink-0">
+                                                                <span class="text-xs font-medium text-gray-600 tracking-wide min-w-0 flex-shrink-0">
                                                                     {{ $addonGroup['name'] }}:
                                                                 </span>
                                                                 <div class="flex flex-wrap gap-1">

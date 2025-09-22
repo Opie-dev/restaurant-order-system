@@ -75,7 +75,7 @@
                                                 @foreach($selections['options'] as $optionGroup)
                                                     @if(!empty($optionGroup['options']))
                                                         <div class="flex items-start space-x-2">
-                                                            <span class="text-xs font-medium text-gray-600 uppercase tracking-wide min-w-0 flex-shrink-0">
+                                                            <span class="text-xs font-medium text-gray-600 tracking-wide min-w-0 flex-shrink-0">
                                                                 {{ $optionGroup['name'] }}:
                                                             </span>
                                                             <div class="flex flex-wrap gap-1">
@@ -94,7 +94,7 @@
                                                 @foreach($selections['addons'] as $addonGroup)
                                                     @if(!empty($addonGroup['options']))
                                                         <div class="flex items-start space-x-2">
-                                                            <span class="text-xs font-medium text-gray-600 uppercase tracking-wide min-w-0 flex-shrink-0">
+                                                            <span class="text-xs font-medium text-gray-600  tracking-wide min-w-0 flex-shrink-0">
                                                                 {{ $addonGroup['name'] }}:
                                                             </span>
                                                             <div class="flex flex-wrap gap-1">
@@ -154,6 +154,48 @@
         <textarea wire:model.lazy="notes" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Any special instructions or delivery notes..."></textarea>
         <p class="text-xs text-gray-500 mt-2">Example: Please ring the bell, no chili, etc.</p>
     </div>
+
+    <!-- Submit Order Button -->
+    <div class="mt-8 flex items-center justify-between">
+        <a href="{{ route('cart') }}" class="text-gray-600 hover:text-gray-800 transition-colors font-medium">
+            ← Back to Cart
+        </a>
+        
+        <button 
+            wire:click="submitOrder" 
+            wire:loading.attr="disabled"
+            wire:target="submitOrder"
+            class="px-8 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
+        >
+            <svg wire:loading.remove wire:target="submitOrder" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <svg wire:loading wire:target="submitOrder" class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span wire:loading.remove wire:target="submitOrder">Place Order</span>
+            <span wire:loading wire:target="submitOrder">Processing...</span>
+        </button>
+    </div>
+
+    <!-- Error Messages -->
+    @if($errors->any())
+        <div class="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+                    <ul class="mt-2 text-sm text-red-700 list-disc list-inside space-y-1">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
 
 

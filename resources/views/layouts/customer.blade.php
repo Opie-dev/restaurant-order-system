@@ -24,6 +24,7 @@
 
                 <!-- Navigation -->
                 <nav class="flex items-center gap-6 text-sm">
+                    <a href="{{ route('menu') }}" class="text-gray-600 hover:text-gray-800 transition-colors font-medium">Menu</a>  
                     @php
                         try {
                             $cartCount = app(\App\Services\CartService::class)->current()->items()->sum('qty');

@@ -23,7 +23,7 @@ class OrderFactory extends Factory
         return [
             'user_id' => \App\Models\User::factory(),
             'code' => strtoupper(fake()->unique()->lexify('??????')),
-            'status' => fake()->randomElement(['pending', 'confirmed', 'preparing', 'ready', 'completed', 'cancelled']),
+            'status' => fake()->randomElement(['pending', 'preparing', 'delivered', 'completed', 'cancelled']),
             'subtotal' => $subtotal,
             'tax' => $tax,
             'total' => $total,

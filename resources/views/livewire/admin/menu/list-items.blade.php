@@ -12,8 +12,8 @@
         </div>
 
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
-            <div class="w-full sm:flex-1 overflow-x-auto pb-2 sm:pb-0">
-                @include('livewire.admin.menu._category-chips', ['categories' => $this->categories, 'categoryId' => $categoryId, 'limit' => 5])
+            <div class="w-full sm:w-64">
+                @include('livewire.admin.menu._category-chips', ['categories' => $this->categories, 'categoryId' => $categoryId])
             </div>
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                 <select wire:model.live="active" class="border rounded px-3 py-2 text-sm">

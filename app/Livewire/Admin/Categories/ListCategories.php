@@ -13,15 +13,60 @@ class ListCategories extends Component
     use WireToast;
 
     public string $name = '';
+    public string $search = '';
 
     public ?int $parentLevel1Id = null; // Select a root (or null)
     public $categories;
     public $rootCategories;
+    public $hierarchicalCategories;
 
     public function mount()
     {
-        $this->categories = Category::ordered()->get(['id', 'name', 'is_active', 'position', 'parent_id']);
+        $this->loadCategories();
+    }
+
+    public function updatedSearch()
+    {
+        $this->loadCategories();
+    }
+
+    private function loadCategories()
+    {
+        $query = Category::ordered();
+
+        if ($this->search) {
+            $query->where('name', 'like', '%' . $this->search . '%');
+        }
+
+        $this->categories = $query->get(['id', 'name', 'is_active', 'position', 'parent_id']);
         $this->rootCategories = Category::whereNull('parent_id')->ordered()->get(['id', 'name', 'position']);
+        $this->buildHierarchicalStructure();
+    }
+
+    private function buildHierarchicalStructure()
+    {
+        $this->hierarchicalCategories = collect();
+        $categoryMap = $this->categories->keyBy('id');
+
+        // Build tree structure - only root categories initially
+        foreach ($this->categories as $category) {
+            if ($category->parent_id === null) {
+                $this->addCategoryToTree($category, $categoryMap, 0);
+            }
+        }
+    }
+
+    private function addCategoryToTree($category, $categoryMap, $level)
+    {
+        $category->level = $level;
+        $category->hasChildren = $this->categories->where('parent_id', $category->id)->count() > 0;
+        $this->hierarchicalCategories->push($category);
+
+        // Add children only if parent is expanded (this will be handled by Alpine.js)
+        $children = $this->categories->where('parent_id', $category->id);
+        foreach ($children as $child) {
+            $this->addCategoryToTree($child, $categoryMap, $level + 1);
+        }
     }
 
     public function create(): void
@@ -43,7 +88,10 @@ class ListCategories extends Component
             'position' => $nextPosition,
         ]);
 
-        $this->js('window.location.reload()');
+        $this->name = '';
+        $this->parentLevel1Id = null;
+        $this->loadCategories();
+        $this->toast()->success('Category created successfully!');
     }
 
     public function toggle(int $id): void
@@ -52,7 +100,8 @@ class ListCategories extends Component
         $cat->is_active = !$cat->is_active;
         $cat->save();
 
-        $this->js('window.location.reload()');
+        $this->loadCategories();
+        $this->toast()->success('Category status updated!');
     }
 
     public function deleteCategory(int $id): void
@@ -69,8 +118,8 @@ class ListCategories extends Component
         }
 
         $cat->delete();
-
-        $this->js('window.location.reload()');
+        $this->loadCategories();
+        $this->toast()->success('Category deleted successfully!');
     }
 
     public function swapOrder(int $sourceId, int $targetId): void
@@ -85,7 +134,8 @@ class ListCategories extends Component
         $source->update(['position' => $target->position]);
         $target->update(['position' => $tmp]);
 
-        $this->js('window.location.reload()');
+        $this->loadCategories();
+        $this->toast()->success('Category order updated!');
     }
 
     public function render()

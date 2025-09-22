@@ -58,17 +58,27 @@ Gourmet Express is a full-featured restaurant ordering app built with Laravel 11
   - Validates items have stock > 0 and quantities do not exceed stock; shows red toast with affected items
 
 #### 5) Admin Back Office
-- Menu management: create/edit items, categories
+- **Category Management**: Hierarchical category system with dropdown/accordion UI
+  - Tree structure with expand/collapse functionality
+  - Clickable rows for parent categories with children
+  - Search functionality with real-time filtering
+  - Clean table layout with status indicators and action buttons
+- **Menu Management**: Enhanced category filtering with dropdown interface
+  - Option groups for parent-child category relationships
+  - Clickable group headers for quick parent category selection
+  - Hierarchical dropdown with visual tree structure
+  - Space-efficient design replacing horizontal category chips
 - Item tags: `popular` or `bestseller` (show on customer/admin cards)
 - Orders list (admin)
   - Search by code, filter by payment status
-  - Paginated (10/page), results summary (e.g., “Showing 1 to 10 of 20 results”)
+  - Paginated (10/page), results summary (e.g., "Showing 1 to 10 of 20 results")
   - Expandable rows (Alpine.js) with smooth transitions to view order items
   - Clear filters button and instant search
 
 #### 6) Database Models (high level)
 - User: `name, email, password, role`
-- Category, MenuItem (`price`, `image_path`, `is_active`, optional `tag`, optional `stock`)
+- Category: Hierarchical structure with `parent_id`, `position`, `is_active` for tree organization
+- MenuItem (`price`, `image_path`, `is_active`, optional `tag`, optional `stock`)
 - DailyMenuAvailability (optional for future daily toggling)
 - Order (`status`, `subtotal`, `tax`, `total`, `payment_status`, `payment_provider`, `payment_ref`, `notes`)
 - OrderItem (`name_snapshot`, `unit_price`, `qty`, `line_total`)
@@ -104,7 +114,10 @@ Gourmet Express is a full-featured restaurant ordering app built with Laravel 11
 - Consistent Tailwind styling; focus rings and borders improved for visibility
 - Mobile-first responsive design across pages
 - Header and content alignment consistent; single customer layout
-- Cart badge with white ring and “99+” cap for large quantities
+- Cart badge with white ring and "99+" cap for large quantities
+- **Admin Category Management**: Intuitive tree view with clickable rows and smooth expand/collapse animations
+- **Category Dropdown**: Space-efficient option groups with hierarchical visual structure
+- **Interactive Elements**: Hover effects, smooth transitions, and clear visual feedback throughout admin interfaces
 
 ### Getting Started
 1) Clone and install

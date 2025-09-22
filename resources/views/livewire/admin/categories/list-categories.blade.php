@@ -103,9 +103,8 @@
         <!-- Table Header -->
         <div class="bg-gray-50 border-b border-gray-200">
             <div class="grid grid-cols-12 gap-4 px-6 py-3 text-sm font-medium text-gray-700">
-                <div class="col-span-5">Name</div>
-                <div class="col-span-3">Parent</div>
-                <div class="col-span-2">Status</div>
+                <div class="col-span-7">Name</div>
+                <div class="col-span-3">Status</div>
                 <div class="col-span-2 text-right">Actions</div>
             </div>
         </div>
@@ -124,7 +123,7 @@
                 >
                     <div class="grid grid-cols-12 gap-4 items-center">
                         <!-- Name Column with Hierarchy -->
-                        <div class="col-span-5">
+                        <div class="col-span-7">
                             <div class="flex items-center" style="padding-left: {{ $category->level * 24 }}px;">
                                 @if($category->level > 0)
                                     <span class="text-gray-400 mr-2">
@@ -158,19 +157,8 @@
                             </div>
                         </div>
 
-                        <!-- Parent Column -->
-                        <div class="col-span-3">
-                            <span class="text-gray-600">
-                                @if($category->parent_id)
-                                    {{ optional($this->categories->firstWhere('id', $category->parent_id))->name ?? 'Unknown' }}
-                                @else
-                                    —
-                                @endif
-                            </span>
-                        </div>
-
                         <!-- Status Column -->
-                        <div class="col-span-2">
+                        <div class="col-span-3">
                             <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium {{ $category->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' }}">
                                 @if($category->is_active)
                                     <span class="w-2 h-2 bg-green-500 rounded-full"></span>

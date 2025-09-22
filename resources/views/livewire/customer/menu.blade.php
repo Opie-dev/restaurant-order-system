@@ -155,54 +155,78 @@
             <div class="flex-1 overflow-y-auto p-4 space-y-4">
                 @if($this->cartCount > 0)
                     @foreach($this->cartLines as $line)
-                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 relative">
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 relative">
                             <button wire:click="remove({{ $line['item']->id }}, {{ $line['id'] }})" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-500 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </button>
-                            @php 
-                                $sel = $line['selections'] ?? []; 
-                                $optionNames = collect($sel['options'] ?? [])->flatMap(fn($g) => collect($g['options'] ?? [])->pluck('name'))->filter()->values()->implode(', ');
-                                $basePrice = ($line['item']->type === 'set') ? (float)($line['item']->base_price ?? 0) : (float)($line['item']->price ?? 0);
-                            @endphp
-
+                            
                             <div class="flex items-start justify-between">
-                                <div class="flex-1 min-w-0">
-                                    <div class="font-semibold text-gray-900">{{ $line['item']->name }}</div>
-                                    <div class="text-xs text-gray-600 mt-1">Base Price: RM {{ number_format($basePrice, 2) }}</div>
-
-                                    @if(!empty($sel['options']))
-                                        <div class="mt-2">
-                                            <div class="text-xs text-gray-500 mb-1">Selected:</div>
-                                            <ul class="text-xs text-gray-800 space-y-0.5">
-                                                @foreach($sel['options'] as $g)
-                                                    @foreach(($g['options'] ?? []) as $opt)
-                                                        <li>• {{ $opt['name'] }}</li>
+                                <div class="flex-1">
+                                    <div class="flex items-center space-x-2">
+                                        <h4 class="text-sm font-medium text-gray-900">{{ $line['item']->name }}</h4>
+                                        <span class="text-xs text-gray-500">×{{ $line['qty'] }}</span>
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        RM{{ number_format($line['unit_price'], 2) }} each
+                                    </div>
+                                    
+                                    @if(!empty($line['selections']))
+                                        @php
+                                            $selections = $line['selections'];
+                                        @endphp
+                                        
+                                        @if(!empty($selections['options']) || !empty($selections['addons']))
+                                            <div class="mt-2 space-y-1">
+                                                @if(!empty($selections['options']))
+                                                    @foreach($selections['options'] as $optionGroup)
+                                                        @if(!empty($optionGroup['options']))
+                                                            <div class="flex items-start space-x-2">
+                                                                <span class="text-xs font-medium text-gray-600 uppercase tracking-wide min-w-0 flex-shrink-0">
+                                                                    {{ $optionGroup['name'] }}:
+                                                                </span>
+                                                                <div class="flex flex-wrap gap-1">
+                                                                    @foreach($optionGroup['options'] as $option)
+                                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                                            {{ $option['name'] }}
+                                                                        </span>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        @endif
                                                     @endforeach
-                                                @endforeach
-                                            </ul>
-                                        </div>
+                                                @endif
+                                                
+                                                @if(!empty($selections['addons']))
+                                                    @foreach($selections['addons'] as $addonGroup)
+                                                        @if(!empty($addonGroup['options']))
+                                                            <div class="flex items-start space-x-2">
+                                                                <span class="text-xs font-medium text-gray-600 uppercase tracking-wide min-w-0 flex-shrink-0">
+                                                                    {{ $addonGroup['name'] }}:
+                                                                </span>
+                                                                <div class="flex flex-wrap gap-1">
+                                                                    @foreach($addonGroup['options'] as $addon)
+                                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                                            {{ $addon['name'] }}
+                                                                            @if(isset($addon['price']) && $addon['price'] > 0)
+                                                                                (+RM {{ number_format($addon['price'], 2) }})
+                                                                            @endif
+                                                                        </span>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        @endif
+                                                    @endforeach
+                                                @endif
+                                            </div>
+                                        @else
+                                            <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
+                                        @endif
+                                    @else
+                                        <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
                                     @endif
 
-                                    @if(!empty($sel['addons']))
-                                        <div class="mt-2">
-                                            <div class="text-xs text-gray-500 mb-1">Addons:</div>
-                                            <ul class="text-xs text-gray-800 space-y-0.5">
-                                                @foreach($sel['addons'] as $g)
-                                                    @foreach(($g['options'] ?? []) as $opt)
-                                                        @php $p = (float)($opt['price'] ?? 0); @endphp
-                                                        <li class="flex items-center justify-between">
-                                                            <span>• {{ $opt['name'] }}</span>
-                                                            @if($p > 0)
-                                                                <span class="ml-2 px-2 py-0.5 rounded bg-gray-100 text-gray-700">+RM {{ number_format($p, 2) }}</span>
-                                                            @endif
-                                                        </li>
-                                                    @endforeach
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    @endif
-
-                                    <div class="flex items-center justify-between mt-3">
+                                    <!-- Quantity Controls -->
+                                    <div class="mt-3 flex items-center justify-between">
                                         @php $outOfStock = isset($line['item']->stock) && ((int)$line['item']->stock <= 0); @endphp
                                         <div>
                                             @if($outOfStock)
@@ -220,11 +244,11 @@
                                             @endif
                                         </div>
                                         
-                                    </div>
-
-                                    <div class="border-t border-gray-200 mt-3 pt-2 flex items-center justify-between">
-                                        <span class="text-xs text-gray-500">Total</span>
-                                        <span class="font-bold text-gray-900">RM {{ number_format($line['line_total'], 2) }}</span>
+                                        <div class="text-right">
+                                            <div class="text-sm font-medium text-gray-900">
+                                                RM{{ number_format($line['line_total'], 2) }}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

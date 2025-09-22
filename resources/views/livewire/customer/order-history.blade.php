@@ -75,15 +75,79 @@
                     <!-- Order Items -->
                     <div class="px-6 py-4">
                         <h4 class="text-sm font-medium text-gray-900 mb-3">Items Ordered</h4>
-                        <div class="space-y-2">
+                        <div class="space-y-3">
                             @foreach($order->items as $item)
-                                <div class="flex items-center justify-between py-">
-                                    <div class="flex-1">
-                                        <p class="text-sm font-medium text-gray-900">{{ $item->name_snapshot }}</p>
-                                        <p class="text-xs text-gray-600">Qty: {{ $item->qty }} × ${{ number_format($item->unit_price, 2) }}</p>
-                                    </div>
-                                    <div class="text-sm font-medium text-gray-900">
-                                        ${{ number_format($item->line_total, 2) }}
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1">
+                                            <div class="flex items-center space-x-2">
+                                                <h4 class="text-sm font-medium text-gray-900">{{ $item->name_snapshot }}</h4>
+                                                <span class="text-xs text-gray-500">×{{ $item->qty }}</span>
+                                            </div>
+                                            <div class="text-xs text-gray-500 mt-1">
+                                                RM{{ number_format($item->unit_price, 2) }} each
+                                            </div>
+                                            
+                                            @if($item->hasSelections())
+                                                @php
+                                                    $selections = $item->getSelectionsArray();
+                                                @endphp
+                                                
+                                                @if(!empty($selections['options']) || !empty($selections['addons']))
+                                                    <div class="mt-2 space-y-1">
+                                                        @if(!empty($selections['options']))
+                                                            @foreach($selections['options'] as $optionGroup)
+                                                                @if(!empty($optionGroup['options']))
+                                                                    <div class="flex items-start space-x-2">
+                                                                        <span class="text-xs font-medium text-gray-600 uppercase tracking-wide min-w-0 flex-shrink-0">
+                                                                            {{ $optionGroup['name'] }}:
+                                                                        </span>
+                                                                        <div class="flex flex-wrap gap-1">
+                                                                            @foreach($optionGroup['options'] as $option)
+                                                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                                                    {{ $option['name'] }}
+                                                                                </span>
+                                                                            @endforeach
+                                                                        </div>
+                                                                    </div>
+                                                                @endif
+                                                            @endforeach
+                                                        @endif
+                                                        
+                                                        @if(!empty($selections['addons']))
+                                                            @foreach($selections['addons'] as $addonGroup)
+                                                                @if(!empty($addonGroup['options']))
+                                                                    <div class="flex items-start space-x-2">
+                                                                        <span class="text-xs font-medium text-gray-600 uppercase tracking-wide min-w-0 flex-shrink-0">
+                                                                            {{ $addonGroup['name'] }}:
+                                                                        </span>
+                                                                        <div class="flex flex-wrap gap-1">
+                                                                            @foreach($addonGroup['options'] as $addon)
+                                                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                                                    {{ $addon['name'] }}
+                                                                                    @if(isset($addon['price']) && $addon['price'] > 0)
+                                                                                        (+RM {{ number_format($addon['price'], 2) }})
+                                                                                    @endif
+                                                                                </span>
+                                                                            @endforeach
+                                                                        </div>
+                                                                    </div>
+                                                                @endif
+                                                            @endforeach
+                                                        @endif
+                                                    </div>
+                                                @else
+                                                    <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
+                                                @endif
+                                            @else
+                                                <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
+                                            @endif
+                                        </div>
+                                        <div class="text-right ml-4">
+                                            <div class="text-sm font-medium text-gray-900">
+                                                RM{{ number_format($item->line_total, 2) }}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach

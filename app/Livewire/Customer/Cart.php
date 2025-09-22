@@ -12,17 +12,17 @@ class Cart extends Component
 {
     public function increment(int $id): void
     {
-        app(CartService::class)->increment($id);
+        app(CartService::class)->incrementLine($id);
     }
 
     public function decrement(int $id): void
     {
-        app(CartService::class)->decrement($id);
+        app(CartService::class)->decrementLine($id);
     }
 
     public function remove(int $id): void
     {
-        app(CartService::class)->remove($id);
+        app(CartService::class)->removeLine($id);
     }
 
     public function clear(): void
@@ -35,11 +35,14 @@ class Cart extends Component
         $cart = app(CartService::class)->current();
         return $cart->items()->with('menuItem')->get()->map(function (CartItem $line) {
             return [
-                'id' => $line->menu_item_id,
+                'id' => $line->id,
+                'menu_item_id' => $line->menu_item_id,
                 'name' => $line->menuItem->name,
                 'price' => (float) $line->unit_price,
                 'qty' => $line->qty,
                 'image_path' => $line->menuItem->image_path,
+                'selections' => $line->selections,
+                'line_total' => $line->qty * $line->unit_price,
             ];
         })->all();
     }

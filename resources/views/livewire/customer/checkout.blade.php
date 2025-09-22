@@ -51,33 +51,80 @@
         @if(empty($lines))
             <p class="text-gray-600 text-sm">Your cart is empty.</p>
         @else
-            <div class="space-y-4">
+            <div class="space-y-3">
                 @foreach($lines as $line)
-                    @php
-                        $src = null;
-                        if (!empty($line['item']->image_path)) {
-                            $src = Storage::url($line['item']->image_path);
-                        }
-                    @endphp
-                    <div class="flex items-start justify-between">
-                        <div class="flex items-start gap-3">
-                            <div class="w-10 h-10 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
-                                @if($src)
-                                    <img src="{{ $src }}" class="w-full h-full object-cover" alt="{{ $line['item']->name }}" />
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2">
+                                    <h4 class="text-sm font-medium text-gray-900">{{ $line['item']->name }}</h4>
+                                    <span class="text-xs text-gray-500">×{{ $line['qty'] }}</span>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    RM{{ number_format($line['unit_price'], 2) }} each
+                                </div>
+                                
+                                @if(!empty($line['selections']))
+                                    @php
+                                        $selections = $line['selections'];
+                                    @endphp
+                                    
+                                    @if(!empty($selections['options']) || !empty($selections['addons']))
+                                        <div class="mt-2 space-y-1">
+                                            @if(!empty($selections['options']))
+                                                @foreach($selections['options'] as $optionGroup)
+                                                    @if(!empty($optionGroup['options']))
+                                                        <div class="flex items-start space-x-2">
+                                                            <span class="text-xs font-medium text-gray-600 uppercase tracking-wide min-w-0 flex-shrink-0">
+                                                                {{ $optionGroup['name'] }}:
+                                                            </span>
+                                                            <div class="flex flex-wrap gap-1">
+                                                                @foreach($optionGroup['options'] as $option)
+                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                                        {{ $option['name'] }}
+                                                                    </span>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                            @endif
+                                            
+                                            @if(!empty($selections['addons']))
+                                                @foreach($selections['addons'] as $addonGroup)
+                                                    @if(!empty($addonGroup['options']))
+                                                        <div class="flex items-start space-x-2">
+                                                            <span class="text-xs font-medium text-gray-600 uppercase tracking-wide min-w-0 flex-shrink-0">
+                                                                {{ $addonGroup['name'] }}:
+                                                            </span>
+                                                            <div class="flex flex-wrap gap-1">
+                                                                @foreach($addonGroup['options'] as $addon)
+                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                                        {{ $addon['name'] }}
+                                                                        @if(isset($addon['price']) && $addon['price'] > 0)
+                                                                            (+RM {{ number_format($addon['price'], 2) }})
+                                                                        @endif
+                                                                    </span>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                            @endif
+                                        </div>
+                                    @else
+                                        <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
+                                    @endif
                                 @else
-                                    <div class="w-full h-full grid place-content-center text-gray-400">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                    </div>
+                                    <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
                                 @endif
                             </div>
-                            <div>
-                                <div class="text-gray-900 font-medium">{{ $line['item']->name }}</div>
-                                <div class="text-gray-500 text-xs mt-0.5">Qty: {{ $line['qty'] }} × RM {{ number_format($line['unit_price'], 2) }}</div>
+                            <div class="text-right ml-4">
+                                <div class="text-sm font-medium text-gray-900">
+                                    RM{{ number_format($line['line_total'], 2) }}
+                                </div>
                             </div>
                         </div>
-                        <div class="text-gray-900 font-semibold">RM {{ number_format($line['line_total'], 2) }}</div>
                     </div>
                 @endforeach
                 <div class="border-t border-gray-200 pt-4 space-y-2">

@@ -222,7 +222,25 @@
             </div>
         </div>
 
-        
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center">
+                            <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-2 w-0 flex-1">
+                        <dl>
+                            <dt class="text-base font-medium text-gray-500 truncate">Delivering Orders</dt>
+                            <dd class="text-base font-medium text-gray-900">{{ $this->deliveringCount }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Search -->
@@ -245,224 +263,223 @@
     </div>
 
     <!-- Orders Grid -->
-    <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        @if($this->pendingOrders->count() > 0)
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
-                @foreach($this->pendingOrders as $order)
-                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 hover:bg-gray-100 transition-colors flex flex-col">
-                        <!-- Order Header -->
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex-1">
-                                <div class="flex items-center space-x-3 mb-2">
-                                    <h3 class="text-lg font-semibold text-gray-900">
-                                        {{ $order->code }}
-                                    </h3>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $order->getStatusColorClass() }}">
-                                        {{ ucfirst($order->status) }}
-                                    </span>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $order->getPaymentStatusColorClass() }}">
-                                        {{ ucfirst($order->payment_status) }}
-                                    </span>
-                                </div>
-                                <div class="flex items-center space-x-4 text-sm text-gray-500">
-                                    <span>{{ $order->user?->name ?? 'Guest' }}</span>
-                                    <span>•</span>
-                                    <span>{{ $order->created_at->format('M j, Y g:i A') }}</span>
-                                    <span>•</span>
-                                    <span>{{ $order->items->sum('qty') }} items</span>
-                                </div>
+    @if($this->pendingOrders->count() > 0)
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            @foreach($this->pendingOrders as $order)
+                 <div class="bg-white border border-gray-200 rounded-lg p-6 hover:bg-gray-100 transition-colors flex flex-col">
+                    <!-- Order Header -->
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <h3 class="text-lg font-semibold text-gray-900">
+                                    {{ $order->code }}
+                                </h3>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $order->getStatusColorClass() }}">
+                                    {{ ucfirst($order->status) }}
+                                </span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $order->getPaymentStatusColorClass() }}">
+                                    {{ ucfirst($order->payment_status) }}
+                                </span>
                             </div>
-                            
-                            <!-- Update Status Button -->
-                            @if(!$order->isCompleted())
-                                <div x-data="{ open: false }" class="relative">
-                                    <button @click="open = !open" class="inline-flex items-center px-3 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                        </svg>
-                                        <svg class="ml-1 h-4 w-4 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </button>
-                                    <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg z-10 border border-gray-200">
-                                        <div class="py-2">
-                                            <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
-                                                Change Status To:
-                                            </div>
-                                            @foreach($order->getValidTransitions() as $transition)
-                                                @if($transition === 'cancelled')
+                            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                <span>{{ $order->user?->name ?? 'Guest' }}</span>
+                                <span>•</span>
+                                <span>{{ $order->created_at->format('M j, Y g:i A') }}</span>
+                                <span>•</span>
+                                <span>{{ $order->items->sum('qty') }} items</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Update Status Button -->
+                        @if(!$order->isCompleted())
+                            <div x-data="{ open: false }" class="relative">
+                                <button @click="open = !open" class="inline-flex items-center px-3 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                                    </svg>
+                                    <svg class="ml-1 h-4 w-4 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+                                <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg z-10 border border-gray-200">
+                                    <div class="py-2">
+                                        <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
+                                            Change Status To:
+                                        </div>
+                                        @foreach($order->getValidTransitions() as $transition)
+                                            @if($transition === 'cancelled')
+                                            <button 
+                                                @click="orderId = {{ $order->id }}; showCancelModal = true; open = false; cancellationRemarks=''; cancellationError=''" 
+                                                    class="block w-full text-left px-4 py-3 text-sm text-red-700 hover:bg-red-50 transition-colors"
+                                                >
+                                                    Cancel Order
+                                                </button>
+                                            @elseif($transition === 'delivering')
                                                 <button 
-                                                    @click="orderId = {{ $order->id }}; showCancelModal = true; open = false; cancellationRemarks=''; cancellationError=''" 
-                                                        class="block w-full text-left px-4 py-3 text-sm text-red-700 hover:bg-red-50 transition-colors"
-                                                    >
-                                                        Cancel Order
-                                                    </button>
-                                                @elseif($transition === 'delivering')
-                                                    <button 
-                                                        @click="orderId = {{ $order->id }}; open = false; $dispatch('open-tracking-modal', { id: {{ $order->id }} })" 
-                                                        class="block w-full text-left px-4 py-3 text-sm text-purple-700 hover:bg-purple-50 transition-colors"
-                                                    >
-                                                        Mark as Delivering
-                                                    </button>
-                                                @else
-                                                    <button 
-                                                        wire:click="updateOrderStatus({{ $order->id }}, '{{ $transition }}')" 
-                                                        class="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                                    >
-                                                        Mark as {{ ucfirst($transition) }}
-                                                    </button>
-                                                @endif
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                </div>
-                            @else
-                                <div class="inline-flex items-center px-3 py-2 bg-gray-100 text-gray-600 text-sm font-medium rounded-lg">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    Order Complete
-                                </div>
-                            @endif
-                        </div>
-                        
-                        <!-- Order Items -->
-                        <div class="space-y-3">
-                            @foreach($order->items as $item)
-                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                                    <div class="flex items-start justify-between">
-                                        <div class="flex-1">
-                                            <div class="flex items-center space-x-2">
-                                                <h4 class="text-sm font-medium text-gray-900">{{ $item->name_snapshot }}</h4>
-                                                <span class="text-xs text-gray-500">×{{ $item->qty }}</span>
-                                            </div>
-                                            <div class="text-xs text-gray-500 mt-1">
-                                                RM{{ number_format($item->unit_price, 2) }} each
-                                            </div>
-                                            
-                                            @if($item->hasSelections())
-                                                <div class="mt-2 space-y-1">
-                                                    @if(!empty($item->selections['options']))
-                                                        @foreach($item->selections['options'] as $optionGroup)
-                                                            @if(!empty($optionGroup['options']))
-                                                                <div class="flex items-start space-x-2">
-                                                                    <span class="text-xs font-medium text-gray-600 tracking-wide min-w-0 flex-shrink-0">
-                                                                        {{ $optionGroup['name'] }}:
-                                                                    </span>
-                                                                    <div class="flex flex-wrap gap-1">
-                                                                        @foreach($optionGroup['options'] as $option)
-                                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                                                                {{ $option['name'] }}
-                                                                            </span>
-                                                                        @endforeach
-                                                                    </div>
-                                                                </div>
-                                                            @endif
-                                                        @endforeach
-                                                    @endif
-                                                    
-                                                    @if(!empty($item->selections['addons']))
-                                                        @foreach($item->selections['addons'] as $addonGroup)
-                                                            @if(!empty($addonGroup['options']))
-                                                                <div class="flex items-start space-x-2">
-                                                                    <span class="text-xs font-medium text-gray-600 tracking-wide min-w-0 flex-shrink-0">
-                                                                        {{ $addonGroup['name'] }}:
-                                                                    </span>
-                                                                    <div class="flex flex-wrap gap-1">
-                                                                        @foreach($addonGroup['options'] as $addon)
-                                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                                                                {{ $addon['name'] }}
-                                                                                @if(isset($addon['price']) && $addon['price'] > 0)
-                                                                                    (+RM {{ number_format($addon['price'], 2) }})
-                                                                                @endif
-                                                                            </span>
-                                                                        @endforeach
-                                                                    </div>
-                                                                </div>
-                                                            @endif
-                                                        @endforeach
-                                                    @endif
-                                                </div>
+                                                    @click="orderId = {{ $order->id }}; open = false; $dispatch('open-tracking-modal', { id: {{ $order->id }} })" 
+                                                    class="block w-full text-left px-4 py-3 text-sm text-purple-700 hover:bg-purple-50 transition-colors"
+                                                >
+                                                    Mark as Delivering
+                                                </button>
                                             @else
-                                                <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
+                                                <button 
+                                                    wire:click="updateOrderStatus({{ $order->id }}, '{{ $transition }}')" 
+                                                    class="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                                >
+                                                    Mark as {{ ucfirst($transition) }}
+                                                </button>
                                             @endif
-                                        </div>
-                                        <div class="text-right ml-4">
-                                            <div class="text-sm font-medium text-gray-900">
-                                                RM{{ number_format($item->line_total, 2) }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                        
-                        @if($order->notes)
-                            <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                <div class="flex items-start">
-                                    <svg class="w-4 h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 6l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                                    </svg>
-                                    <div>
-                                        <span class="text-sm font-medium text-blue-800">Order Notes:</span>
-                                        <p class="text-sm text-blue-700 mt-1">{{ $order->notes }}</p>
+                                        @endforeach
                                     </div>
                                 </div>
                             </div>
-                        @endif
-                        
-                        <!-- Cancellation Remarks -->
-                        @if($order->status === 'cancelled' && $order->cancellation_remarks)
-                            <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                                <div class="flex items-start">
-                                    <svg class="w-4 h-4 text-red-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                    </svg>
-                                    <div>
-                                        <span class="text-sm font-medium text-red-800">Cancellation Reason:</span>
-                                        <p class="text-sm text-red-700 mt-1">{{ $order->cancellation_remarks }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                        
-                        <!-- Order Total -->
-                        <div class="mt-auto flex justify-end">
-                            <div class="text-right">
-                                <div class="text-2xl font-bold text-gray-900">RM{{ number_format($order->total, 2) }}</div>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-
-            @if($this->pendingOrders->hasPages())
-                <div class="px-6 py-4 bg-white border-t border-gray-200 flex items-center justify-between">
-                    <div class="text-sm text-gray-600">
-                        @if($this->pendingOrders->total() > 0)
-                            Showing {{ $this->pendingOrders->firstItem() }} to {{ $this->pendingOrders->lastItem() }} of {{ $this->pendingOrders->total() }} results
                         @else
-                            Showing 0 results
+                            <div class="inline-flex items-center px-3 py-2 bg-gray-100 text-gray-600 text-sm font-medium rounded-lg">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Order Complete
+                            </div>
                         @endif
                     </div>
-                    <div>
-                        {{ $this->pendingOrders->links('vendor.pagination.custom') }}
+                    
+                    <!-- Order Items -->
+                    <div class="space-y-3">
+                        @foreach($order->items as $item)
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2">
+                                            <h4 class="text-sm font-medium text-gray-900">{{ $item->name_snapshot }}</h4>
+                                            <span class="text-xs text-gray-500">×{{ $item->qty }}</span>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            RM{{ number_format($item->unit_price, 2) }} each
+                                        </div>
+                                        
+                                        @if($item->hasSelections())
+                                            <div class="mt-2 space-y-1">
+                                                @if(!empty($item->selections['options']))
+                                                    @foreach($item->selections['options'] as $optionGroup)
+                                                        @if(!empty($optionGroup['options']))
+                                                            <div class="flex items-start space-x-2">
+                                                                <span class="text-xs font-medium text-gray-600 tracking-wide min-w-0 flex-shrink-0">
+                                                                    {{ $optionGroup['name'] }}:
+                                                                </span>
+                                                                <div class="flex flex-wrap gap-1">
+                                                                    @foreach($optionGroup['options'] as $option)
+                                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                                            {{ $option['name'] }}
+                                                                        </span>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        @endif
+                                                    @endforeach
+                                                @endif
+                                                
+                                                @if(!empty($item->selections['addons']))
+                                                    @foreach($item->selections['addons'] as $addonGroup)
+                                                        @if(!empty($addonGroup['options']))
+                                                            <div class="flex items-start space-x-2">
+                                                                <span class="text-xs font-medium text-gray-600 tracking-wide min-w-0 flex-shrink-0">
+                                                                    {{ $addonGroup['name'] }}:
+                                                                </span>
+                                                                <div class="flex flex-wrap gap-1">
+                                                                    @foreach($addonGroup['options'] as $addon)
+                                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                                            {{ $addon['name'] }}
+                                                                            @if(isset($addon['price']) && $addon['price'] > 0)
+                                                                                (+RM {{ number_format($addon['price'], 2) }})
+                                                                            @endif
+                                                                        </span>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        @endif
+                                                    @endforeach
+                                                @endif
+                                            </div>
+                                        @else
+                                            <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
+                                        @endif
+                                    </div>
+                                    <div class="text-right ml-4">
+                                        <div class="text-sm font-medium text-gray-900">
+                                            RM{{ number_format($item->line_total, 2) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    
+                    @if($order->notes)
+                        <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div class="flex items-start">
+                                <svg class="w-4 h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 6l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                                </svg>
+                                <div>
+                                    <span class="text-sm font-medium text-blue-800">Order Notes:</span>
+                                    <p class="text-sm text-blue-700 mt-1">{{ $order->notes }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                    
+                    <!-- Cancellation Remarks -->
+                    @if($order->status === 'cancelled' && $order->cancellation_remarks)
+                        <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <div class="flex items-start">
+                                <svg class="w-4 h-4 text-red-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                </svg>
+                                <div>
+                                    <span class="text-sm font-medium text-red-800">Cancellation Reason:</span>
+                                    <p class="text-sm text-red-700 mt-1">{{ $order->cancellation_remarks }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                    
+                    <!-- Order Total -->
+                    <div class="mt-auto flex justify-end">
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-gray-900">RM{{ number_format($order->total, 2) }}</div>
+                        </div>
                     </div>
                 </div>
-            @endif
-        @else
-            <div class="p-12 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No active orders</h3>
-                <p class="mt-1 text-sm text-gray-500">All orders are completed or cancelled.</p>
+            @endforeach
+        </div>
+
+        @if($this->pendingOrders->hasPages())
+            <div class="px-6 py-4 bg-white border-t border-gray-200 flex items-center justify-between">
+                <div class="text-sm text-gray-600">
+                    @if($this->pendingOrders->total() > 0)
+                        Showing {{ $this->pendingOrders->firstItem() }} to {{ $this->pendingOrders->lastItem() }} of {{ $this->pendingOrders->total() }} results
+                    @else
+                        Showing 0 results
+                    @endif
+                </div>
+                <div>
+                    {{ $this->pendingOrders->links('vendor.pagination.custom') }}
+                </div>
             </div>
         @endif
-    </div>
+    @else
+        <div class="p-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No active orders</h3>
+            <p class="mt-1 text-sm text-gray-500">All orders are completed or cancelled.</p>
+        </div>
+    @endif
+
     <!-- Tracking URL Modal (embedded to keep single root) -->
     <div x-data="{ open: false }" 
-         x-on:open-tracking-modal.window="open=true; $wire.trackingOrderId=$event.detail.id; $wire.trackingUrl=''; $wire.clearTrackingValidation()" 
+         x-on:open-tracking-modal.window="open=true; $wire.trackingOrderId=$event.detail.id; $wire.trackingUrl=''; $wire.deliveryFee=''; $wire.clearTrackingValidation()" 
          x-on:close-tracking-modal.window="open=false"
          x-show="open" x-cloak @keydown.escape.window="open = false" class="fixed inset-0 z-50 overflow-y-auto" style="display:none;">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -473,15 +490,22 @@
                     <p class="mt-1 text-sm text-gray-600">Provide a tracking link for this delivery.</p>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700">Tracking URL</label>
-                        <input type="url" wire:model.live.debounce.300ms="trackingUrl" placeholder="https://..." class="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm" />
+                        <input type="url" wire:model.live.debounce.300ms="trackingUrl" placeholder="https://..." class="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm" />
                         @error('trackingUrl')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700">Delivery Fee</label>
+                        <input type="number" wire:model.live.debounce.300ms="deliveryFee" placeholder="0.00" step="0.01" min="0" class="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm" />
+                        @error('deliveryFee')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                     <button wire:click="confirmDelivering" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm">Confirm</button>
-                    <button @click="open=false; $wire.trackingUrl=''; $wire.clearTrackingValidation()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
+                    <button @click="open=false; $wire.trackingUrl=''; $wire.deliveryFee=''; $wire.clearTrackingValidation()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
                 </div>
             </div>
         </div>

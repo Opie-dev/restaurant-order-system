@@ -122,11 +122,59 @@ x-init="
     </div>
 
     <!-- Revenue Overview -->
+
+    <div class="flex justify-end items-center gap-3 mb-3">
+        <div class="relative">
+            <label class="block text-xs font-medium text-gray-600 mb-1">Year</label>
+            <div class="relative">
+                <select wire:model.live="selectedYear" class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 pr-8 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors appearance-none">
+                    @foreach($this->availableYears as $year)
+                        <option value="{{ $year }}">{{ $year }}</option>
+                    @endforeach
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div class="relative">
+            <label class="block text-xs font-medium text-gray-600 mb-1">Month</label>
+            <div class="relative">
+                <select wire:model.live="selectedMonth" class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 pr-8 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors appearance-none">
+                    @foreach($this->availableMonths as $monthNum => $monthName)
+                        <option value="{{ $monthNum }}">{{ $monthName }}</option>
+                    @endforeach
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div class="relative">
+            <label class="block text-xs font-medium text-gray-600 mb-1">Week</label>
+            <div class="relative">
+                <select wire:model.live="selectedWeek" class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 pr-8 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors appearance-none">
+                    @foreach($this->availableWeeks as $weekNum => $weekName)
+                        <option value="{{ $weekNum }}">{{ $weekName }}</option>
+                    @endforeach
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <!-- Weekly Revenue -->
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow duration-200">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">Weekly Revenue</h3>
+                 <h3 class="text-lg font-semibold text-gray-900">Week {{ $this->selectedWeek }} Revenue</h3>
                 <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
                     <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
@@ -134,13 +182,13 @@ x-init="
                 </div>
             </div>
             <p class="text-3xl font-bold text-green-600 mb-2">RM{{ number_format($this->weeklyRevenue, 2) }}</p>
-            <p class="text-sm text-gray-500">This week's total revenue</p>
+            <p class="text-sm text-gray-500">Selected week's total revenue</p>
         </div>
 
         <!-- Monthly Revenue -->
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow duration-200">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">Monthly Revenue</h3>
+                 <h3 class="text-lg font-semibold text-gray-900">{{ $this->availableMonths[$this->selectedMonth] }} Revenue</h3>
                 <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                     <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -148,13 +196,13 @@ x-init="
                 </div>
             </div>
             <p class="text-3xl font-bold text-blue-600 mb-2">RM{{ number_format($this->monthlyRevenue, 2) }}</p>
-            <p class="text-sm text-gray-500">This month's total revenue</p>
+            <p class="text-sm text-gray-500">Selected month's total revenue</p>
         </div>
 
         <!-- Total Revenue -->
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow duration-200">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">Total Revenue</h3>
+                 <h3 class="text-lg font-semibold text-gray-900">Total Revenue for {{ $this->selectedYear }}</h3>
                 <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
                     <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
@@ -184,50 +232,138 @@ x-init="
         <!-- Daily Orders Chart -->
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-semibold text-gray-900">Daily Orders (Last 7 Days)</h3>
-                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>
-                </div>
-            </div>
-            <div class="space-y-4">
-                @foreach($this->dailyOrdersData as $data)
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-600 w-16">{{ $data['date'] }}</span>
-                        <div class="flex items-center flex-1 mx-4">
-                            <div class="w-full bg-gray-200 rounded-full h-3 mr-3">
-                                <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500" style="width: {{ $data['orders'] > 0 ? ($data['orders'] / max(array_column($this->dailyOrdersData, 'orders'))) * 100 : 0 }}%"></div>
-                            </div>
-                            <span class="text-sm font-bold text-gray-900 w-8 text-right">{{ $data['orders'] }}</span>
+                <h3 class="text-lg font-semibold text-gray-900">Daily Orders</h3>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <select wire:model.live="selectedOrdersPeriod" class="text-sm border border-gray-300 rounded-lg px-3 py-1 pr-8 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none">
+                            <option value="7">Last 7 Days</option>
+                            <option value="30">Last 30 Days</option>
+                            <option value="60">Last 60 Days</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
                         </div>
                     </div>
-                @endforeach
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="relative">
+                <!-- Y-axis labels -->
+                <div class="absolute left-0 top-0 h-64 w-8 flex flex-col justify-between text-xs text-gray-500">
+                    @php
+                        $maxOrders = max(array_column($this->dailyOrdersData, 'orders'));
+                        $yAxisValues = [];
+                        if ($maxOrders > 0) {
+                            $yAxisValues = [
+                                $maxOrders,
+                                round($maxOrders * 0.75),
+                                round($maxOrders * 0.5),
+                                round($maxOrders * 0.25),
+                                0
+                            ];
+                        } else {
+                            $yAxisValues = [0, 0, 0, 0, 0];
+                        }
+                    @endphp
+                    @foreach($yAxisValues as $value)
+                        <span class="text-right pr-2">{{ $value }}</span>
+                    @endforeach
+                </div>
+                
+                <!-- Chart area -->
+                <div class="overflow-x-auto">
+                    <div class="h-64 flex items-end space-x-2 ml-10 {{ $this->selectedOrdersPeriod == 7 ? 'justify-between' : 'min-w-max' }}">
+                        @foreach($this->dailyOrdersData as $data)
+                            <div class="flex flex-col items-center {{ $this->selectedOrdersPeriod == 7 ? 'flex-1' : 'flex-shrink-0' }}" style="{{ $this->selectedOrdersPeriod == 7 ? '' : 'min-width: 40px;' }}">
+                                <div class="w-full bg-gray-100 rounded-t-lg relative group">
+                                    <div 
+                                        class="bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg transition-all duration-500 hover:from-blue-600 hover:to-blue-500" 
+                                        style="height: {{ $maxOrders > 0 ? ($data['orders'] / $maxOrders) * 200 : 0 }}px;"
+                                    ></div>
+                                    <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                                        {{ $data['orders'] }} orders
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-600 mt-2 font-medium whitespace-nowrap">{{ $data['date'] }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Daily Revenue Chart -->
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-semibold text-gray-900">Daily Revenue (Last 7 Days)</h3>
-                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                    </svg>
-                </div>
-            </div>
-            <div class="space-y-4">
-                @foreach($this->dailyRevenueData as $data)
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-600 w-16">{{ $data['date'] }}</span>
-                        <div class="flex items-center flex-1 mx-4">
-                            <div class="w-full bg-gray-200 rounded-full h-3 mr-3">
-                                <div class="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full transition-all duration-500" style="width: {{ $data['revenue'] > 0 ? ($data['revenue'] / max(array_column($this->dailyRevenueData, 'revenue'))) * 100 : 0 }}%"></div>
-                            </div>
-                            <span class="text-sm font-bold text-gray-900 w-16 text-right">RM{{ number_format($data['revenue'], 0) }}</span>
+                <h3 class="text-lg font-semibold text-gray-900">Daily Revenue</h3>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <select wire:model.live="selectedRevenuePeriod" class="text-sm border border-gray-300 rounded-lg px-3 py-1 pr-8 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors appearance-none">
+                            <option value="7">Last 7 Days</option>
+                            <option value="30">Last 30 Days</option>
+                            <option value="60">Last 60 Days</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
                         </div>
                     </div>
-                @endforeach
+                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="relative">
+                <!-- Y-axis labels -->
+                <div class="absolute left-0 top-0 h-64 w-12 flex flex-col justify-between text-xs text-gray-500">
+                    @php
+                        $maxRevenue = max(array_column($this->dailyRevenueData, 'revenue'));
+                        $yAxisValues = [];
+                        if ($maxRevenue > 0) {
+                            $yAxisValues = [
+                                'RM' . number_format($maxRevenue, 0),
+                                'RM' . number_format($maxRevenue * 0.75, 0),
+                                'RM' . number_format($maxRevenue * 0.5, 0),
+                                'RM' . number_format($maxRevenue * 0.25, 0),
+                                'RM0'
+                            ];
+                        } else {
+                            $yAxisValues = ['RM0', 'RM0', 'RM0', 'RM0', 'RM0'];
+                        }
+                    @endphp
+                    @foreach($yAxisValues as $value)
+                        <span class="text-right pr-2">{{ $value }}</span>
+                    @endforeach
+                </div>
+                
+                <!-- Chart area -->
+                <div class="overflow-x-auto">
+                    <div class="h-64 flex items-end space-x-2 ml-14 {{ $this->selectedRevenuePeriod == 7 ? 'justify-between' : 'min-w-max' }}">
+                        @foreach($this->dailyRevenueData as $data)
+                            <div class="flex flex-col items-center {{ $this->selectedRevenuePeriod == 7 ? 'flex-1' : 'flex-shrink-0' }}" style="{{ $this->selectedRevenuePeriod == 7 ? '' : 'min-width: 40px;' }}">
+                                <div class="w-full bg-gray-100 rounded-t-lg relative group">
+                                    <div 
+                                        class="bg-gradient-to-t from-green-500 to-green-400 rounded-t-lg transition-all duration-500 hover:from-green-600 hover:to-green-500" 
+                                        style="height: {{ $maxRevenue > 0 ? ($data['revenue'] / $maxRevenue) * 200 : 0 }}px;"
+                                    ></div>
+                                    <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                                        RM{{ number_format($data['revenue'], 0) }}
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-600 mt-2 font-medium whitespace-nowrap">{{ $data['date'] }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -136,6 +136,11 @@ class PendingOrders extends Component
         return Order::where('status', Order::STATUS_PREPARING)->count();
     }
 
+    public function getDeliveringCountProperty(): int
+    {
+        return Order::where('status', Order::STATUS_DELIVERING)->count();
+    }
+
     // Real-time methods
     public function checkForNewOrders(): void
     {

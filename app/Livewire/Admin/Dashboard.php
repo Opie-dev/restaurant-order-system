@@ -13,6 +13,39 @@ use Illuminate\Support\Facades\Cache;
 #[Layout('layouts.admin')]
 class Dashboard extends Component
 {
+    public int $selectedMonth;
+    public int $selectedWeek;
+    public int $selectedYear;
+    public int $selectedOrdersPeriod = 7;
+    public int $selectedRevenuePeriod = 7;
+
+    public function mount()
+    {
+        $this->selectedMonth = now()->month;
+        $this->selectedYear = now()->year;
+        $this->selectedWeek = $this->getCurrentWeekOfMonth();
+    }
+
+    public function getCurrentWeekOfMonth()
+    {
+        $now = now();
+        $firstDayOfMonth = $now->copy()->startOfMonth();
+        $currentDay = $now->day;
+
+        // Calculate which week of the month (1-4)
+        return ceil($currentDay / 7);
+    }
+
+    public function updatedSelectedMonth()
+    {
+        $this->selectedWeek = 1; // Reset to week 1 when month changes
+    }
+
+    public function updatedSelectedYear()
+    {
+        $this->selectedWeek = 1; // Reset to week 1 when year changes
+    }
+
     public function getTodayOrdersProperty()
     {
         return Order::whereDate('created_at', today())->count();
@@ -47,7 +80,9 @@ class Dashboard extends Component
 
     public function getTotalRevenueProperty()
     {
-        return Order::where('payment_status', 'paid')->sum('total');
+        return Order::where('payment_status', 'paid')
+            ->whereYear('created_at', $this->selectedYear)
+            ->sum('total');
     }
 
     public function getRecentOrdersProperty()
@@ -71,20 +106,83 @@ class Dashboard extends Component
 
     public function getWeeklyRevenueProperty()
     {
-        $startOfWeek = Carbon::now()->startOfWeek();
-        $endOfWeek = Carbon::now()->endOfWeek();
+        return Cache::remember("dashboard.weekly_revenue.{$this->selectedYear}.{$this->selectedMonth}.{$this->selectedWeek}", 300, function () {
+            $startOfWeek = $this->getWeekStartDate();
+            $endOfWeek = $this->getWeekEndDate();
 
-        return Order::whereBetween('created_at', [$startOfWeek, $endOfWeek])
-            ->where('payment_status', 'paid')
-            ->sum('total');
+            return Order::whereBetween('created_at', [$startOfWeek, $endOfWeek])
+                ->where('payment_status', 'paid')
+                ->sum('total');
+        });
     }
 
     public function getMonthlyRevenueProperty()
     {
-        return Order::whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->where('payment_status', 'paid')
-            ->sum('total');
+        return Cache::remember("dashboard.monthly_revenue.{$this->selectedYear}.{$this->selectedMonth}", 600, function () {
+            return Order::whereMonth('created_at', $this->selectedMonth)
+                ->whereYear('created_at', $this->selectedYear)
+                ->where('payment_status', 'paid')
+                ->sum('total');
+        });
+    }
+
+    public function getWeekStartDate()
+    {
+        $date = Carbon::create($this->selectedYear, $this->selectedMonth, 1);
+        $weekStart = $date->copy()->addWeeks($this->selectedWeek - 1)->startOfWeek();
+
+        // If the week start is in the previous month, use the 1st of the current month
+        if ($weekStart->month !== $this->selectedMonth) {
+            $weekStart = $date->copy();
+        }
+
+        return $weekStart;
+    }
+
+    public function getWeekEndDate()
+    {
+        $date = Carbon::create($this->selectedYear, $this->selectedMonth, 1);
+        $weekEnd = $date->copy()->addWeeks($this->selectedWeek - 1)->endOfWeek();
+
+        // If the week end is in the next month, use the last day of the current month
+        if ($weekEnd->month !== $this->selectedMonth) {
+            $weekEnd = $date->copy()->endOfMonth();
+        }
+
+        return $weekEnd;
+    }
+
+    public function getAvailableYearsProperty()
+    {
+        $currentYear = now()->year;
+        $years = [];
+        for ($i = $currentYear - 2; $i <= $currentYear; $i++) {
+            $years[] = $i;
+        }
+        return $years;
+    }
+
+    public function getAvailableMonthsProperty()
+    {
+        return [
+            1 => 'January',
+            2 => 'February',
+            3 => 'March',
+            4 => 'April',
+            5 => 'May',
+            6 => 'June',
+            7 => 'July',
+            8 => 'August',
+            9 => 'September',
+            10 => 'October',
+            11 => 'November',
+            12 => 'December'
+        ];
+    }
+
+    public function getAvailableWeeksProperty()
+    {
+        return [1 => 'Week 1', 2 => 'Week 2', 3 => 'Week 3', 4 => 'Week 4'];
     }
 
     public function getOrderStatusCountsProperty()
@@ -100,9 +198,9 @@ class Dashboard extends Component
 
     public function getDailyOrdersDataProperty()
     {
-        return Cache::remember('dashboard.daily_orders_data', 300, function () {
+        return Cache::remember("dashboard.daily_orders_data.{$this->selectedOrdersPeriod}", 300, function () {
             $data = [];
-            for ($i = 6; $i >= 0; $i--) {
+            for ($i = $this->selectedOrdersPeriod - 1; $i >= 0; $i--) {
                 $date = Carbon::now()->subDays($i);
                 $count = Order::whereDate('created_at', $date)->count();
                 $data[] = [
@@ -116,9 +214,9 @@ class Dashboard extends Component
 
     public function getDailyRevenueDataProperty()
     {
-        return Cache::remember('dashboard.daily_revenue_data', 300, function () {
+        return Cache::remember("dashboard.daily_revenue_data.{$this->selectedRevenuePeriod}", 300, function () {
             $data = [];
-            for ($i = 6; $i >= 0; $i--) {
+            for ($i = $this->selectedRevenuePeriod - 1; $i >= 0; $i--) {
                 $date = Carbon::now()->subDays($i);
                 $revenue = Order::whereDate('created_at', $date)
                     ->where('payment_status', 'paid')
@@ -144,11 +242,13 @@ class Dashboard extends Component
         Cache::forget('dashboard.total_revenue');
         Cache::forget('dashboard.recent_orders');
         Cache::forget('dashboard.top_selling_items');
-        Cache::forget('dashboard.weekly_revenue');
-        Cache::forget('dashboard.monthly_revenue');
         Cache::forget('dashboard.order_status_counts');
-        Cache::forget('dashboard.daily_orders_data');
-        Cache::forget('dashboard.daily_revenue_data');
+        Cache::forget("dashboard.daily_orders_data.{$this->selectedOrdersPeriod}");
+        Cache::forget("dashboard.daily_revenue_data.{$this->selectedRevenuePeriod}");
+
+        // Clear dynamic cache keys
+        Cache::forget("dashboard.weekly_revenue.{$this->selectedYear}.{$this->selectedMonth}.{$this->selectedWeek}");
+        Cache::forget("dashboard.monthly_revenue.{$this->selectedYear}.{$this->selectedMonth}");
 
         $this->dispatch('dashboard-refreshed');
     }

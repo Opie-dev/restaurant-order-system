@@ -5,12 +5,10 @@ namespace App\Livewire\Admin\Categories;
 use App\Models\Category;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use Usernotnull\Toast\Concerns\WireToast;
 
 #[Layout('layouts.admin')]
 class ListCategories extends Component
 {
-    use WireToast;
 
     public string $name = '';
     public string $search = '';
@@ -91,7 +89,7 @@ class ListCategories extends Component
         $this->name = '';
         $this->parentLevel1Id = null;
         $this->loadCategories();
-        $this->toast()->success('Category created successfully!');
+        session()->flash('success', 'Category created successfully!');
     }
 
     public function toggle(int $id): void
@@ -101,7 +99,7 @@ class ListCategories extends Component
         $cat->save();
 
         $this->loadCategories();
-        $this->toast()->success('Category status updated!');
+        session()->flash('success', 'Category status updated!');
     }
 
     public function deleteCategory(int $id): void
@@ -109,17 +107,17 @@ class ListCategories extends Component
         $cat = Category::findOrFail($id);
 
         if ($cat->children()->exists()) {
-            $this->toast()->error('Cannot delete: category has subcategories.');
+            session()->flash('error', 'Cannot delete: category has subcategories.');
             return;
         }
         if ($cat->menuItems()->exists()) {
-            $this->toast()->error('Cannot delete: category has menu items.');
+            session()->flash('error', 'Cannot delete: category has menu items.');
             return;
         }
 
         $cat->delete();
         $this->loadCategories();
-        $this->toast()->success('Category deleted successfully!');
+        session()->flash('success', 'Category deleted successfully!');
     }
 
     public function swapOrder(int $sourceId, int $targetId): void
@@ -135,7 +133,7 @@ class ListCategories extends Component
         $target->update(['position' => $tmp]);
 
         $this->loadCategories();
-        $this->toast()->success('Category order updated!');
+        session()->flash('success', 'Category order updated!');
     }
 
     public function render()

@@ -18,6 +18,7 @@ class PendingOrders extends Component
 
     public ?int $trackingOrderId = null;
     public string $trackingUrl = '';
+    public string $deliveryFee = '';
 
     // Real-time tracking
     public ?string $lastOrderTimestamp = null;
@@ -38,7 +39,7 @@ class PendingOrders extends Component
         $this->resetPage();
     }
 
-    public function updateOrderStatus($orderId, $newStatus, $cancellationRemarks = null, $trackingUrl = null): void
+    public function updateOrderStatus($orderId, $newStatus, $cancellationRemarks = null, $trackingUrl = null, $deliveryFee = null): void
     {
         $order = Order::findOrFail($orderId);
 
@@ -64,6 +65,9 @@ class PendingOrders extends Component
 
         if ($newStatus === Order::STATUS_DELIVERING) {
             $updateData['tracking_url'] = $trackingUrl;
+            $updateData['delivery_fee'] = $deliveryFee;
+            // Add delivery fee to existing total
+            $updateData['total'] = $order->total + $deliveryFee;
         }
 
         $order->update($updateData);
@@ -83,6 +87,7 @@ class PendingOrders extends Component
     {
         $this->validate([
             'trackingUrl' => ['required', 'url'],
+            'deliveryFee' => ['required', 'numeric', 'min:0'],
             'trackingOrderId' => ['required', 'integer'],
         ]);
 
@@ -93,9 +98,14 @@ class PendingOrders extends Component
             return;
         }
 
+        // Add delivery fee to existing total
+        $newTotal = $order->total + $this->deliveryFee;
+
         $order->update([
             'status' => Order::STATUS_DELIVERING,
             'tracking_url' => $this->trackingUrl,
+            'delivery_fee' => $this->deliveryFee,
+            'total' => $newTotal,
         ]);
 
         session()->flash('success', 'Order status updated to Delivering');
@@ -105,6 +115,7 @@ class PendingOrders extends Component
         // Reset form state
         $this->trackingOrderId = null;
         $this->trackingUrl = '';
+        $this->deliveryFee = '';
         $this->resetErrorBag();
         $this->resetValidation();
     }

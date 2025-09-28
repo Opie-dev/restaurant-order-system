@@ -46,7 +46,7 @@ class ListOrders extends Component
         return ['all', 'pending', 'preparing', 'delivering', 'completed', 'cancelled'];
     }
 
-    public function updateOrderStatus($orderId, $newStatus, $cancellationRemarks = null, $trackingUrl = null): void
+    public function updateOrderStatus($orderId, $newStatus, $cancellationRemarks = null, $trackingUrl = null, $deliveryFee = null): void
     {
         $order = Order::findOrFail($orderId);
 
@@ -65,6 +65,9 @@ class ListOrders extends Component
 
         if ($newStatus === Order::STATUS_DELIVERING) {
             $updateData['tracking_url'] = $trackingUrl;
+            $updateData['delivery_fee'] = $deliveryFee;
+            // Add delivery fee to existing total
+            $updateData['total'] = $order->total + $deliveryFee;
         }
         $order->update($updateData);
 

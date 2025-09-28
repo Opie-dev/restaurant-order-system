@@ -37,6 +37,7 @@ class Order extends Model
         'payment_provider',
         'payment_ref',
         'tracking_url',
+        'delivery_fee',
         'notes',
         'cancellation_remarks',
         'ship_recipient_name',
@@ -53,6 +54,7 @@ class Order extends Model
         'subtotal' => 'decimal:2',
         'tax' => 'decimal:2',
         'total' => 'decimal:2',
+        'delivery_fee' => 'decimal:2',
     ];
 
     public function user(): BelongsTo

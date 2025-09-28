@@ -287,6 +287,10 @@
                                 <span>{{ $order->created_at->format('M j, Y g:i A') }}</span>
                                 <span>•</span>
                                 <span>{{ $order->items->sum('qty') }} items</span>
+                                @if($order->delivery_fee)
+                                    <span>•</span>
+                                    <span class="text-green-600 font-medium">Delivery: RM{{ number_format($order->delivery_fee, 2) }}</span>
+                                @endif
                             </div>
                         </div>
                         
@@ -438,6 +442,35 @@
                                 <div>
                                     <span class="text-sm font-medium text-red-800">Cancellation Reason:</span>
                                     <p class="text-sm text-red-700 mt-1">{{ $order->cancellation_remarks }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                    
+                    <!-- Tracking Information -->
+                    @if($order->status === 'delivering' && ($order->tracking_url || $order->delivery_fee))
+                        <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="flex items-start">
+                                <svg class="w-4 h-4 text-green-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                </svg>
+                                <div class="flex-1">
+                                    <span class="text-sm font-medium text-green-800">Delivery Information:</span>
+                                    <div class="mt-1 space-y-1">
+                                        @if($order->tracking_url)
+                                            <div class="text-sm text-green-700">
+                                                <span class="font-medium">Tracking:</span> 
+                                                <a href="{{ $order->tracking_url }}" target="_blank" class="text-green-600 hover:text-green-800 underline">
+                                                    {{ $order->tracking_url }}
+                                                </a>
+                                            </div>
+                                        @endif
+                                        @if($order->delivery_fee)
+                                            <div class="text-sm text-green-700">
+                                                <span class="font-medium">Delivery Fee:</span> RM{{ number_format($order->delivery_fee, 2) }}
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -157,6 +157,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delivery Fee</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -184,6 +185,15 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">{{ $order->items->sum('qty') }} items</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">
+                                        @if($order->delivery_fee)
+                                            RM{{ number_format($order->delivery_fee, 2) }}
+                                        @else
+                                            <span class="text-gray-400">-</span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">RM{{ number_format($order->total, 2) }}</div>
@@ -249,7 +259,7 @@
                             
                             <!-- Expandable Order Details -->
                             <tr id="details-{{ $order->id }}" x-show="openRowId === {{ $order->id }}" class="bg-gray-50">
-                                <td colspan="8" class="px-6 py-4">
+                                <td colspan="9" class="px-6 py-4">
                                     <div class="space-y-4">
                                         <!-- Order Items -->
                                         <div>
@@ -335,6 +345,35 @@
                                                     <div>
                                                         <span class="text-sm font-medium text-blue-800">Order Notes:</span>
                                                         <p class="text-sm text-blue-700 mt-1">{{ $order->notes }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                        
+                                        <!-- Tracking Information -->
+                                        @if($order->status === 'delivering' && ($order->tracking_url || $order->delivery_fee))
+                                            <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                                <div class="flex items-start">
+                                                    <svg class="w-4 h-4 text-green-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                                    </svg>
+                                                    <div class="flex-1">
+                                                        <span class="text-sm font-medium text-green-800">Delivery Information:</span>
+                                                        <div class="mt-1 space-y-1">
+                                                            @if($order->tracking_url)
+                                                                <div class="text-sm text-green-700">
+                                                                    <span class="font-medium">Tracking:</span> 
+                                                                    <a href="{{ $order->tracking_url }}" target="_blank" class="text-green-600 hover:text-green-800 underline">
+                                                                        {{ $order->tracking_url }}
+                                                                    </a>
+                                                                </div>
+                                                            @endif
+                                                            @if($order->delivery_fee)
+                                                                <div class="text-sm text-green-700">
+                                                                    <span class="font-medium">Delivery Fee:</span> RM{{ number_format($order->delivery_fee, 2) }}
+                                                                </div>
+                                                            @endif
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

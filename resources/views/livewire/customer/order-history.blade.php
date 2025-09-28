@@ -161,12 +161,41 @@
                             </div>
                         @endif
 
+                        <!-- Tracking Information -->
+                        @if($order->status === 'delivering' && ($order->tracking_url || $order->delivery_fee))
+                            <div class="mt-4 py-4 border-y border-gray-200">
+                                <h5 class="text-sm font-medium text-gray-900 mb-3">Delivery Information</h5>
+                                <div class="space-y-2">
+                                    @if($order->tracking_url)
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm text-gray-600">Tracking:</span>
+                                            <a href="{{ $order->tracking_url }}" target="_blank" class="text-sm text-purple-600 hover:text-purple-800 underline">
+                                                Track your order
+                                            </a>
+                                        </div>
+                                    @endif
+                                    @if($order->delivery_fee)
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm text-gray-600">Delivery Fee:</span>
+                                            <span class="text-sm text-gray-900">RM{{ number_format($order->delivery_fee, 2) }}</span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+
                         <!-- Order Summary -->
                         <div class="mt-4 pt-2">
                             <div class="flex justify-end gap-2 text-sm">
                                 <span class="text-gray-600">Subtotal:</span>
                                 <span class="text-gray-900">RM{{ number_format($order->subtotal, 2) }}</span>
                             </div>
+                            @if($order->delivery_fee)
+                                <div class="flex justify-end gap-2 text-sm mt-1">
+                                    <span class="text-gray-600">Delivery Fee:</span>
+                                    <span class="text-gray-900">RM{{ number_format($order->delivery_fee, 2) }}</span>
+                                </div>
+                            @endif
                             <div class="flex justify-end gap-2 text-sm mt-1">
                                 <span class="text-gray-600">Tax:</span>
                                 <span class="text-gray-900">RM{{ number_format($order->tax, 2) }}</span>

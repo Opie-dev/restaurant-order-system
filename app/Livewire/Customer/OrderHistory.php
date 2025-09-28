@@ -21,6 +21,11 @@ class OrderHistory extends Component
         return ['all', 'unpaid', 'processing', 'paid', 'refunded', 'failed'];
     }
 
+    public function updatedSearch(): void
+    {
+        // This method ensures the component re-renders when search changes
+    }
+
     public function getOrdersProperty()
     {
         return Order::where('user_id', Auth::id())

@@ -1,7 +1,12 @@
 <div class="p-6 space-y-6 max-w-5xl mx-auto px-6 py-8" x-data>
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-semibold text-gray-900">Your Cart</h1>
-        <a href="{{ route('menu') }}" class="text-sm text-indigo-600 hover:text-indigo-700 underline">Continue Ordering</a>
+        <a href="{{ route('menu') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Continue Ordering
+        </a>
     </div>
 
     @if(empty($this->lines))
@@ -150,9 +155,12 @@
         <!-- Action Buttons -->
         <div class="flex items-center justify-between">
             <button 
-                @click.prevent="if (confirm('Clear all items from your cart?')) { $wire.clear() }" 
-                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                @click="if (confirm('Are you sure you want to clear all items from your cart?')) { $wire.clear() }" 
+                class="inline-flex items-center px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
             >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
                 Clear Cart
             </button>
             <a 

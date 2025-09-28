@@ -13,7 +13,7 @@
             <div>
                 <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search by order #</label>
                 <div class="relative">
-                    <input id="search" type="text" placeholder="e.g. ABC123" wire:model.debounce.400ms="search" class="w-full p-2 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 shadow-sm focus:border-purple-500 focus:ring-purple-500" />
+                    <input id="search" type="text" placeholder="e.g. ABC123" wire:model.live.debounce.400ms="search" class="w-full p-2 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 shadow-sm focus:border-purple-500 focus:ring-purple-500" />
                 </div>
             </div>
 
@@ -172,12 +172,6 @@
                                             <a href="{{ $order->tracking_url }}" target="_blank" class="text-sm text-purple-600 hover:text-purple-800 underline">
                                                 Track your order
                                             </a>
-                                        </div>
-                                    @endif
-                                    @if($order->delivery_fee)
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-sm text-gray-600">Delivery Fee:</span>
-                                            <span class="text-sm text-gray-900">RM{{ number_format($order->delivery_fee, 2) }}</span>
                                         </div>
                                     @endif
                                 </div>

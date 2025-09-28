@@ -24,6 +24,8 @@ class OrderHistory extends Component
     public function updatedSearch(): void
     {
         // This method ensures the component re-renders when search changes
+        // Force re-render by accessing the orders property
+        $this->getOrdersProperty();
     }
 
     public function getOrdersProperty()

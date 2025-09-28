@@ -176,6 +176,16 @@ class EditItem extends Component
         // This allows admins to edit disabled groups while seeing preview effect
     }
 
+    public function toggleStatus(): void
+    {
+        $this->menuItem->update([
+            'is_active' => !$this->menuItem->is_active
+        ]);
+
+        $status = $this->menuItem->is_active ? 'activated' : 'deactivated';
+        session()->flash('success', "Menu item has been {$status} successfully.");
+    }
+
     public function save(): void
     {
         $rules = [

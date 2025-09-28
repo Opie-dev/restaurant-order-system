@@ -122,63 +122,29 @@ x-init="
     </div>
 
     <!-- Revenue Overview -->
-
-    <div class="flex justify-end items-center gap-3 mb-3">
-        <div class="relative">
-            <label class="block text-xs font-medium text-gray-600 mb-1">Year</label>
-            <div class="relative">
-                <select wire:model.live="selectedYear" class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 pr-8 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors appearance-none">
-                    @foreach($this->availableYears as $year)
-                        <option value="{{ $year }}">{{ $year }}</option>
-                    @endforeach
-                </select>
-                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-            </div>
-        </div>
-        <div class="relative">
-            <label class="block text-xs font-medium text-gray-600 mb-1">Month</label>
-            <div class="relative">
-                <select wire:model.live="selectedMonth" class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 pr-8 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors appearance-none">
-                    @foreach($this->availableMonths as $monthNum => $monthName)
-                        <option value="{{ $monthNum }}">{{ $monthName }}</option>
-                    @endforeach
-                </select>
-                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-            </div>
-        </div>
-        <div class="relative">
-            <label class="block text-xs font-medium text-gray-600 mb-1">Week</label>
-            <div class="relative">
-                <select wire:model.live="selectedWeek" class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 pr-8 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors appearance-none">
-                    @foreach($this->availableWeeks as $weekNum => $weekName)
-                        <option value="{{ $weekNum }}">{{ $weekName }}</option>
-                    @endforeach
-                </select>
-                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <!-- Weekly Revenue -->
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow duration-200">
             <div class="flex items-center justify-between mb-4">
-                 <h3 class="text-lg font-semibold text-gray-900">Week {{ $this->selectedWeek }} Revenue</h3>
-                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                    </svg>
+                <h3 class="text-lg font-semibold text-gray-900">Week {{ $this->selectedWeek }} Revenue</h3>
+                <div class="flex items-center gap-2">
+                    <div class="relative">
+                        <select wire:model.live="selectedWeek" class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 pr-8 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors appearance-none">
+                            @foreach($this->availableWeeks as $weekNum => $weekName)
+                                <option value="{{ $weekNum }}">{{ $weekName }}</option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
                 </div>
             </div>
             <p class="text-3xl font-bold text-green-600 mb-2">RM{{ number_format($this->weeklyRevenue, 2) }}</p>
@@ -188,11 +154,27 @@ x-init="
         <!-- Monthly Revenue -->
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow duration-200">
             <div class="flex items-center justify-between mb-4">
-                 <h3 class="text-lg font-semibold text-gray-900">{{ $this->availableMonths[$this->selectedMonth] }} Revenue</h3>
-                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
+                <h3 class="text-lg font-semibold text-gray-900">{{ $this->availableMonths[$this->selectedMonth] }} Revenue</h3>
+                <div class="flex items-center gap-2">
+                    <div class="relative">
+                        <div class="relative">
+                            <select wire:model.live="selectedMonth" class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 pr-8 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors appearance-none">
+                                @foreach($this->availableMonths as $monthNum => $monthName)
+                                    <option value="{{ $monthNum }}">{{ $monthName }}</option>
+                                @endforeach
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
                 </div>
             </div>
             <p class="text-3xl font-bold text-blue-600 mb-2">RM{{ number_format($this->monthlyRevenue, 2) }}</p>
@@ -202,15 +184,29 @@ x-init="
         <!-- Total Revenue -->
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow duration-200">
             <div class="flex items-center justify-between mb-4">
-                 <h3 class="text-lg font-semibold text-gray-900">Total Revenue for {{ $this->selectedYear }}</h3>
-                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                    </svg>
+                <h3 class="text-lg font-semibold text-gray-900">Total Revenue for {{ $this->selectedYear }}</h3>
+                <div class="flex items-center gap-2">
+                    <div class="relative">
+                        <select wire:model.live="selectedYear" class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 pr-8 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors appearance-none">
+                            @foreach($this->availableYears as $year)
+                                <option value="{{ $year }}">{{ $year }}</option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                    </div>
                 </div>
             </div>
             <p class="text-3xl font-bold text-purple-600 mb-2">RM{{ number_format($this->totalRevenue, 2) }}</p>
-            <p class="text-sm text-gray-500">All-time total revenue</p>
+            <p class="text-sm text-gray-500">All-time total revenue for {{ $this->selectedYear }}</p>
         </div>
     </div>
 

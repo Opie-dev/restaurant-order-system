@@ -15,10 +15,46 @@
         </div>
     @endif
 
+    <div class="text-right mb-4">
+        <button 
+            wire:click="toggleCustomerStatus"
+            wire:confirm="{{ $customer->is_disabled ? 'Are you sure you want to enable this customer?' : 'Are you sure you want to disable this customer?' }}"
+            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md {{ $customer->is_disabled ? 'text-green-700 bg-green-100 hover:bg-green-200' : 'text-red-700 bg-red-100 hover:bg-red-200' }} focus:outline-none focus:ring-2 focus:ring-offset-2 {{ $customer->is_disabled ? 'focus:ring-green-500' : 'focus:ring-red-500' }} transition-colors"
+        >
+            @if($customer->is_disabled)
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Enable Customer
+            @else
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
+                </svg>
+                Disable Customer
+            @endif
+        </button>
+    </div>
     <!-- Customer Info -->
     <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-semibold text-gray-900">Customer Information</h2>
+            <div class="flex items-center space-x-3">
+                @if($customer->is_disabled)
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                        </svg>
+                        Disabled
+                    </span>
+                @else
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        Active
+                    </span>
+                @endif
+            </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -35,7 +71,13 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Total Orders</label>
-                <p class="text-sm text-gray-900">{{ $customer->orders()->count() }}</p>
+                <div class="flex item-center space-x-2">
+                    <a href="{{ route('admin.orders.index', ['user' => $customer->id]) }}" 
+                        class="text-blue-600 hover:text-blue-700 text-sm font-medium" 
+                        title="View orders">
+                        {{ $customer->orders()->count() }}
+                    </a>
+                </div>
             </div>
         </div>
     </div>

@@ -82,7 +82,7 @@
                 
                 <div class="flex-1 min-w-0">
                     <h1 x-show="sidebarOpen" class="text-lg font-bold text-gray-900 leading-tight break-words">{{ $storeName }}</h1>
-                    <h1 x-show="!sidebarOpen" class="text-lg font-bold text-gray-900">{{ substr($storeName, 0, 2) }}</h1>
+                    {{-- <h1 x-show="!sidebarOpen" class="text-lg font-bold text-gray-900">{{ substr($storeName, 0, 2) }}</h1> --}}
                 </div>
             </div>
         </div>
@@ -145,7 +145,7 @@
             </a>
 
             <!-- Settings with submenu -->
-            <div x-data="{ settingsOpen: false }">
+            <div x-data="{ settingsOpen: {{ request()->routeIs('admin.settings.*') ? 'true' : 'false' }} }">
                 <button @click="settingsOpen = !settingsOpen" 
                         class="group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                         :title="sidebarOpen ? '' : 'Settings'">
@@ -169,14 +169,14 @@
                      x-transition:leave-end="opacity-0 transform scale-95"
                      class="ml-8 mt-1 space-y-1">
                     <a href="{{ route('admin.settings.store-details') }}" 
-                       class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-500 hover:bg-gray-50 hover:text-gray-900">
+                       class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.settings.store-details') ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }}">
                         <svg class="h-4 w-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                         </svg>
                         Store Details
                     </a>
                 <a href="{{ route('admin.settings.security') }}" 
-                   class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-500 hover:bg-gray-50 hover:text-gray-900">
+                   class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.settings.security') ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }}">
                     <svg class="h-4 w-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
@@ -219,7 +219,7 @@
             <!-- Logo -->
             <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
                 <div class="flex items-center">
-                    <h1 class="text-lg font-semibold text-gray-900">Restaurant Admin</h1>
+                    {{-- <h1 class="text-lg font-semibold text-gray-900">Restaurant Admin</h1> --}}
                 </div>
             </div>
 

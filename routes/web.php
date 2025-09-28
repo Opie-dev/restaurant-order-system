@@ -5,6 +5,7 @@ use App\Livewire\Admin\Menu\ListItems;
 use App\Livewire\Admin\Menu\EditItem;
 use App\Livewire\Admin\Menu\CreateItem;
 use App\Livewire\Admin\Categories\ListCategories;
+use App\Livewire\Admin\Categories\CreateCategory;
 use App\Livewire\Admin\Orders\ListOrders;
 use App\Livewire\Admin\Orders\PendingOrders;
 use App\Livewire\Admin\Users\ListUsers;
@@ -45,6 +46,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/menu/{menuItem}/edit', EditItem::class)->whereNumber('menuItem')->name('menu.edit');
 
     Route::get('/categories', ListCategories::class)->name('categories.index');
+    Route::get('/categories/create', CreateCategory::class)->name('categories.create');
     Route::get('/orders', ListOrders::class)->name('orders.index');
     Route::get('/orders/pending', PendingOrders::class)->name('orders.pending');
     Route::get('/customers', ListUsers::class)->name('customers.index');

@@ -1,5 +1,4 @@
 <div x-data="{ 
-    showCreate: false,
     expandedCategories: new Set(),
     toggleCategory(id) {
         if (this.expandedCategories.has(id)) {
@@ -31,72 +30,17 @@
                 />
             </div>
             <!-- Add Button -->
-            <button 
-                type="button" 
-                @click="showCreate=true" 
-                class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            <a href="{{ route('admin.categories.create') }}" 
+               class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
             >
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
                 Add Category
-            </button>
+            </a>
         </div>
     </div>
 
-    <!-- Create Modal -->
-    <div x-cloak x-show="showCreate" class="fixed inset-0 z-20 flex items-center justify-center">
-        <div class="absolute inset-0 bg-black/40" @click="showCreate=false"></div>
-        <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full p-6 mx-4">
-            <h2 class="text-lg font-semibold mb-4">Create Category</h2>
-            <form wire:submit.prevent="create" @submit="showCreate=false" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                    <input 
-                        type="text" 
-                        wire:model.blur="name" 
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
-                        placeholder="e.g. Burgers" 
-                    />
-                    @error('name') 
-                        <div class="text-sm text-red-600 mt-1">{{ $message }}</div> 
-                    @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Parent Category (optional)</label>
-                    <select 
-                        wire:model="parentLevel1Id" 
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    >
-                        <option value="">Root (no parent)</option>
-                        @isset($rootCategories)
-                            @foreach($rootCategories as $root)
-                                <option value="{{ $root->id }}">{{ $root->name }}</option>
-                            @endforeach
-                        @endisset
-                    </select>
-                    @error('parentLevel1Id') 
-                        <div class="text-sm text-red-600 mt-1">{{ $message }}</div> 
-                    @enderror
-                </div>
-                <div class="flex items-center justify-end gap-3 pt-4">
-                    <button 
-                        type="button" 
-                        @click="showCreate=false" 
-                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                        Cancel
-                    </button>
-                    <button 
-                        type="submit" 
-                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                    >
-                        Create Category
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <!-- Categories Table -->
     <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
@@ -149,8 +93,6 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                         </svg>
                                     </div>
-                                @else
-                                    <span class="w-6 mr-2"></span>
                                 @endif
                                 
                                 <span class="font-medium text-gray-900">{{ $category->name }}</span>

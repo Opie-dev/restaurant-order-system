@@ -10,10 +10,8 @@ use Livewire\Component;
 class ListCategories extends Component
 {
 
-    public string $name = '';
     public string $search = '';
 
-    public ?int $parentLevel1Id = null; // Select a root (or null)
     public $categories;
     public $rootCategories;
     public $hierarchicalCategories;
@@ -67,30 +65,6 @@ class ListCategories extends Component
         }
     }
 
-    public function create(): void
-    {
-        $this->validate([
-            'name' => ['required', 'string', 'min:2', 'max:255'],
-            'parentLevel1Id' => ['nullable', 'integer', 'exists:categories,id'],
-        ]);
-
-        $parentId = $this->parentLevel1Id;
-
-        // Compute next position within siblings (same parent_id)
-        $nextPosition = (int) (Category::where('parent_id', $parentId)->max('position') ?? 0) + 1;
-
-        $category = Category::create([
-            'name' => $this->name,
-            'is_active' => true,
-            'parent_id' => $parentId,
-            'position' => $nextPosition,
-        ]);
-
-        $this->name = '';
-        $this->parentLevel1Id = null;
-        $this->loadCategories();
-        session()->flash('success', 'Category created successfully!');
-    }
 
     public function toggle(int $id): void
     {

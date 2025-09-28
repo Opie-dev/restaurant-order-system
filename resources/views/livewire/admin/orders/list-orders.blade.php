@@ -245,13 +245,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        @else
-                                            <span class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-md">
-                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                                </svg>
-                                                Complete
-                                            </span>
                                         @endif
                                     </div>
                                 </td>

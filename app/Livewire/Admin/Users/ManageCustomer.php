@@ -4,7 +4,9 @@ namespace App\Livewire\Admin\Users;
 
 use App\Models\User;
 use App\Models\UserAddress;
+use App\Models\StoreSetting;
 use App\Mail\PasswordChangedNotification;
+use App\Mail\CustomerStatusChangedNotification;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -183,6 +185,35 @@ class ManageCustomer extends Component
     {
         $address->delete();
         session()->flash('success', 'Address deleted successfully.');
+    }
+
+    public function toggleCustomerStatus()
+    {
+        $oldStatus = $this->customer->is_disabled;
+
+        $this->customer->update([
+            'is_disabled' => !$this->customer->is_disabled
+        ]);
+
+        $newStatus = $this->customer->is_disabled;
+        $status = $newStatus ? 'disabled' : 'enabled';
+
+        // Get store settings for email
+        $storeSettings = StoreSetting::getSettings();
+        $storeName = $storeSettings?->store_name ?? 'Our Store';
+        $storePhone = $storeSettings?->phone ?? 'our support team';
+
+        // Send email notification to customer
+        Mail::to($this->customer->email)->send(
+            new CustomerStatusChangedNotification(
+                $this->customer,
+                $newStatus,
+                $storeName,
+                $storePhone
+            )
+        );
+
+        session()->flash('success', "Customer has been {$status} successfully and has been notified via email.");
     }
 
     public function cancelAddressForm()

@@ -6,6 +6,7 @@ use App\Models\Order;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Cache;
 
 #[Layout('layouts.admin')]
 class ListOrders extends Component
@@ -89,6 +90,19 @@ class ListOrders extends Component
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+    }
+
+    public function getOrderStatusCountsProperty()
+    {
+        return Cache::remember('orders.status_counts', 120, function () {
+            return [
+                'pending' => Order::where('status', 'pending')->count(),
+                'preparing' => Order::where('status', 'preparing')->count(),
+                'delivering' => Order::where('status', 'delivering')->count(),
+                'completed' => Order::where('status', 'completed')->count(),
+                'cancelled' => Order::where('status', 'cancelled')->count(),
+            ];
+        });
     }
 
     public function render()

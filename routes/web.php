@@ -9,6 +9,8 @@ use App\Livewire\Admin\Orders\ListOrders;
 use App\Livewire\Admin\Orders\PendingOrders;
 use App\Livewire\Admin\Users\ListUsers;
 use App\Livewire\Admin\Users\CreateUser;
+use App\Livewire\Admin\Users\ManageCustomer;
+use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Settings\StoreDetails;
 use App\Livewire\Admin\Settings\Security;
 use App\Livewire\Auth\Login as LoginPage;
@@ -35,7 +37,8 @@ Route::post('/logout', function () {
 })->name('logout');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function (): void {
-    Route::redirect('/', '/admin/menu');
+    Route::redirect('/', '/admin/dashboard');
+    Route::get('/dashboard', Dashboard::class)->name('dashboard');
 
     Route::get('/menu', ListItems::class)->name('menu.index');
     Route::get('/menu/create', CreateItem::class)->name('menu.create');
@@ -46,6 +49,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/orders/pending', PendingOrders::class)->name('orders.pending');
     Route::get('/customers', ListUsers::class)->name('customers.index');
     Route::get('/customers/create', CreateUser::class)->name('customers.create');
+    Route::get('/customers/{customer}/manage', ManageCustomer::class)->name('customers.manage');
 
     Route::get('/settings/store-details', StoreDetails::class)->name('settings.store-details');
     Route::get('/settings/security', Security::class)->name('settings.security');

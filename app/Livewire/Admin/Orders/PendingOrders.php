@@ -19,6 +19,10 @@ class PendingOrders extends Component
     public ?int $trackingOrderId = null;
     public string $trackingUrl = '';
 
+    // Real-time tracking
+    public ?string $lastOrderTimestamp = null;
+    public int $newOrderCount = 0;
+
     protected $queryString = [
         'search' => ['except' => ''],
     ];
@@ -130,6 +134,38 @@ class PendingOrders extends Component
     public function getPreparingCountProperty(): int
     {
         return Order::where('status', Order::STATUS_PREPARING)->count();
+    }
+
+    // Real-time methods
+    public function checkForNewOrders(): void
+    {
+        if ($this->lastOrderTimestamp) {
+            $newOrders = Order::whereIn('status', [Order::STATUS_PENDING, Order::STATUS_PREPARING, Order::STATUS_DELIVERING])
+                ->where('created_at', '>', $this->lastOrderTimestamp)
+                ->count();
+
+            if ($newOrders > 0) {
+                $this->newOrderCount += $newOrders;
+                $this->dispatch('new-orders-notification', [
+                    'count' => $newOrders,
+                    'message' => $newOrders === 1 ? 'New order received!' : "{$newOrders} new orders received!"
+                ]);
+            }
+        }
+
+        // Update timestamp to current time
+        $this->lastOrderTimestamp = now()->toDateTimeString();
+    }
+
+    public function markOrdersAsSeen(): void
+    {
+        $this->newOrderCount = 0;
+    }
+
+    public function mount(): void
+    {
+        // Initialize with current timestamp
+        $this->lastOrderTimestamp = now()->toDateTimeString();
     }
 
     // Removed ready/delivered count from pending page per new flow

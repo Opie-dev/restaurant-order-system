@@ -47,10 +47,24 @@
                     </label>
                 </div>
 
-                <!-- Upload Progress -->
+                <!-- New Logo Preview -->
                 @if($logo)
-                    <div class="text-sm text-gray-600">
-                        Selected: {{ $logo->getClientOriginalName() }}
+                    <div class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-shrink-0">
+                                <img src="{{ $logo->temporaryUrl() }}" alt="New logo preview" class="h-16 w-16 object-contain border border-gray-300 rounded-lg">
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-medium text-gray-900">New logo preview</div>
+                                <div class="text-sm text-gray-600">{{ $logo->getClientOriginalName() }}</div>
+                                <div class="text-xs text-gray-500 mt-1">This will replace your current logo when you save changes</div>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <button type="button" wire:click="$set('logo', null)" class="text-red-600 hover:text-red-800 text-sm">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 @endif
             </div>

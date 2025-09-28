@@ -34,7 +34,10 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-right">
-                            <a href="{{ route('admin.orders.index', ['user' => $user->id]) }}" class="text-purple-600 hover:text-purple-700">View orders</a>
+                            <div class="flex items-center justify-end space-x-3">
+                                <a href="{{ route('admin.customers.manage', $user) }}" class="text-blue-600 hover:text-blue-700 text-sm">Manage</a>
+                                <a href="{{ route('admin.orders.index', ['user' => $user->id]) }}" class="text-purple-600 hover:text-purple-700 text-sm">View orders</a>
+                            </div>
                         </td>
                     </tr>
                 @endforeach

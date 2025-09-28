@@ -179,264 +179,270 @@
         </aside>
 
         <!-- Form -->
-        <form wire:submit.prevent="save" class="order-1 lg:order-1 lg:col-span-2 space-y-4">
-        <div>
-            <label class="block text-sm font-medium mb-1">Name</label>
-            <input type="text" wire:model.blur="name" class="w-full border rounded px-3 py-2" />
-            @error('name') <div class="text-sm text-red-600">{{ $message }}</div> @enderror
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium mb-1">Description</label>
-            <textarea wire:model.blur="description" rows="4" class="w-full border rounded px-3 py-2"></textarea>
-            @error('description') <div class="text-sm text-red-600">{{ $message }}</div> @enderror
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            @if($type === 'set')
-                <div>
-                    <label class="block text-sm font-medium mb-1">Base Price</label>
-                    <input type="number" step="0.01" min="0" wire:model.blur="base_price" class="w-full border rounded px-3 py-2" />
-                    @error('base_price') <div class="text-sm text-red-600">{{ $message }}</div> @enderror
-                </div>
-            @elseif($type === 'ala_carte')
-                <div>
-                    <label class="block text-sm font-medium mb-1">Price</label>
-                    <input type="number" step="0.01" min="0" wire:model.blur="price" class="w-full border rounded px-3 py-2" />
-                    @error('price') <div class="text-sm text-red-600">{{ $message }}</div> @enderror
-                </div>
-            @endif
-            
-            <div>
-                <label class="block text-sm font-medium mb-1">Stock</label>
-                <input type="number" step="1" min="0" wire:model.blur="stock" class="w-full border rounded px-3 py-2" />
-                @error('stock') <div class="text-sm text-red-600">{{ $message }}</div> @enderror
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-1">Category</label>
-                <select wire:model.blur="category_id" class="w-full border rounded px-3 py-2">
-                    <option value="">Select category</option>
-                    @foreach($categories as $cat)
-                        <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                    @endforeach
-                </select>
-                @error('category_id') <div class="text-sm text-red-600">{{ $message }}</div> @enderror
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-1">Type</label>
-                <select wire:model.live="type" class="w-full border rounded px-3 py-2">
-                    <option value="ala_carte">Ala Carte</option>
-                    <option value="set">Set</option>
-                </select>
-                @error('type') <div class="text-sm text-red-600">{{ $message }}</div> @enderror
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-1">Tag</label>
-                <select wire:model.blur="tag" class="w-full border rounded px-3 py-2">
-                    <option value="">None</option>
-                    <option value="popular">Popular</option>
-                    <option value="bestseller">Bestseller</option>
-                </select>
-                @error('tag') <div class="text-sm text-red-600">{{ $message }}</div> @enderror
-            </div>
-        </div>
-
-        <div class="flex items-center gap-6">
-            <div class="flex items-center gap-3">
-                <input id="is_active" type="checkbox" wire:model.live="is_active" class="rounded" />
-                <label for="is_active">Active</label>
-            </div>
-            <div class="flex items-center gap-3">
-                <input id="enabled" type="checkbox" wire:model.live="enabled" class="rounded" />
-                <label for="enabled">Enabled</label>
-            </div>
-        </div>
-
-        <div class="space-y-2">
-            <label class="block text-sm font-medium">Image</label>
-            <input type="file" wire:model="image" accept="image/*" />
-            @error('image') <div class="text-sm text-red-600">{{ $message }}</div> @enderror
-
-            <div class="grid grid-cols-2 gap-4">
-                @if($image)
+        <div class="order-1 lg:order-1 lg:col-span-2">
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                <form wire:submit.prevent="save" class="space-y-6">
                     <div>
-                        <div class="text-sm text-gray-600 mb-1">Preview</div>
-                        <img src="{{ $image->temporaryUrl() }}" class="rounded border" />
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                        <input type="text" wire:model.blur="name" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                        @error('name') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
                     </div>
-                @endif
-                @if($isEdit && $menuItem && $menuItem->image_path)
+
                     <div>
-                        <div class="text-sm text-gray-600 mb-1">Current</div>
-                        <img src="{{ asset('storage/' . $menuItem->image_path) }}" class="rounded border" />
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea wire:model.blur="description" rows="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"></textarea>
+                        @error('description') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
                     </div>
-                @endif
-            </div>
-        </div>
 
-        <!-- Options Section (for all items) -->
-        <div class="border rounded p-4">
-            <h3 class="text-lg font-semibold mb-3">Option Groups</h3>
-            <div class="space-y-4">
-                @foreach($options as $groupIndex => $group)
-                    <div class="border rounded p-3" wire:key="opt-group-{{ $groupIndex }}">
-                        <div class="flex items-center gap-3 mb-2">
-                            <input type="text" wire:model.live="options.{{ $groupIndex }}.name" placeholder="Group name" class="flex-1 border rounded px-3 py-2" />
-                            <select wire:model.live="options.{{ $groupIndex }}.rules.0" class="border rounded px-3 py-2">
-                                <option value="required">Required</option>
-                                <option value="optional">Optional</option>
-                            </select>
-                            <select wire:model.live="options.{{ $groupIndex }}.rules.1" class="border rounded px-3 py-2">
-                                <option value="one">One</option>
-                                <option value="multiple">Multiple</option>
-                            </select>
-                            <button type="button" wire:click="removeOptionGroup({{ $groupIndex }})" class="text-red-600 hover:text-red-800 p-1" title="Remove Group">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        @error('options.' . $groupIndex . '.name')
-                            <div class="text-xs text-red-600 mb-2">{{ $message }}</div>
-                        @enderror
-                        <div class="space-y-2">
-                            @foreach($group['options'] ?? [] as $optionIndex => $option)
-                                <div class="flex items-center gap-3" wire:key="opt-{{ $groupIndex }}-{{ $optionIndex }}">
-                                    <input type="text" 
-                                           wire:model.live="options.{{ $groupIndex }}.options.{{ $optionIndex }}.name" 
-                                           placeholder="Option name" 
-                                           class="flex-1 border rounded px-3 py-2" />
-                                    <div class="flex items-center gap-2">
-                                        <input type="checkbox" 
-                                               wire:model.live="options.{{ $groupIndex }}.options.{{ $optionIndex }}.enabled" 
-                                               class="rounded" />
-                                        <span class="text-xs text-gray-600">Enabled</span>
-                                    </div>
-                                    <button type="button" 
-                                            wire:click="removeOptionOption({{ $groupIndex }}, {{ $optionIndex }})" 
-                                            class="text-red-600 hover:text-red-800 p-1">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                                @error('options.' . $groupIndex . '.options.' . $optionIndex . '.name')
-                                    <div class="text-xs text-red-600">{{ $message }}</div>
-                                @enderror
-                            @endforeach
-                            @error('options.' . $groupIndex . '.options')
-                                <div class="text-xs text-red-600">{{ $message }}</div>
-                            @enderror
-                            <div class="flex items-center justify-between mt-1">
-                                <button type="button" 
-                                        wire:click="addOptionOption({{ $groupIndex }})" 
-                                        class="text-blue-600">+ Add Option</button>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" 
-                                           wire:click="toggleOptionGroupEnabled({{ $groupIndex }})" 
-                                           @checked($group['enabled'] ?? true)
-                                           class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2" />
-                                    <span class="text-sm font-medium {{ ($group['enabled'] ?? true) ? 'text-gray-700' : 'text-gray-500' }}">
-                                        Enable this option group
-                                    </span>
-                                </label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        @if($type === 'set')
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Base Price</label>
+                                <input type="number" step="0.01" min="0" wire:model.blur="base_price" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                                @error('base_price') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
                             </div>
-                        </div>
-                    </div>
-                @endforeach
-                <button type="button" wire:click="addOptionGroup" class="text-blue-600">+ Add Option Group</button>
-            </div>
-        </div>
-
-        <!-- Addons Section (for all items) -->
-        <div class="border rounded p-4">
-            <h3 class="text-lg font-semibold mb-3">Addon Groups</h3>
-            <div class="space-y-4">
-                @foreach($addons as $groupIndex => $group)
-                    <div class="border rounded p-3" wire:key="addon-group-{{ $groupIndex }}">
-                        <div class="flex items-center gap-3 mb-2">
-                            <input type="text" wire:model.live="addons.{{ $groupIndex }}.name" placeholder="Group name" class="flex-1 border rounded px-3 py-2" />
-                            <select wire:model.live="addons.{{ $groupIndex }}.rules.0" class="border rounded px-3 py-2">
-                                <option value="required">Required</option>
-                                <option value="optional">Optional</option>
-                            </select>
-                            <select wire:model.live="addons.{{ $groupIndex }}.rules.1" class="border rounded px-3 py-2">
-                                <option value="one">One</option>
-                                <option value="multiple">Multiple</option>
-                            </select>
-                            <button type="button" wire:click="removeAddonGroup({{ $groupIndex }})" class="text-red-600 hover:text-red-800 p-1" title="Remove Group">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        @error('addons.' . $groupIndex . '.name')
-                            <div class="text-xs text-red-600 mb-2">{{ $message }}</div>
-                        @enderror
-                        <div class="space-y-2">
-                            @foreach($group['options'] ?? [] as $optionIndex => $option)
-                                <div class="flex items-center gap-2" wire:key="addon-{{ $groupIndex }}-{{ $optionIndex }}">
-                                    <input type="text" 
-                                           wire:model.live="addons.{{ $groupIndex }}.options.{{ $optionIndex }}.name" 
-                                           placeholder="Option name" 
-                                           class="flex-1 border rounded px-3 py-2" />
-                                    <input type="number" 
-                                           step="0.01" 
-                                           wire:model.live="addons.{{ $groupIndex }}.options.{{ $optionIndex }}.price" 
-                                           placeholder="Price" 
-                                           class="w-20 border rounded px-3 py-2" />
-                                    <div class="flex items-center gap-2">
-                                        <input type="checkbox" 
-                                               wire:model.live="addons.{{ $groupIndex }}.options.{{ $optionIndex }}.enabled" 
-                                               class="rounded" />
-                                        <span class="text-xs text-gray-600">Enabled</span>
-                                    </div>
-                                    <button type="button" 
-                                            wire:click="removeAddonOption({{ $groupIndex }}, {{ $optionIndex }})" 
-                                            class="text-red-600 hover:text-red-800 p-1">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                                @if($errors->has('addons.' . $groupIndex . '.options.' . $optionIndex . '.name') || $errors->has('addons.' . $groupIndex . '.options.' . $optionIndex . '.price'))
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                        @error('addons.' . $groupIndex . '.options.' . $optionIndex . '.name')
-                                            <div class="text-xs text-red-600">{{ $message }}</div>
-                                        @enderror
-                                        @error('addons.' . $groupIndex . '.options.' . $optionIndex . '.price')
-                                            <div class="text-xs text-red-600">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                @endif
-                            @endforeach
-                            @error('addons.' . $groupIndex . '.options')
-                                <div class="text-xs text-red-600">{{ $message }}</div>
-                            @enderror
-                            <div class="flex items-center justify-between mt-1">
-                                <button type="button" 
-                                        wire:click="addAddonOption({{ $groupIndex }})" 
-                                        class="text-blue-600">+ Add Option</button>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" 
-                                           wire:click="toggleAddonGroupEnabled({{ $groupIndex }})" 
-                                           @checked($group['enabled'] ?? true)
-                                           class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2" />
-                                    <span class="text-sm font-medium {{ ($group['enabled'] ?? true) ? 'text-gray-700' : 'text-gray-500' }}">
-                                        Enable this addon group
-                                    </span>
-                                </label>
+                        @elseif($type === 'ala_carte')
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Price</label>
+                                <input type="number" step="0.01" min="0" wire:model.blur="price" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                                @error('price') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
                             </div>
+                        @endif
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Stock</label>
+                            <input type="number" step="1" min="0" wire:model.blur="stock" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                            @error('stock') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                            <select wire:model.blur="category_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                <option value="">Select category</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('category_id') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                            <select wire:model.live="type" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                <option value="ala_carte">Ala Carte</option>
+                                <option value="set">Set</option>
+                            </select>
+                            @error('type') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tag</label>
+                            <select wire:model.blur="tag" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                <option value="">None</option>
+                                <option value="popular">Popular</option>
+                                <option value="bestseller">Bestseller</option>
+                            </select>
+                            @error('tag') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
                         </div>
                     </div>
-                @endforeach
-                <button type="button" wire:click="addAddonGroup" class="text-blue-600">+ Add Addon Group</button>
+
+                    <div class="flex items-center gap-8">
+                        <div class="flex items-center gap-3">
+                            <input id="is_active" type="checkbox" wire:model.live="is_active" class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2" />
+                            <label for="is_active" class="text-sm font-medium text-gray-700">Active</label>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <input id="enabled" type="checkbox" wire:model.live="enabled" class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2" />
+                            <label for="enabled" class="text-sm font-medium text-gray-700">Enabled</label>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Image</label>
+                            <input type="file" wire:model="image" accept="image/*" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                            @error('image') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @if($image)
+                                <div>
+                                    <div class="text-sm font-medium text-gray-700 mb-2">Preview</div>
+                                    <img src="{{ $image->temporaryUrl() }}" class="rounded-lg border border-gray-200 w-full h-32 object-cover" />
+                                </div>
+                            @endif
+                            @if($isEdit && $menuItem && $menuItem->image_path)
+                                <div>
+                                    <div class="text-sm font-medium text-gray-700 mb-2">Current</div>
+                                    <img src="{{ asset('storage/' . $menuItem->image_path) }}" class="rounded-lg border border-gray-200 w-full h-32 object-cover" />
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Options Section (for all items) -->
+                    <div class="border border-gray-200 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Option Groups</h3>
+                        <div class="space-y-4">
+                            @foreach($options as $groupIndex => $group)
+                                <div class="border border-gray-200 rounded-lg p-4" wire:key="opt-group-{{ $groupIndex }}">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <input type="text" wire:model.live="options.{{ $groupIndex }}.name" placeholder="Group name" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                                        <select wire:model.live="options.{{ $groupIndex }}.rules.0" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                            <option value="required">Required</option>
+                                            <option value="optional">Optional</option>
+                                        </select>
+                                        <select wire:model.live="options.{{ $groupIndex }}.rules.1" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                            <option value="one">One</option>
+                                            <option value="multiple">Multiple</option>
+                                        </select>
+                                        <button type="button" wire:click="removeOptionGroup({{ $groupIndex }})" class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors" title="Remove Group">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    @error('options.' . $groupIndex . '.name')
+                                        <div class="text-sm text-red-600 mb-2">{{ $message }}</div>
+                                    @enderror
+                                    <div class="space-y-3">
+                                        @foreach($group['options'] ?? [] as $optionIndex => $option)
+                                            <div class="flex items-center gap-3" wire:key="opt-{{ $groupIndex }}-{{ $optionIndex }}">
+                                                <input type="text" 
+                                                       wire:model.live="options.{{ $groupIndex }}.options.{{ $optionIndex }}.name" 
+                                                       placeholder="Option name" 
+                                                       class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                                                <div class="flex items-center gap-2">
+                                                    <input type="checkbox" 
+                                                           wire:model.live="options.{{ $groupIndex }}.options.{{ $optionIndex }}.enabled" 
+                                                           class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2" />
+                                                    <span class="text-sm text-gray-600">Enabled</span>
+                                                </div>
+                                                <button type="button" 
+                                                        wire:click="removeOptionOption({{ $groupIndex }}, {{ $optionIndex }})" 
+                                                        class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            @error('options.' . $groupIndex . '.options.' . $optionIndex . '.name')
+                                                <div class="text-sm text-red-600">{{ $message }}</div>
+                                            @enderror
+                                        @endforeach
+                                        @error('options.' . $groupIndex . '.options')
+                                            <div class="text-sm text-red-600">{{ $message }}</div>
+                                        @enderror
+                                        <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                                            <button type="button" 
+                                                    wire:click="addOptionOption({{ $groupIndex }})" 
+                                                    class="text-indigo-600 hover:text-indigo-800 font-medium">+ Add Option</button>
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input type="checkbox" 
+                                                       wire:click="toggleOptionGroupEnabled({{ $groupIndex }})" 
+                                                       @checked($group['enabled'] ?? true)
+                                                       class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2" />
+                                                <span class="text-sm font-medium {{ ($group['enabled'] ?? true) ? 'text-gray-700' : 'text-gray-500' }}">
+                                                    Enable this option group
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                            <button type="button" wire:click="addOptionGroup" class="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50 transition-colors font-medium">+ Add Option Group</button>
+                        </div>
+                    </div>
+
+                    <!-- Addons Section (for all items) -->
+                    <div class="border border-gray-200 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Addon Groups</h3>
+                        <div class="space-y-4">
+                            @foreach($addons as $groupIndex => $group)
+                                <div class="border border-gray-200 rounded-lg p-4" wire:key="addon-group-{{ $groupIndex }}">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <input type="text" wire:model.live="addons.{{ $groupIndex }}.name" placeholder="Group name" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                                        <select wire:model.live="addons.{{ $groupIndex }}.rules.0" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                            <option value="required">Required</option>
+                                            <option value="optional">Optional</option>
+                                        </select>
+                                        <select wire:model.live="addons.{{ $groupIndex }}.rules.1" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                            <option value="one">One</option>
+                                            <option value="multiple">Multiple</option>
+                                        </select>
+                                        <button type="button" wire:click="removeAddonGroup({{ $groupIndex }})" class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors" title="Remove Group">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    @error('addons.' . $groupIndex . '.name')
+                                        <div class="text-sm text-red-600 mb-2">{{ $message }}</div>
+                                    @enderror
+                                    <div class="space-y-3">
+                                        @foreach($group['options'] ?? [] as $optionIndex => $option)
+                                            <div class="flex items-center gap-3" wire:key="addon-{{ $groupIndex }}-{{ $optionIndex }}">
+                                                <input type="text" 
+                                                       wire:model.live="addons.{{ $groupIndex }}.options.{{ $optionIndex }}.name" 
+                                                       placeholder="Option name" 
+                                                       class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                                                <input type="number" 
+                                                       step="0.01" 
+                                                       wire:model.live="addons.{{ $groupIndex }}.options.{{ $optionIndex }}.price" 
+                                                       placeholder="Price" 
+                                                       class="w-24 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                                                <div class="flex items-center gap-2">
+                                                    <input type="checkbox" 
+                                                           wire:model.live="addons.{{ $groupIndex }}.options.{{ $optionIndex }}.enabled" 
+                                                           class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2" />
+                                                    <span class="text-sm text-gray-600">Enabled</span>
+                                                </div>
+                                                <button type="button" 
+                                                        wire:click="removeAddonOption({{ $groupIndex }}, {{ $optionIndex }})" 
+                                                        class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            @if($errors->has('addons.' . $groupIndex . '.options.' . $optionIndex . '.name') || $errors->has('addons.' . $groupIndex . '.options.' . $optionIndex . '.price'))
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                    @error('addons.' . $groupIndex . '.options.' . $optionIndex . '.name')
+                                                        <div class="text-sm text-red-600">{{ $message }}</div>
+                                                    @enderror
+                                                    @error('addons.' . $groupIndex . '.options.' . $optionIndex . '.price')
+                                                        <div class="text-sm text-red-600">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                        @error('addons.' . $groupIndex . '.options')
+                                            <div class="text-sm text-red-600">{{ $message }}</div>
+                                        @enderror
+                                        <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                                            <button type="button" 
+                                                    wire:click="addAddonOption({{ $groupIndex }})" 
+                                                    class="text-indigo-600 hover:text-indigo-800 font-medium">+ Add Option</button>
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input type="checkbox" 
+                                                       wire:click="toggleAddonGroupEnabled({{ $groupIndex }})" 
+                                                       @checked($group['enabled'] ?? true)
+                                                       class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2" />
+                                                <span class="text-sm font-medium {{ ($group['enabled'] ?? true) ? 'text-gray-700' : 'text-gray-500' }}">
+                                                    Enable this addon group
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                            <button type="button" wire:click="addAddonGroup" class="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50 transition-colors font-medium">+ Add Addon Group</button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-200">
+                        <a href="{{ route('admin.menu.index') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</a>
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">Save</button>
+                    </div>
+                </form>
             </div>
         </div>
-
-        <div class="flex items-center justify-end gap-3">
-            <a href="{{ route('admin.menu.index') }}" class="px-4 py-2 border rounded">Cancel</a>
-            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded">Save</button>
-        </div>
-        </form>
     </div>
 </div>

@@ -61,16 +61,44 @@
         
         <!-- Sidebar Header -->
         <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <h1 x-show="sidebarOpen" class="text-xl font-bold text-gray-900">Restaurant Admin</h1>
-                    <h1 x-show="!sidebarOpen" class="text-lg font-bold text-gray-900">RA</h1>
+            <div class="flex items-center space-x-3">
+                @php
+                    $storeSettings = \App\Models\StoreSetting::getSettings();
+                    $storeName = $storeSettings?->store_name ?? 'Restaurant Admin';
+                    $storeLogo = $storeSettings?->logo_path;
+                @endphp
+                
+                @if($storeLogo)
+                    <div class="flex-shrink-0">
+                        <img src="{{ Storage::url($storeLogo) }}" alt="{{ $storeName }}" class="h-8 w-8 object-contain rounded">
+                    </div>
+                @else
+                    <div class="flex-shrink-0 h-8 w-8 bg-purple-100 rounded flex items-center justify-center">
+                        <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                    </div>
+                @endif
+                
+                <div class="flex-1 min-w-0">
+                    <h1 x-show="sidebarOpen" class="text-lg font-bold text-gray-900 leading-tight break-words">{{ $storeName }}</h1>
+                    <h1 x-show="!sidebarOpen" class="text-lg font-bold text-gray-900">{{ substr($storeName, 0, 2) }}</h1>
                 </div>
             </div>
         </div>
 
         <!-- Navigation -->
         <nav class="mt-5 px-2 space-y-1">
+            <a href="{{ route('admin.dashboard') }}" 
+               class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.dashboard') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+               :title="sidebarOpen ? '' : 'Dashboard'">
+                <svg class="h-5 w-5 flex-shrink-0" :class="sidebarOpen ? 'mr-3' : 'mx-auto'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
+                </svg>
+                <span x-show="sidebarOpen">Dashboard</span>
+            </a>
+
             <a href="{{ route('admin.menu.index') }}" 
                class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.menu.*') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                :title="sidebarOpen ? '' : 'Menu'">

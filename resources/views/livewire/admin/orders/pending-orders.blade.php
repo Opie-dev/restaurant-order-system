@@ -1,9 +1,57 @@
-<div class="p-6 space-y-6" x-data="{ 
-    showCancelModal: false, 
-    orderId: null, 
-    cancellationRemarks: '',
-    cancellationError: ''
-}">
+<div class="p-6 space-y-6" 
+     x-data="{ 
+        showCancelModal: false, 
+        orderId: null, 
+        cancellationRemarks: '',
+        cancellationError: '',
+        showNotification: false,
+        notificationMessage: '',
+        notificationCount: 0
+     }"
+     x-init="
+        // Check for new orders every 5 seconds
+        setInterval(() => {
+            $wire.checkForNewOrders();
+        }, 5000);
+        
+        // Listen for new order notifications
+        $wire.on('new-orders-notification', (event) => {
+            notificationMessage = event.message;
+            notificationCount = event.count;
+            showNotification = true;
+            
+            // Auto-hide notification after 5 seconds
+            setTimeout(() => {
+                showNotification = false;
+            }, 5000);
+        });
+     "
+     wire:poll.5s="checkForNewOrders">
+    <!-- Real-time Notification -->
+    <div x-show="showNotification" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform translate-y-2"
+         x-transition:enter-end="opacity-100 transform translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 transform translate-y-0"
+         x-transition:leave-end="opacity-0 transform translate-y-2"
+         class="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3"
+         style="display: none;">
+        <div class="flex-shrink-0">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4 19h6v-6H4v6zM4 13h6V7H4v6zM4 7h6V1H4v6z"></path>
+            </svg>
+        </div>
+        <div class="flex-1">
+            <p class="font-medium" x-text="notificationMessage"></p>
+        </div>
+        <button @click="showNotification = false; $wire.markOrdersAsSeen()" class="flex-shrink-0 text-green-200 hover:text-white">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    </div>
+
     <!-- Flash Messages -->
     @if (session()->has('success'))
         <div class="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -104,8 +152,25 @@
     </div>
 
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold">Active Orders</h1>
+        <div class="flex items-center space-x-3">
+            <h1 class="text-2xl font-semibold">Active Orders</h1>
+            @if($newOrderCount > 0)
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 animate-pulse">
+                    {{ $newOrderCount }} new
+                </span>
+            @endif
+        </div>
         <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2 text-sm text-gray-500">
+                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span>Live updates</span>
+            </div>
+            <button onclick="window.location.reload()" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Refresh
+            </button>
             <a href="{{ route('admin.orders.index') }}" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
                 <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>

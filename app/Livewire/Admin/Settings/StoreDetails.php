@@ -6,11 +6,13 @@ use App\Models\StoreSetting;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
 
 #[Layout('layouts.admin')]
 class StoreDetails extends Component
 {
+    use WithFileUploads;
     #[Validate('required|string|max:255')]
     public string $store_name = '';
 
@@ -104,6 +106,9 @@ class StoreDetails extends Component
 
         // Save to database
         StoreSetting::updateSettings($data);
+
+        // Clear the logo upload after successful save
+        $this->logo = null;
 
         session()->flash('success', 'Store details updated successfully.');
     }

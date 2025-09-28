@@ -53,6 +53,7 @@ class OrderSeeder extends Seeder
                 'payment_provider' => fake()->randomElement(['stripe', null]),
                 'payment_ref' => fake()->optional()->uuid(),
                 'tracking_url' => $status === 'delivering' ? fake()->url() : null,
+                'delivery_fee' => $deliver ? fake()->randomFloat(2, 3.00, 8.00) : null,
                 'notes' => fake()->optional()->sentence(),
                 'cancellation_remarks' => $status === 'cancelled' ? fake()->sentence() : null,
                 'created_at' => $orderDate,
@@ -95,7 +96,8 @@ class OrderSeeder extends Seeder
 
             // Update order totals
             $tax = $subtotal * 0.1; // 10% tax
-            $total = $subtotal + $tax;
+            $deliveryFee = $order->delivery_fee ?? 0;
+            $total = $subtotal + $tax + $deliveryFee;
 
             $order->update([
                 'subtotal' => $subtotal,

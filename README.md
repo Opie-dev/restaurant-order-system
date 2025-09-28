@@ -76,14 +76,14 @@ Gourmet Express is a full-featured restaurant ordering app built with Laravel 11
   - Clear filters button and instant search
 
 #### 6) Database Models (high level)
-- User: `name, email, password, role`
-- Category: Hierarchical structure with `parent_id`, `position`, `is_active` for tree organization
-- MenuItem (`price`, `image_path`, `is_active`, optional `tag`, optional `stock`)
+- User: `name, email, password, role` (with soft deletes)
+- Category: Hierarchical structure with `parent_id`, `position`, `is_active` for tree organization (with soft deletes)
+- MenuItem (`price`, `image_path`, `is_active`, optional `tag`, optional `stock`) (with soft deletes)
 - DailyMenuAvailability (optional for future daily toggling)
-- Order (`status`, `subtotal`, `tax`, `total`, `payment_status`, `payment_provider`, `payment_ref`, `notes`)
-- OrderItem (`name_snapshot`, `unit_price`, `qty`, `line_total`)
+- Order (`status`, `subtotal`, `tax`, `total`, `payment_status`, `payment_provider`, `payment_ref`, `notes`, `delivery_fee`, `tracking_url`, `cancellation_remarks`) (with soft deletes)
+- OrderItem (`name_snapshot`, `unit_price`, `qty`, `line_total`, `selections`) (with soft deletes)
 - Payment (Stripe) – design ready
-- UserAddress (`label`, `recipient_name`, `phone`, address fields, `is_default`)
+- UserAddress (`label`, `recipient_name`, `phone`, address fields, `is_default`) (with soft deletes)
 
 #### 7) Payments (Stripe) – Designed
 - Create PaymentIntent during checkout (not fully wired for demo)
@@ -95,6 +95,14 @@ Gourmet Express is a full-featured restaurant ordering app built with Laravel 11
 - Alpine-based toast with auto-dismiss timer and visual progress bar
 - Error messages show a red theme; success/informational use dark theme
 - Supports both string payloads and structured `{ type, message }`
+
+#### 9) Soft Deletes
+- All major models implement soft deletes for data preservation
+- Models with soft deletes: User, Category, MenuItem, Order, OrderItem, UserAddress
+- Records are marked as deleted instead of permanently removed
+- Supports recovery with `restore()` and permanent deletion with `forceDelete()`
+- Queries automatically exclude soft-deleted records by default
+- Use `withTrashed()` to include deleted records, `onlyTrashed()` for deleted-only queries
 
 ### Primary Routes
 - Public/Customer
@@ -150,6 +158,7 @@ php artisan serve
 - Customer layout: `resources/views/layouts/customer.blade.php`
 - Error handling aims for early returns and clear user feedback
 - Code style targets PSR-12; prefer explicit typing and meaningful names
+- Soft deletes are implemented across all major models for data integrity and recovery
 
 ### Roadmap / Ideas
 - Stripe PaymentIntent creation on checkout confirm + webhook handling

@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Order;
 use App\Models\User;
 use App\Models\MenuItem;
+use App\Services\StoreService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Carbon\Carbon;
@@ -18,12 +19,16 @@ class Dashboard extends Component
     public int $selectedYear;
     public int $selectedOrdersPeriod = 7;
     public int $selectedRevenuePeriod = 7;
+    public $currentStore;
 
     public function mount()
     {
         $this->selectedMonth = now()->month;
         $this->selectedYear = now()->year;
         $this->selectedWeek = $this->getCurrentWeekOfMonth();
+
+        $storeService = app(StoreService::class);
+        $this->currentStore = $storeService->getCurrentStore();
     }
 
     public function getCurrentWeekOfMonth()
@@ -48,12 +53,14 @@ class Dashboard extends Component
 
     public function getTodayOrdersProperty()
     {
-        return Order::whereDate('created_at', today())->count();
+        return Order::where('store_id', $this->currentStore->id)
+            ->whereDate('created_at', today())->count();
     }
 
     public function getTodayRevenueProperty()
     {
-        return Order::whereDate('created_at', today())
+        return Order::where('store_id', $this->currentStore->id)
+            ->whereDate('created_at', today())
             ->where('payment_status', 'paid')
             ->sum('total');
     }
@@ -65,29 +72,34 @@ class Dashboard extends Component
 
     public function getTotalMenuItemsProperty()
     {
-        return MenuItem::where('is_active', true)->count();
+        return MenuItem::where('store_id', $this->currentStore->id)
+            ->where('is_active', true)->count();
     }
 
     public function getPendingOrdersProperty()
     {
-        return Order::whereIn('status', ['pending', 'preparing'])->count();
+        return Order::where('store_id', $this->currentStore->id)
+            ->whereIn('status', ['pending', 'preparing'])->count();
     }
 
     public function getCompletedOrdersProperty()
     {
-        return Order::where('status', 'completed')->count();
+        return Order::where('store_id', $this->currentStore->id)
+            ->where('status', 'completed')->count();
     }
 
     public function getTotalRevenueProperty()
     {
-        return Order::where('payment_status', 'paid')
+        return Order::where('store_id', $this->currentStore->id)
+            ->where('payment_status', 'paid')
             ->whereYear('created_at', $this->selectedYear)
             ->sum('total');
     }
 
     public function getRecentOrdersProperty()
     {
-        return Order::with(['user', 'items'])
+        return Order::where('store_id', $this->currentStore->id)
+            ->with(['user', 'items'])
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
@@ -95,10 +107,12 @@ class Dashboard extends Component
 
     public function getTopSellingItemsProperty()
     {
-        return MenuItem::withCount(['orderItems as total_ordered' => function ($query) {
-            $query->join('orders', 'order_items.order_id', '=', 'orders.id')
-                ->where('orders.payment_status', 'paid');
-        }])
+        return MenuItem::where('store_id', $this->currentStore->id)
+            ->withCount(['orderItems as total_ordered' => function ($query) {
+                $query->join('orders', 'order_items.order_id', '=', 'orders.id')
+                    ->where('orders.payment_status', 'paid')
+                    ->where('orders.store_id', $this->currentStore->id);
+            }])
             ->orderBy('total_ordered', 'desc')
             ->limit(5)
             ->get();
@@ -106,11 +120,12 @@ class Dashboard extends Component
 
     public function getWeeklyRevenueProperty()
     {
-        return Cache::remember("dashboard.weekly_revenue.{$this->selectedYear}.{$this->selectedMonth}.{$this->selectedWeek}", 300, function () {
+        return Cache::remember("dashboard.weekly_revenue.{$this->currentStore->id}.{$this->selectedYear}.{$this->selectedMonth}.{$this->selectedWeek}", 300, function () {
             $startOfWeek = $this->getWeekStartDate();
             $endOfWeek = $this->getWeekEndDate();
 
-            return Order::whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            return Order::where('store_id', $this->currentStore->id)
+                ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
                 ->where('payment_status', 'paid')
                 ->sum('total');
         });
@@ -118,8 +133,9 @@ class Dashboard extends Component
 
     public function getMonthlyRevenueProperty()
     {
-        return Cache::remember("dashboard.monthly_revenue.{$this->selectedYear}.{$this->selectedMonth}", 600, function () {
-            return Order::whereMonth('created_at', $this->selectedMonth)
+        return Cache::remember("dashboard.monthly_revenue.{$this->currentStore->id}.{$this->selectedYear}.{$this->selectedMonth}", 600, function () {
+            return Order::where('store_id', $this->currentStore->id)
+                ->whereMonth('created_at', $this->selectedMonth)
                 ->whereYear('created_at', $this->selectedYear)
                 ->where('payment_status', 'paid')
                 ->sum('total');
@@ -188,21 +204,22 @@ class Dashboard extends Component
     public function getOrderStatusCountsProperty()
     {
         return [
-            'pending' => Order::where('status', 'pending')->count(),
-            'preparing' => Order::where('status', 'preparing')->count(),
-            'delivering' => Order::where('status', 'delivering')->count(),
-            'completed' => Order::where('status', 'completed')->count(),
-            'cancelled' => Order::where('status', 'cancelled')->count(),
+            'pending' => Order::where('store_id', $this->currentStore->id)->where('status', 'pending')->count(),
+            'preparing' => Order::where('store_id', $this->currentStore->id)->where('status', 'preparing')->count(),
+            'delivering' => Order::where('store_id', $this->currentStore->id)->where('status', 'delivering')->count(),
+            'completed' => Order::where('store_id', $this->currentStore->id)->where('status', 'completed')->count(),
+            'cancelled' => Order::where('store_id', $this->currentStore->id)->where('status', 'cancelled')->count(),
         ];
     }
 
     public function getDailyOrdersDataProperty()
     {
-        return Cache::remember("dashboard.daily_orders_data.{$this->selectedOrdersPeriod}", 300, function () {
+        return Cache::remember("dashboard.daily_orders_data.{$this->currentStore->id}.{$this->selectedOrdersPeriod}", 300, function () {
             $data = [];
             for ($i = $this->selectedOrdersPeriod - 1; $i >= 0; $i--) {
                 $date = Carbon::now()->subDays($i);
-                $count = Order::whereDate('created_at', $date)->count();
+                $count = Order::where('store_id', $this->currentStore->id)
+                    ->whereDate('created_at', $date)->count();
                 $data[] = [
                     'date' => $date->format('M j'),
                     'orders' => $count
@@ -214,11 +231,12 @@ class Dashboard extends Component
 
     public function getDailyRevenueDataProperty()
     {
-        return Cache::remember("dashboard.daily_revenue_data.{$this->selectedRevenuePeriod}", 300, function () {
+        return Cache::remember("dashboard.daily_revenue_data.{$this->currentStore->id}.{$this->selectedRevenuePeriod}", 300, function () {
             $data = [];
             for ($i = $this->selectedRevenuePeriod - 1; $i >= 0; $i--) {
                 $date = Carbon::now()->subDays($i);
-                $revenue = Order::whereDate('created_at', $date)
+                $revenue = Order::where('store_id', $this->currentStore->id)
+                    ->whereDate('created_at', $date)
                     ->where('payment_status', 'paid')
                     ->sum('total');
                 $data[] = [
@@ -247,8 +265,10 @@ class Dashboard extends Component
         Cache::forget("dashboard.daily_revenue_data.{$this->selectedRevenuePeriod}");
 
         // Clear dynamic cache keys
-        Cache::forget("dashboard.weekly_revenue.{$this->selectedYear}.{$this->selectedMonth}.{$this->selectedWeek}");
-        Cache::forget("dashboard.monthly_revenue.{$this->selectedYear}.{$this->selectedMonth}");
+        Cache::forget("dashboard.weekly_revenue.{$this->currentStore->id}.{$this->selectedYear}.{$this->selectedMonth}.{$this->selectedWeek}");
+        Cache::forget("dashboard.monthly_revenue.{$this->currentStore->id}.{$this->selectedYear}.{$this->selectedMonth}");
+        Cache::forget("dashboard.daily_orders_data.{$this->currentStore->id}.{$this->selectedOrdersPeriod}");
+        Cache::forget("dashboard.daily_revenue_data.{$this->currentStore->id}.{$this->selectedRevenuePeriod}");
 
         $this->dispatch('dashboard-refreshed');
     }

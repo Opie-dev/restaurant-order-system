@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Models\Store;
 
 class MenuItemSeeder extends Seeder
 {
@@ -80,9 +81,12 @@ class MenuItemSeeder extends Seeder
             'Side',
         ];
 
+        // Resolve store context if present
+        $storeId = Store::first()?->id;
+
         foreach ($categories as $category) {
             $category = Category::firstOrCreate(
-                ['name' => $category],
+                ['name' => $category, 'store_id' => $storeId],
                 ['is_active' => true]
             );
         }
@@ -221,9 +225,9 @@ class MenuItemSeeder extends Seeder
 
         foreach ($menu as $itemData) {
             $item = MenuItem::firstOrCreate(
-                ['name' => $itemData['name']],
+                ['name' => $itemData['name'], 'store_id' => $storeId],
                 [
-                    'category_id' => Category::where('name', $itemData['category'])->first()->id,
+                    'category_id' => Category::where('name', $itemData['category'])->where('store_id', $storeId)->first()->id,
                     'description' => $itemData['description'] ?? '',
                     'price' => $itemData['base_price'] ?? 0,
                     'base_price' => $itemData['base_price'] ?? null,
@@ -233,6 +237,7 @@ class MenuItemSeeder extends Seeder
                     'is_active' => $itemData['enabled'] ?? true,
                     'enabled' => $itemData['enabled'] ?? true,
                     'stock' => 100, // Default stock
+                    'store_id' => $storeId,
                 ]
             );
         }

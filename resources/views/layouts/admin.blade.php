@@ -245,6 +245,79 @@
                     </svg>
                 </button>
 
+                <!-- Store Switcher -->
+                <div class="relative" x-data="{ open: false }">
+                    <button type="button" 
+                            class="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500 flex items-center"
+                            @click="open = !open">
+                        <span class="sr-only">Switch store</span>
+                        <svg class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <span class="hidden lg:block text-sm font-medium text-gray-700">
+                            @php
+                                $currentStore = app(\App\Services\StoreService::class)->getCurrentStore();
+                            @endphp
+                            {{ $currentStore?->name ?? 'Select Store' }}
+                        </span>
+                        <svg class="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-100"
+                         x-transition:enter-start="transform opacity-0 scale-95"
+                         x-transition:enter-end="transform opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="transform opacity-100 scale-100"
+                         x-transition:leave-end="transform opacity-0 scale-95"
+                         @click.away="open = false"
+                         class="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
+                        @php
+                            $stores = app(\App\Services\StoreService::class)->getUserStores();
+                            $currentStore = app(\App\Services\StoreService::class)->getCurrentStore();
+                        @endphp
+                        
+                        @if($stores->count() > 0)
+                            <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Switch Store
+                            </div>
+                            @foreach($stores as $store)
+                                <a href="{{ route('admin.stores.select') }}?store={{ $store->id }}" 
+                                   class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 {{ $currentStore && $currentStore->id === $store->id ? 'bg-blue-50 text-blue-700' : '' }}">
+                                    <svg class="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                    </svg>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="font-medium truncate">{{ $store->name }}</div>
+                                        @if($store->address)
+                                            <div class="text-xs text-gray-500 truncate">{{ Str::limit($store->address, 30) }}</div>
+                                        @endif
+                                    </div>
+                                    @if($currentStore && $currentStore->id === $store->id)
+                                        <svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    @endif
+                                </a>
+                            @endforeach
+                        @else
+                            <div class="px-3 py-2 text-sm text-gray-500">
+                                No stores available
+                            </div>
+                            <div class="border-t border-gray-100 my-1"></div>
+                            <a href="{{ route('admin.stores.create') }}" 
+                               class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <svg class="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                Create Store
+                            </a>
+                        @endif
+                    </div>
+                </div>
+
                 <!-- Separator -->
                 <div class="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200" aria-hidden="true"></div>
 

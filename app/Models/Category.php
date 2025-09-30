@@ -17,6 +17,7 @@ class Category extends Model
         'is_active',
         'position',
         'parent_id',
+        'store_id',
     ];
 
     protected $casts = [
@@ -43,5 +44,10 @@ class Category extends Model
     public function children(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id')->ordered();
+    }
+
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(Store::class);
     }
 }

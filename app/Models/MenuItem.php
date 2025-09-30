@@ -14,6 +14,7 @@ class MenuItem extends Model
 
     protected $fillable = [
         'category_id',
+        'store_id',
         'name',
         'description',
         'price',
@@ -53,5 +54,10 @@ class MenuItem extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(Store::class);
     }
 }

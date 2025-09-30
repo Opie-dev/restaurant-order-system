@@ -4,8 +4,20 @@
     <form wire:submit.prevent="save" class="space-y-6 bg-white border border-gray-200 rounded-xl shadow-sm p-6">
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Store Name</label>
-            <input type="text" wire:model.blur="store_name" class="w-full rounded-lg border-2 border-gray-300 px-3 py-2.5 focus:border-purple-500 focus:ring-purple-500" />
-            @error('store_name')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
+            <input type="text" wire:model.blur="name" class="w-full rounded-lg border-2 border-gray-300 px-3 py-2.5 focus:border-purple-500 focus:ring-purple-500" />
+            @error('name')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Store URL Slug</label>
+            <div class="flex">
+                <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                    {{ config('app.url') }}/menu/
+                </span>
+                <input type="text" wire:model.blur="slug" class="flex-1 rounded-r-lg border-2 border-gray-300 px-3 py-2.5 focus:border-purple-500 focus:ring-purple-500" placeholder="store-slug" />
+            </div>
+            <p class="mt-1 text-xs text-gray-500">Only lowercase letters, numbers, and hyphens allowed. This will be your store's unique URL.</p>
+            @error('slug')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
         </div>
 
         <div>

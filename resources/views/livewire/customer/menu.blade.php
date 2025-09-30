@@ -1,30 +1,121 @@
+<div class="min-h-screen bg-gray-50 flex flex-col">
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col lg:flex-row lg:h-[calc(100vh-80px)]">
+        <!-- Left Panel - Menu -->
+        <div class="flex-1 overflow-y-auto lg:mr-96">
+            <div class="">
+            <!-- Store Header -->
+            @if($store)
+                <div class="mb-6 p-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            @if($store->logo_path)
+                                <img src="{{ \Illuminate\Support\Facades\Storage::url($store->logo_path) }}" alt="{{ $store->name }}" class="h-12 w-12 object-contain rounded-lg">
+                            @else
+                                <div class="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                    </svg>
+                                </div>
+                            @endif
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-900">{{ $store->name }}</h1>
+                                @if($store->description)
+                                    <p class="text-gray-600 text-sm">{{ $store->description }}</p>
+                                @endif
+                            </div>
+                        </div>
+                        
+                        <!-- Navigation Links -->
+                        <nav class="hidden lg:flex items-center space-x-4">
+                            @if(auth()->check() && auth()->user()->role !== 'admin')
+                                <a href="{{ route('cart') }}" class="flex relative items-center gap-2 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                                    </svg>
+                                    <span class="text-sm font-medium">Cart</span>
+                                    @if($this->cartCount > 0)
+                                        <span class="absolute -top-2 -right-3 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold leading-none text-white bg-purple-600 rounded-full ring-2 ring-white shadow">{{ $this->cartCount > 99 ? '99+' : $this->cartCount }}</span>
+                                    @endif
+                                </a>
+                                <div class="relative" x-data="{ open: false }">
+                                    <button @click="open = !open" class="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium px-3 py-2 rounded-lg">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                        <span>{{ Auth::user()->name }}</span>
+                                        <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </button>
+                                    <!-- Dropdown Menu -->
+                                    <div x-show="open"
+                                         @click.away="open = false"
+                                         x-transition:enter="transition ease-out duration-200"
+                                         x-transition:enter-start="opacity-0 scale-95"
+                                         x-transition:enter-end="opacity-100 scale-100"
+                                         x-transition:leave="transition ease-in duration-150"
+                                         x-transition:leave-start="opacity-100 scale-100"
+                                         x-transition:leave-end="opacity-0 scale-95"
+                                         class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                                        <div class="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
+                                            <div class="font-medium">{{ Auth::user()->name }}</div>
+                                            <div class="text-gray-500">{{ Auth::user()->email }}</div>
+                                        </div>
+                                        <a href="{{ route('orders') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                            <div class="flex items-center gap-2">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                                </svg>
+                                                My Orders
+                                            </div>
+                                        </a>
+                                        <a href="{{ route('addresses') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                            <div class="flex items-center gap-2">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-3-3h-2M9 20H4v-2a3 3 0 013-3h2m7-4a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                </svg>
+                                                My Addresses
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            @else
+                                
+                                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium px-3 py-2 rounded-lg">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Admin Panel
+                                </a>
+                            @endif
+                        </nav>
+                    </div>
+                </div>
+            @endif
 
-<div class="min-h-screen bg-gray-50 flex flex-col lg:flex-row lg:h-screen">
-    <!-- Left Panel - Menu -->
-    <div class="flex-1 overflow-y-auto">
-        <div class="p-4 lg:px-6 lg:py-6">
             <!-- Category Filters -->
             @php 
                 $rootCategories = $this->categories->whereNull('parent_id');
             @endphp
-            <div class="flex items-center gap-2 lg:gap-3 mb-4 lg:mb-6 overflow-x-auto pb-2">
-                <button type="button" 
-                    wire:click="$set('categoryId', null)" 
-                    class="px-3 lg:px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap {{ !$categoryId ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
-                    All Items
-                </button>
-                @foreach($rootCategories as $cat)
+            <div id="categories" class="flex items-center gap-2 lg:gap-3 mb-4 lg:mb-6 overflow-x-auto px-4">
                     <button type="button" 
-                        wire:click="$set('categoryId', {{ $cat->id }})" 
-                        class="px-3 lg:px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap {{ (int)$categoryId === (int)$cat->id ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
-                        {{ $cat->name }}
+                        wire:click="$set('categoryId', null)" 
+                        class="px-3 lg:px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer hover:bg-purple-600 hover:text-white whitespace-nowrap {{ !$categoryId ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
+                        All Items
                     </button>
-                @endforeach
-            </div>
+                    @foreach($rootCategories as $cat)
+                        <button type="button" 
+                            wire:click="$set('categoryId', {{ $cat->id }})" 
+                            class="px-3 lg:px-4 py-2 cursor-pointer hover:bg-purple-600 hover:text-white rounded-full text-sm font-medium transition-colors whitespace-nowrap {{ (int)$categoryId === (int)$cat->id ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
+                            {{ $cat->name }}
+                        </button>
+                    @endforeach
+                </div>
 
             <!-- Search Bar -->
-            <div class="relative mb-4 lg:mb-6">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div id="search" class="relative mb-4 lg:mb-6 px-4">
+                <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
                     <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
@@ -35,113 +126,125 @@
                     class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
             </div>
 
-            <!-- Menu Items -->
-            @php
-                $itemsByCategory = $this->items->groupBy(function($item) {
-                    return $item->category?->name ?? 'Uncategorized';
-                });
-            @endphp
+                <!-- Menu Items -->
+                @php
+                    $itemsByCategory = $this->items->groupBy(function($item) {
+                        return $item->category?->name ?? 'Uncategorized';
+                    });
+                @endphp
 
-            @forelse($itemsByCategory as $categoryName => $items)
-                <div class="mb-6 lg:mb-8">
-                    <h2 class="text-lg lg:text-xl font-semibold text-gray-800 mb-3 lg:mb-4">{{ $categoryName }}</h2>
-                    <!-- Responsive Grid: 1 item on mobile, 2 on tablet, 3 on desktop -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-                        @foreach($items as $item)
-                            <div class="bg-white rounded-lg lg:rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-60' : '' }}">
-                                @php
-                                    $src = Str::startsWith($item->image_path, ['http://','https://']) ? $item->image_path : ($item->image_path ? asset('storage/' . $item->image_path) : null);
-                                @endphp
-                                
-                                <!-- Item Image -->
-                                <div class="aspect-video bg-gray-100 overflow-hidden relative {{ (int)($item->stock ?? 0) <= 0 ? 'grayscale' : '' }}">
-                                    @if($src)
-                                        <img src="{{ $src }}" class="w-full h-full object-cover" alt="{{ $item->name }}" />
-                                    @else
-                                        <div class="w-full h-full grid place-content-center text-gray-400">
-                                            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                        </div>
-                                    @endif
+                @forelse($itemsByCategory as $categoryName => $items)
+                    <div class="mb-6 lg:mb-8 px-4">
+                        <h2 class="text-lg lg:text-xl font-semibold text-gray-800 mb-3 lg:mb-4">{{ $categoryName }}</h2>
+                        <!-- Responsive Grid: 1 item on mobile, 2 on tablet, 3 on desktop -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                            @foreach($items as $item)
+                                <div class="bg-white rounded-lg lg:rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-60' : '' }}">
+                                    @php
+                                        $src = Str::startsWith($item->image_path, ['http://','https://']) ? $item->image_path : ($item->image_path ? asset('storage/' . $item->image_path) : null);
+                                    @endphp
                                     
-                                    <!-- Item Label from tag -->
-                                    @if($item->tag)
-                                        <div class="absolute top-2 right-2">
-                                            <span class="px-2 py-1 text-xs font-semibold text-white rounded-full bg-purple-600">
-                                                {{ ucfirst($item->tag) }}
-                                            </span>
-                                        </div>
-                                    @endif
-                                </div>
-
-                                <!-- Item Details -->
-                                <div class="p-4">
-                                    <div class="flex items-start justify-between mb-2">
-                                        <h3 class="font-semibold text-gray-800 text-lg">{{ $item->name }}</h3>
-                                        <span class="text-lg font-bold text-purple-600">RM {{ number_format($item->price, 2) }}</span>
+                                    <!-- Item Image -->
+                                    <div class="aspect-video bg-gray-100 overflow-hidden relative {{ (int)($item->stock ?? 0) <= 0 ? 'grayscale' : '' }}">
+                                        @if($src)
+                                            <img src="{{ $src }}" class="w-full h-full object-cover" alt="{{ $item->name }}" />
+                                        @else
+                                            <div class="w-full h-full grid place-content-center text-gray-400">
+                                                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                            </div>
+                                        @endif
+                                        
+                                        <!-- Item Label from tag -->
+                                        @if($item->tag)
+                                            <div class="absolute top-2 right-2">
+                                                <span class="px-2 py-1 text-xs font-semibold text-white rounded-full bg-purple-600">
+                                                    {{ ucfirst($item->tag) }}
+                                                </span>
+                                            </div>
+                                        @endif
                                     </div>
-                                    
-                                    @if($item->description)
-                                        <p class="text-gray-600 text-sm mb-3">{{ $item->description }}</p>
-                                    @endif
 
-                                    <!-- Add Button -->
-                                    <div class="w-full">
-                                        @auth
-                                            <button wire:click="addToCart({{ $item->id }})" 
-                                                class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-50 cursor-not-allowed' : '' }}" 
-                                                @disabled(($item->stock ?? 0) <= 0)>
-                                                @if((int)($item->stock ?? 0) > 0)
+                                    <!-- Item Details -->
+                                    <div class="p-4">
+                                        <div class="flex items-start justify-between mb-2">
+                                            <h3 class="font-semibold text-gray-800 text-lg">{{ $item->name }}</h3>
+                                            <span class="text-lg font-bold text-purple-600">RM {{ number_format($item->price, 2) }}</span>
+                                        </div>
+                                        
+                                        @if($item->description)
+                                            <p class="text-gray-600 text-sm mb-3">{{ $item->description }}</p>
+                                        @endif
+
+                                        <!-- Add Button -->
+                                        <div class="w-full">
+                                            @auth
+                                                <button wire:click="addToCart({{ $item->id }})" 
+                                                    class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-50 cursor-not-allowed' : '' }}" 
+                                                    @disabled(($item->stock ?? 0) <= 0)>
+                                                    @if((int)($item->stock ?? 0) > 0)
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                        </svg>
+                                                    @endif
+                                                    {{ (int)($item->stock ?? 0) <= 0 ? 'Out of stock' : 'Add to Order' }}
+                                                </button>
+                                            @else
+                                                <a href="{{ route('login') }}" 
+                                                    class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' }}">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                                     </svg>
-                                                @endif
-                                                {{ (int)($item->stock ?? 0) <= 0 ? 'Out of stock' : 'Add to Order' }}
-                                            </button>
-                                        @else
-                                            <a href="{{ route('login') }}" 
-                                                class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' }}">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                                </svg>
-                                                {{ (int)($item->stock ?? 0) <= 0 ? 'Out of stock' : 'Add to Order' }}
-                                            </a>
-                                        @endauth
+                                                    {{ (int)($item->stock ?? 0) <= 0 ? 'Out of stock' : 'Add to Order' }}
+                                                </a>
+                                            @endauth
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endforeach
+                            @endforeach
+                        </div>
                     </div>
-                </div>
-            @empty
-                <div class="text-center py-12">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.709M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                @empty
+                    <div class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.709M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No items found</h3>
+                        <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
+                    </div>
+                @endforelse
+
+                <footer class="mt-12 border-t border-gray-200 pt-8 pb-6 bg-white">
+                    <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="text-gray-500 text-sm">
+                            &copy; {{ date('Y') }} Gourmet Express. All rights reserved.
+                        </div>
+                        <div class="flex items-center gap-4 text-sm">
+                            <a href="{{ route('cart') }}" class="text-purple-600 hover:underline">Cart</a>
+                            <a href="{{ route('orders') }}" class="text-purple-600 hover:underline">My Orders</a>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+
+        <!-- Mobile Cart Button (Fixed Bottom) -->
+        @if($this->cartCount > 0)
+            <div class="lg:hidden fixed bottom-4 right-4 z-50">
+                <a href="{{ route('cart') }}" class="bg-purple-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-700 transition-colors flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
                     </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">No items found</h3>
-                    <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
-                </div>
-            @endforelse
-        </div>
-    </div>
+                    <span class="font-semibold">View Cart</span>
+                    <span class="bg-white text-purple-600 px-2 py-1 rounded-full text-xs font-bold">{{ $this->cartCount }}</span>
+                </a>
+            </div>
+        @endif
 
-    <!-- Mobile Cart Button (Fixed Bottom) -->
-    @if($this->cartCount > 0)
-        <div class="lg:hidden fixed bottom-4 right-4 z-50">
-            <a href="{{ route('cart') }}" class="bg-purple-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-700 transition-colors flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
-                </svg>
-                <span class="font-semibold">View Cart</span>
-                <span class="bg-white text-purple-600 px-2 py-1 rounded-full text-xs font-bold">{{ $this->cartCount }}</span>
-            </a>
-        </div>
-    @endif
-
-        <!-- Right Panel - Your Order (Desktop Only) -->
-        <div class="hidden lg:flex lg:w-96 bg-gray-50 border-l border-gray-200 flex-col">
-            <!-- Order Header -->
+        <!-- Right Panel - Cart (Desktop Only) -->
+        <div class="hidden lg:flex lg:w-96 bg-gray-50 border-l border-gray-200 flex-col fixed right-0 top-0 h-full z-10">
+            <!-- Cart Header -->
             <div class="p-6 border-b border-gray-200 bg-white">
                 <div class="flex items-center gap-3">
                     <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,7 +255,7 @@
             </div>
 
             <!-- Order Items -->
-            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            <div id="cart" class="flex-1 overflow-y-auto p-4 space-y-4">
                 @if($this->cartCount > 0)
                     @foreach($this->cartLines as $line)
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 relative">
@@ -253,17 +356,17 @@
                                 </div>
                             </div>
                         </div>
-                    @endforeach
-            @else
-                <div class="text-center py-12">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">Your order is empty</h3>
-                    <p class="mt-1 text-sm text-gray-500">Add items from the menu to get started.</p>
-                </div>
-            @endif
-        </div>
+                    @endforeach   
+                @else
+                    <div class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">Your order is empty</h3>
+                        <p class="mt-1 text-sm text-gray-500">Add items from the menu to get started.</p>
+                    </div>
+                @endif
+            </div>
 
         <!-- Order Summary -->
     @if($this->cartCount > 0)
@@ -287,12 +390,22 @@
 
             <!-- Action Buttons -->
             <div class="space-y-3 pt-2">
-                <button wire:click="proceedToCheckout" class="w-full px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Proceed to Checkout
-                </button>
+                @if(auth()->check() && auth()->user()->role === 'admin')
+                    <button disabled
+                        class="w-full px-6 py-3 bg-gray-400 text-white rounded-xl font-semibold cursor-not-allowed flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
+                        </svg>
+                        Checkout Disabled for Admins
+                    </button>
+                @else
+                    <button wire:click="proceedToCheckout" class="w-full px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Proceed to Checkout
+                    </button>
+                @endif
                 <button x-data @click.prevent="if (confirm('Clear all items from your order?')) { $wire.clear() }" class="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors cursor-pointer">
                     Clear Order
                 </button>
@@ -457,6 +570,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 </div>
 

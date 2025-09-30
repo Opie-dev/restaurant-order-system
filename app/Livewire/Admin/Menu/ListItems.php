@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\Menu;
 
 use App\Models\Category;
 use App\Models\MenuItem;
+use App\Services\StoreService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -32,11 +33,20 @@ class ListItems extends Component
     #[Url]
     public string $sort = 'position';
 
+    public $currentStore;
+
+    public function mount()
+    {
+        $storeService = app(StoreService::class);
+        $this->currentStore = $storeService->getCurrentStore();
+    }
+
     #[Computed]
     public function categories()
     {
-        // Always show root categories
-        $rootCategories = Category::whereNull('parent_id')
+        // Always show root categories for current store
+        $rootCategories = Category::where('store_id', $this->currentStore->id)
+            ->whereNull('parent_id')
             ->ordered()
             ->get(['id', 'name', 'position', 'parent_id']);
 
@@ -45,7 +55,8 @@ class ListItems extends Component
             $selectedCategory = Category::find($this->categoryId);
             if ($selectedCategory && $selectedCategory->parent_id === null) {
                 // If a root category is selected, show its subcategories
-                $subcategories = Category::where('parent_id', $this->categoryId)->ordered()->get(['id', 'name', 'position', 'parent_id']);
+                $subcategories = Category::where('store_id', $this->currentStore->id)
+                    ->where('parent_id', $this->categoryId)->ordered()->get(['id', 'name', 'position', 'parent_id']);
                 return $rootCategories->concat($subcategories);
             }
         }
@@ -71,6 +82,7 @@ class ListItems extends Component
     public function items(): Collection
     {
         $query = MenuItem::query()
+            ->where('store_id', $this->currentStore->id)
             ->with('category')
             ->when($this->search !== '', function (Builder $q): void {
                 $q->where(
@@ -107,7 +119,7 @@ class ListItems extends Component
     #[On('item-toggled')]
     public function toggleActive(int $id): void
     {
-        $item = MenuItem::findOrFail($id);
+        $item = MenuItem::where('store_id', $this->currentStore->id)->findOrFail($id);
         $item->is_active = !$item->is_active;
         $item->save();
     }
@@ -115,7 +127,7 @@ class ListItems extends Component
 
     public function deleteItem(int $id): void
     {
-        $item = MenuItem::findOrFail($id);
+        $item = MenuItem::where('store_id', $this->currentStore->id)->findOrFail($id);
         if ($item->image_path && !str_starts_with($item->image_path, 'http')) {
             Storage::disk('public')->delete($item->image_path);
         }

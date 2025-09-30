@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
 use App\Models\UserAddress;
+use App\Models\Store;
 
 class OrderItemSeeder extends Seeder
 {
@@ -17,8 +18,9 @@ class OrderItemSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get some menu items
-        $menuItems = MenuItem::take(5)->get();
+        // Get some menu items scoped to first store if exists
+        $storeId = Store::first()?->id;
+        $menuItems = MenuItem::when($storeId, fn($q) => $q->where('store_id', $storeId))->take(5)->get();
 
         if ($menuItems->isEmpty()) {
             $this->command->info('No menu items found. Please run MenuItemSeeder first.');
@@ -68,6 +70,7 @@ class OrderItemSeeder extends Seeder
                 'ship_state' => $address?->state,
                 'ship_postal_code' => $address?->postal_code,
                 'ship_country' => $address?->country,
+                'store_id' => $storeId,
             ]);
 
             $subtotal = 0;

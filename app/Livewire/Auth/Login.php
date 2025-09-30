@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Auth;
 
+use App\Services\StoreService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
@@ -43,7 +44,15 @@ class Login extends Component
             request()->session()->regenerate();
 
             if ($user->role === 'admin') {
-                $this->redirect(route('admin.menu.index'), navigate: true);
+                $storeService = app(StoreService::class);
+
+                // Check if user has stores
+                if (!$storeService->userHasStores()) {
+                    $this->redirect(route('admin.stores.create'), navigate: true);
+                } else {
+                    // Always redirect to store selection after login
+                    $this->redirect(route('admin.stores.select'), navigate: true);
+                }
             } else {
                 $this->redirect(route('menu'), navigate: true);
             }

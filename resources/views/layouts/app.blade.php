@@ -13,10 +13,55 @@
             <a href="{{ route('home') }}" class="font-semibold">Restaurant Admin</a>
             <nav class="flex items-center gap-4 text-sm">
                 @auth
-                    <a href="{{ route('admin.menu.index') }}" class="hover:underline">Menu</a>
-                    <a href="{{ route('admin.categories.index') }}" class="hover:underline">Categories</a>
-                    <a href="{{ route('admin.orders.index') }}" class="hover:underline">Orders</a>
-                    <a href="{{ route('admin.customers.index') }}" class="hover:underline">Customers</a>
+                    @if(auth()->user()->role === 'admin')
+                        <a href="{{ route('admin.menu.index') }}" class="hover:underline">Menu</a>
+                        <a href="{{ route('admin.categories.index') }}" class="hover:underline">Categories</a>
+                        <a href="{{ route('admin.orders.index') }}" class="hover:underline">Orders</a>
+                        <a href="{{ route('admin.customers.index') }}" class="hover:underline">Customers</a>
+                        
+                        <!-- Store Dropdown -->
+                        <div class="relative" x-data="{ open: false }">
+                            <button 
+                                @click="open = !open"
+                                class="flex items-center gap-1 hover:underline"
+                            >
+                                <span x-text="'{{ app(\App\Services\StoreService::class)->getCurrentStore()?->name ?? 'Select Store' }}'"></span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            
+                            <div 
+                                x-show="open" 
+                                @click.away="open = false"
+                                x-transition
+                                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200"
+                            >
+                                @php
+                                    $stores = app(\App\Services\StoreService::class)->getUserStores();
+                                    $currentStore = app(\App\Services\StoreService::class)->getCurrentStore();
+                                @endphp
+                                
+                                @foreach($stores as $store)
+                                    <a 
+                                        href="{{ route('admin.stores.select') }}?store={{ $store->id }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {{ $currentStore && $currentStore->id === $store->id ? 'bg-blue-50 text-blue-700' : '' }}"
+                                    >
+                                        {{ $store->name }}
+                                    </a>
+                                @endforeach
+                                
+                                <div class="border-t border-gray-200 my-1"></div>
+                                <a 
+                                    href="{{ route('admin.stores.manage') }}"
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                    Manage Stores
+                                </a>
+                            </div>
+                        </div>
+                    @endif
+                    
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="hover:underline">Logout</button>

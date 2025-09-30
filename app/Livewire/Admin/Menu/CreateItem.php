@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\Menu;
 
 use App\Models\Category;
 use App\Models\MenuItem;
+use App\Services\StoreService;
 use Illuminate\Validation\Rules\File;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
@@ -28,6 +29,13 @@ class CreateItem extends Component
     public array $options = [];
     public array $addons = [];
     public $image;
+    public $currentStore;
+
+    public function mount()
+    {
+        $storeService = app(StoreService::class);
+        $this->currentStore = $storeService->getCurrentStore();
+    }
 
     public function addOptionGroup(): void
     {
@@ -138,6 +146,7 @@ class CreateItem extends Component
         }
 
         $item = new MenuItem($validated);
+        $item->store_id = $this->currentStore->id;
 
         if ($this->image) {
             $path = $this->image->store('menu', 'public');
@@ -153,7 +162,7 @@ class CreateItem extends Component
     public function render()
     {
         return view('livewire.admin.menu.edit-item', [
-            'categories' => Category::orderBy('name')->get(['id', 'name']),
+            'categories' => Category::where('store_id', $this->currentStore->id)->orderBy('name')->get(['id', 'name']),
             'isEdit' => false,
             'menuItem' => null,
             'navigationBar' => true,

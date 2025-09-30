@@ -17,9 +17,10 @@ class OrderSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get existing users and menu items
+        // Get existing users and menu items scoped to a store if exists
+        $storeId = \App\Models\Store::first()?->id;
         $users = User::where('role', 'customer')->get();
-        $menuItems = MenuItem::all();
+        $menuItems = MenuItem::when($storeId, fn($q) => $q->where('store_id', $storeId))->get();
 
         if ($users->isEmpty() || $menuItems->isEmpty()) {
             $this->command->warn('No customers or menu items found. Please run UserSeeder and MenuItemSeeder first.');
@@ -66,6 +67,7 @@ class OrderSeeder extends Seeder
                 'ship_state' => $address?->state,
                 'ship_postal_code' => $address?->postal_code,
                 'ship_country' => $address?->country,
+                'store_id' => $storeId,
             ]);
 
             // Create 1-4 order items per order, building selections from menu item

@@ -2,7 +2,8 @@
 
 namespace App\Livewire\Admin\Settings;
 
-use App\Models\StoreSetting;
+use App\Models\Store;
+use App\Services\StoreService;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -14,73 +15,90 @@ class StoreDetails extends Component
 {
     use WithFileUploads;
     #[Validate('required|string|max:255')]
-    public string $store_name = '';
+    public string $name = '';
+
+    #[Validate('required|string|max:255|unique:stores,slug')]
+    public string $slug = '';
 
     #[Validate('nullable|string|max:500')]
     public ?string $description = null;
 
     #[Validate('required|string|max:255')]
-    public string $address_line1 = '';
+    public ?string $address_line1 = '';
 
     #[Validate('nullable|string|max:255')]
     public ?string $address_line2 = null;
 
     #[Validate('required|string|max:100')]
-    public string $city = '';
+    public ?string $city = '';
 
     #[Validate('required|string|max:100')]
-    public string $state = '';
+    public ?string $state = '';
 
     #[Validate('required|string|max:20')]
-    public string $postal_code = '';
+    public ?string $postal_code = '';
 
     #[Validate('required|string|max:20|regex:/^[0-9+\-\s()]+$/')]
-    public string $phone = '';
+    public ?string $phone = '';
 
     #[Validate('required|email')]
-    public string $email = '';
+    public ?string $email = '';
 
     #[Validate('nullable|image|max:2048')]
     public $logo;
 
     public ?string $logo_path = null;
+    public ?Store $currentStore = null;
 
     public function mount()
     {
-        // Load existing store details from database
-        $settings = StoreSetting::getSettings();
+        // Load current store from StoreService
+        $storeService = app(StoreService::class);
+        $this->currentStore = $storeService->getCurrentStore();
 
-        if ($settings) {
-            $this->store_name = $settings->store_name;
-            $this->description = $settings->description;
-            $this->address_line1 = $settings->address_line1;
-            $this->address_line2 = $settings->address_line2;
-            $this->city = $settings->city;
-            $this->state = $settings->state;
-            $this->postal_code = $settings->postal_code;
-            $this->phone = $settings->phone;
-            $this->email = $settings->email;
-            $this->logo_path = $settings->logo_path;
+        if ($this->currentStore) {
+            $this->name = $this->currentStore->name ?? '';
+            $this->slug = $this->currentStore->slug ?? '';
+            $this->description = $this->currentStore->description;
+            $this->address_line1 = $this->currentStore->address_line1 ?? '';
+            $this->address_line2 = $this->currentStore->address_line2;
+            $this->city = $this->currentStore->city ?? '';
+            $this->state = $this->currentStore->state ?? '';
+            $this->postal_code = $this->currentStore->postal_code ?? '';
+            $this->phone = $this->currentStore->phone ?? '';
+            $this->email = $this->currentStore->email ?? '';
+            $this->logo_path = $this->currentStore->logo_path;
         } else {
-            // Default values if no settings exist
-            $this->store_name = 'Restaurant Admin';
-            $this->description = 'Your local restaurant serving delicious meals';
-            $this->address_line1 = '123 Main Street';
-            $this->address_line2 = 'Suite 100';
-            $this->city = 'Kuala Lumpur';
-            $this->state = 'Wilayah Persekutuan';
-            $this->postal_code = '50000';
-            $this->phone = '+60 12-345-6789';
-            $this->email = 'info@restaurant.com';
+            // Redirect to store selection if no store is selected
+            $this->redirectRoute('admin.stores.select');
         }
     }
 
     public function save()
     {
-        $this->validate();
+        // Update validation to ignore current store's slug
+        $this->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:stores,slug,' . $this->currentStore->id,
+            'description' => 'nullable|string|max:500',
+            'address_line1' => 'required|string|max:255',
+            'address_line2' => 'nullable|string|max:255',
+            'city' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'postal_code' => 'required|string|max:20',
+            'phone' => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/',
+            'email' => 'required|email|max:255',
+            'logo' => 'nullable|image|max:2048',
+        ]);
+
+        if (!$this->currentStore) {
+            session()->flash('error', 'No store selected.');
+            return;
+        }
 
         $data = [
-            'store_name' => $this->store_name,
+            'name' => $this->name,
+            'slug' => $this->slug,
             'description' => $this->description,
             'address_line1' => $this->address_line1,
             'address_line2' => $this->address_line2,
@@ -104,8 +122,8 @@ class StoreDetails extends Component
             $this->logo_path = $logoPath;
         }
 
-        // Save to database
-        StoreSetting::updateSettings($data);
+        // Update the current store
+        $this->currentStore->update($data);
 
         // Clear the logo upload after successful save
         $this->logo = null;

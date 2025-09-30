@@ -4,6 +4,7 @@ namespace App\Livewire\Customer;
 
 use App\Models\Category;
 use App\Models\MenuItem;
+use App\Models\Store;
 use App\Services\CartService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -14,12 +15,18 @@ class Menu extends Component
 {
     public string $search = '';
     public ?int $categoryId = null;
+    public ?Store $store = null;
 
     protected CartService $cartService;
 
     public function boot(CartService $cartService): void
     {
         $this->cartService = $cartService;
+    }
+
+    public function mount(?Store $store = null): void
+    {
+        $this->store = $store;
     }
 
     public array $config = [];
@@ -52,6 +59,15 @@ class Menu extends Component
 
     public function addConfiguredToCart(int $qty = 1): void
     {
+        // Block admins from adding to cart
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            $this->dispatch('flash', ['type' => 'error', 'message' => 'Admins cannot add items to cart. Please use the admin panel.']);
+            $this->dispatch('close-config');
+            $this->config = [];
+            $this->configItemId = null;
+            return;
+        }
+
         if (!Auth::check()) {
             $this->redirectRoute('login');
             return;
@@ -78,6 +94,12 @@ class Menu extends Component
 
     public function addToCart(int $menuItemId): void
     {
+        // Block admins from adding to cart
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            $this->dispatch('flash', ['type' => 'error', 'message' => 'Admins cannot add items to cart. Please use the admin panel.']);
+            return;
+        }
+
         if (!Auth::check()) {
             $this->redirectRoute('login');
             return;
@@ -94,13 +116,22 @@ class Menu extends Component
 
     public function getCategoriesProperty()
     {
-        return Category::where('is_active', true)->where('parent_id', null)->ordered()->get(['id', 'name']);
+        $query = Category::where('is_active', true)->where('parent_id', null);
+
+        if ($this->store) {
+            $query->where('store_id', $this->store->id);
+        }
+
+        return $query->ordered()->get(['id', 'name']);
     }
 
     public function getItemsProperty()
     {
         $query = MenuItem::query()
             ->where('is_active', true)
+            ->when($this->store, function ($q) {
+                return $q->where('store_id', $this->store->id);
+            })
             ->when($this->categoryId, function ($q) {
                 $category = Category::find($this->categoryId);
                 if ($category) {
@@ -217,6 +248,12 @@ class Menu extends Component
 
     public function increment(int $menuItemId, ?int $lineId = null): void
     {
+        // Block admins from cart operations
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            $this->dispatch('flash', ['type' => 'error', 'message' => 'Admins cannot modify cart. Please use the admin panel.']);
+            return;
+        }
+
         if (!Auth::check()) {
             $this->redirectRoute('login');
             return;
@@ -231,6 +268,12 @@ class Menu extends Component
 
     public function decrement(int $menuItemId, ?int $lineId = null): void
     {
+        // Block admins from cart operations
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            $this->dispatch('flash', ['type' => 'error', 'message' => 'Admins cannot modify cart. Please use the admin panel.']);
+            return;
+        }
+
         if (!Auth::check()) {
             $this->redirectRoute('login');
             return;
@@ -245,6 +288,12 @@ class Menu extends Component
 
     public function remove(int $menuItemId, ?int $lineId = null): void
     {
+        // Block admins from cart operations
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            $this->dispatch('flash', ['type' => 'error', 'message' => 'Admins cannot modify cart. Please use the admin panel.']);
+            return;
+        }
+
         if (!Auth::check()) {
             $this->redirectRoute('login');
             return;
@@ -259,6 +308,12 @@ class Menu extends Component
 
     public function clear(): void
     {
+        // Block admins from cart operations
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            $this->dispatch('flash', ['type' => 'error', 'message' => 'Admins cannot modify cart. Please use the admin panel.']);
+            return;
+        }
+
         if (!Auth::check()) {
             $this->redirectRoute('login');
             return;
@@ -269,6 +324,12 @@ class Menu extends Component
 
     public function proceedToCheckout(): void
     {
+        // Block admins from checkout
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            $this->dispatch('flash', ['type' => 'error', 'message' => 'Admins cannot proceed to checkout. Please use the admin panel.']);
+            return;
+        }
+
         if (!Auth::check()) {
             $this->redirectRoute('login');
             return;

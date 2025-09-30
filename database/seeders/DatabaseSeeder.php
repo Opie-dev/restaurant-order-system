@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->call([
+            StoreSeeder::class, // ensure a store exists and attach existing data
             MenuItemSeeder::class,
             OrderSeeder::class,
             OrderItemSeeder::class,

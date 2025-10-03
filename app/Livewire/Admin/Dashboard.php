@@ -5,7 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Order;
 use App\Models\User;
 use App\Models\MenuItem;
-use App\Services\StoreService;
+use App\Services\Admin\StoreService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Carbon\Carbon;

@@ -4,7 +4,7 @@ namespace App\Livewire\Admin\Menu;
 
 use App\Models\Category;
 use App\Models\MenuItem;
-use App\Services\StoreService;
+use App\Services\Admin\StoreService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;

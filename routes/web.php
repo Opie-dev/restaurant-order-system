@@ -19,9 +19,15 @@ use App\Livewire\Admin\Stores\StoreSelector;
 use App\Livewire\Auth\Login as LoginPage;
 use App\Livewire\Auth\Register as RegisterPage;
 use App\Livewire\Customer\Menu as CustomerMenu;
+use App\Livewire\Customer\StoresShowcase;
 use App\Livewire\Customer\Cart as CustomerCart;
 use App\Livewire\Customer\Checkout as CustomerCheckout;
 use App\Livewire\Customer\Addresses as CustomerAddresses;
+use App\Livewire\Subscribe;
+use App\Livewire\Customer\OrderHistory as CustomerOrderHistory;
+use App\Livewire\Admin\Settings\StoreMedia as AdminStoreMedia;
+use App\Livewire\Admin\Settings\StoreAddress as AdminStoreAddress;
+use App\Livewire\Admin\Settings\StoreHours as AdminStoreHours;
 
 Route::get('/', function () {
     return view('welcome');
@@ -78,16 +84,28 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/customers/{customer}/manage', ManageCustomer::class)->name('customers.manage');
 
         Route::get('/settings/store-details', StoreDetails::class)->name('settings.store-details');
+        Route::get('/settings/store-media', AdminStoreMedia::class)->name('settings.store-media');
+        Route::get('/settings/store-address', AdminStoreAddress::class)->name('settings.store-address');
+        Route::get('/settings/store-hours', AdminStoreHours::class)->name('settings.store-hours');
         Route::get('/settings/security', Security::class)->name('settings.security');
     });
 });
 
 // Customer-facing pages (admins can view but not interact)
 Route::get('/menu', CustomerMenu::class)->name('menu');
+Route::get('/stores', StoresShowcase::class)->name('stores.index');
+
 Route::get('/menu/{store:slug}', CustomerMenu::class)->name('menu.store');
-Route::get('/cart', CustomerCart::class)->name('cart');
-Route::get('/checkout', CustomerCheckout::class)->name('checkout');
-Route::get('/addresses', CustomerAddresses::class)->middleware('auth')->name('addresses');
-Route::get('/orders', function () {
-    return view('customer.orders');
-})->middleware('auth')->name('orders');
+
+Route::middleware(['session.store', 'auth'])->group(function () {
+    Route::get('/checkout', CustomerCheckout::class)->name('checkout');
+    Route::get('/orders', CustomerOrderHistory::class)->name('orders');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/cart', CustomerCart::class)->name('cart');
+    Route::get('/addresses', CustomerAddresses::class)->name('addresses');
+});
+
+// Early access subscription page
+Route::get('/subscribe', Subscribe::class)->name('subscribe');

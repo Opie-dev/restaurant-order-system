@@ -25,6 +25,7 @@ class Store extends Model
         'phone',
         'email',
         'logo_path',
+        'cover_path',
         'settings',
         'is_active',
         'admin_id',
@@ -34,6 +35,16 @@ class Store extends Model
         'settings' => 'array',
         'is_active' => 'boolean',
     ];
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    public function getAddressAttribute(): string
+    {
+        return "{$this->address_line1}, {$this->address_line2}, {$this->city}, {$this->state}, {$this->postal_code}";
+    }
 
     public function admin(): BelongsTo
     {
@@ -53,5 +64,101 @@ class Store extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Check if the store is currently open based on opening hours
+     */
+    public function isCurrentlyOpen(): bool
+    {
+        $settings = $this->settings ?? [];
+
+        // If always open is enabled, store is always available
+        if ($settings['always_open'] ?? false) {
+            return true;
+        }
+
+        $openingHours = $settings['opening_hours'] ?? [];
+        if (empty($openingHours)) {
+            return false; // No hours set means closed
+        }
+
+        $currentDay = strtolower(now()->format('l')); // monday, tuesday, etc.
+        $currentTime = now()->format('H:i');
+
+        // Find today's hours
+        $todayHours = null;
+        foreach ($openingHours as $dayHours) {
+            if (strtolower($dayHours['day']) === $currentDay) {
+                $todayHours = $dayHours;
+                break;
+            }
+        }
+
+        // If no hours for today or day is disabled, store is closed
+        if (!$todayHours || !($todayHours['enabled'] ?? false)) {
+            return false;
+        }
+
+        $openTime = $todayHours['open'] ?? null;
+        $closeTime = $todayHours['close'] ?? null;
+
+        if (!$openTime || !$closeTime) {
+            return false;
+        }
+
+        // Check if current time is within opening hours
+        return $currentTime >= $openTime && $currentTime <= $closeTime;
+    }
+
+    /**
+     * Get the next opening time for display
+     */
+    public function getNextOpeningTime(): ?string
+    {
+        $settings = $this->settings ?? [];
+
+        if ($settings['always_open'] ?? false) {
+            return null; // Always open
+        }
+
+        $openingHours = $settings['opening_hours'] ?? [];
+        if (empty($openingHours)) {
+            return null;
+        }
+
+        $currentDay = strtolower(now()->format('l'));
+        $currentTime = now()->format('H:i');
+
+        // Check if store is open today
+        foreach ($openingHours as $dayHours) {
+            if (strtolower($dayHours['day']) === $currentDay && ($dayHours['enabled'] ?? false)) {
+                $openTime = $dayHours['open'] ?? null;
+                if ($openTime && $currentTime < $openTime) {
+                    return "Opens today at {$openTime}";
+                }
+            }
+        }
+
+        // Find next available day
+        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        $currentDayIndex = array_search($currentDay, $days);
+
+        for ($i = 1; $i <= 7; $i++) {
+            $nextDayIndex = ($currentDayIndex + $i) % 7;
+            $nextDay = $days[$nextDayIndex];
+
+            foreach ($openingHours as $dayHours) {
+                if (strtolower($dayHours['day']) === $nextDay && ($dayHours['enabled'] ?? false)) {
+                    $openTime = $dayHours['open'] ?? null;
+                    if ($openTime) {
+                        $dayName = ucfirst($nextDay);
+                        return "Opens {$dayName} at {$openTime}";
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 }

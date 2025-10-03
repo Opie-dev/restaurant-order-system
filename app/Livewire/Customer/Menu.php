@@ -27,6 +27,10 @@ class Menu extends Component
     public function mount(?Store $store = null): void
     {
         $this->store = $store;
+        if ($this->store) {
+            // Persist current store for cart scoping and later visits
+            session(['current_store_id' => $this->store->id]);
+        }
     }
 
     public array $config = [];
@@ -72,6 +76,16 @@ class Menu extends Component
             $this->redirectRoute('login');
             return;
         }
+
+        // Check if store is currently open
+        if ($this->store && !$this->store->isCurrentlyOpen()) {
+            $this->dispatch('flash', ['type' => 'error', 'message' => 'Store is currently closed. Orders cannot be placed at this time.']);
+            $this->dispatch('close-config');
+            $this->config = [];
+            $this->configItemId = null;
+            return;
+        }
+
         $item = MenuItem::findOrFail((int)$this->configItemId);
         $selections = [];
 
@@ -104,6 +118,13 @@ class Menu extends Component
             $this->redirectRoute('login');
             return;
         }
+
+        // Check if store is currently open
+        if ($this->store && !$this->store->isCurrentlyOpen()) {
+            $this->dispatch('flash', ['type' => 'error', 'message' => 'Store is currently closed. Orders cannot be placed at this time.']);
+            return;
+        }
+
         // For items with options/addons, open configurator instead
         $item = MenuItem::findOrFail($menuItemId);
         if (!empty($item->options) || !empty($item->addons)) {

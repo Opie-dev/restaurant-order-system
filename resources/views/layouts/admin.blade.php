@@ -175,6 +175,27 @@
                         </svg>
                         Store Details
                     </a>
+                    <a href="{{ route('admin.settings.store-media') }}" 
+                       class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.settings.store-media') ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <svg class="h-4 w-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h18M3 12h18M3 19h18" />
+                        </svg>
+                        Store Media
+                    </a>
+                    <a href="{{ route('admin.settings.store-address') }}" 
+                       class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.settings.store-address') ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <svg class="h-4 w-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4" />
+                        </svg>
+                        Store Address
+                    </a>
+                    <a href="{{ route('admin.settings.store-hours') }}" 
+                       class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.settings.store-hours') ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <svg class="h-4 w-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Opening Hours
+                    </a>
                 <a href="{{ route('admin.settings.security') }}" 
                    class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.settings.security') ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }}">
                     <svg class="h-4 w-4 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -256,7 +277,7 @@
                         </svg>
                         <span class="hidden lg:block text-sm font-medium text-gray-700">
                             @php
-                                $currentStore = app(\App\Services\StoreService::class)->getCurrentStore();
+                                $currentStore = app(\App\Services\Admin\StoreService::class)->getCurrentStore();
                             @endphp
                             {{ $currentStore?->name ?? 'Select Store' }}
                         </span>
@@ -275,8 +296,8 @@
                          @click.away="open = false"
                          class="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
                         @php
-                            $stores = app(\App\Services\StoreService::class)->getUserStores();
-                            $currentStore = app(\App\Services\StoreService::class)->getCurrentStore();
+                            $stores = app(\App\Services\Admin\StoreService::class)->getUserStores();
+                            $currentStore = app(\App\Services\Admin\StoreService::class)->getCurrentStore();
                         @endphp
                         
                         @if($stores->count() > 0)

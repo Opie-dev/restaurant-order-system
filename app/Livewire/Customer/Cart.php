@@ -6,33 +6,45 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use App\Services\CartService;
 use App\Models\CartItem;
+use App\Models\Store;
+use App\Services\StoreService;
 
 #[Layout('layouts.customer')]
 class Cart extends Component
 {
+    private $cartService;
+    public ?Store $store = null;
+    private StoreService $storeService;
+
+    public function boot(CartService $cartService, StoreService $storeService): void
+    {
+        $this->cartService = $cartService;
+        $this->store = $storeService->getCurrentStore();
+    }
+
     public function increment(int $id): void
     {
-        app(CartService::class)->incrementLine($id);
+        $this->cartService->incrementLine($id);
     }
 
     public function decrement(int $id): void
     {
-        app(CartService::class)->decrementLine($id);
+        $this->cartService->decrementLine($id);
     }
 
     public function remove(int $id): void
     {
-        app(CartService::class)->removeLine($id);
+        $this->cartService->removeLine($id);
     }
 
     public function clear(): void
     {
-        app(CartService::class)->clear();
+        $this->cartService->clear();
     }
 
     public function getLinesProperty(): array
     {
-        $cart = app(CartService::class)->current();
+        $cart = $this->cartService->current();
         return $cart->items()->with('menuItem')->get()->map(function (CartItem $line) {
             return [
                 'id' => $line->id,
@@ -53,6 +65,11 @@ class Cart extends Component
         $tax = round($subtotal * 0.1, 2);
         $total = round($subtotal + $tax, 2);
         return compact('subtotal', 'tax', 'total');
+    }
+
+    public function getStoreProperty(): Store
+    {
+        return $this->storeService->getCurrentStore();
     }
 
     public function render()

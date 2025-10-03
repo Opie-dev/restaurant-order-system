@@ -2,11 +2,12 @@
 
 namespace App\Livewire\Auth;
 
-use App\Services\StoreService;
+use App\Services\Admin\StoreService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use App\Models\StoreSetting;
 
 #[Layout('layouts.auth')]
 class Login extends Component
@@ -18,6 +19,13 @@ class Login extends Component
     public string $password = '';
 
     public bool $remember = false;
+
+    private $storeService;
+
+    public function boot()
+    {
+        $this->storeService = app(StoreService::class);
+    }
 
     public function authenticate(): void
     {
@@ -33,7 +41,7 @@ class Login extends Component
                 request()->session()->regenerateToken();
 
                 // Get store settings for the message
-                $storeSettings = \App\Models\StoreSetting::getSettings();
+                $storeSettings = StoreSetting::getSettings();
                 $storeName = $storeSettings?->store_name ?? 'our store';
                 $storePhone = $storeSettings?->phone ?? 'our support team';
 
@@ -44,17 +52,20 @@ class Login extends Component
             request()->session()->regenerate();
 
             if ($user->role === 'admin') {
-                $storeService = app(StoreService::class);
-
                 // Check if user has stores
-                if (!$storeService->userHasStores()) {
+                if (!$this->storeService->userHasStores()) {
                     $this->redirect(route('admin.stores.create'), navigate: true);
                 } else {
                     // Always redirect to store selection after login
                     $this->redirect(route('admin.stores.select'), navigate: true);
                 }
             } else {
-                $this->redirect(route('menu'), navigate: true);
+                $storeId = session('store');
+                if ($storeId) {
+                    $this->redirect(route('menu', ['store' => $storeId]), navigate: true);
+                } else {
+                    $this->redirect(route('stores.index'), navigate: true);
+                }
             }
             return;
         }

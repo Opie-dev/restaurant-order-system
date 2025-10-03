@@ -29,23 +29,17 @@ class StoreSeeder extends Seeder
             ]);
         }
 
-        // Create a default store with granular address fields
-        $store = Store::firstOrCreate(
-            ['slug' => 'main-restaurant'],
-            [
+        // Create a default store via factory for the admin
+        $store = Store::where('slug', 'main-restaurant')->first();
+        if (!$store) {
+            $store = Store::factory()->create([
                 'name' => 'Main Restaurant',
+                'slug' => 'main-restaurant',
                 'description' => 'Our main restaurant location',
-                'address_line1' => '123 Main Street',
-                'address_line2' => null,
-                'city' => 'Sample City',
-                'state' => 'Sample State',
-                'postal_code' => '12345',
-                'phone' => '+1 (555) 123-4567',
-                'email' => 'info@mainrestaurant.com',
                 'admin_id' => $admin->id,
                 'is_active' => true,
-            ]
-        );
+            ]);
+        }
 
         // Update existing categories to belong to this store
         Category::whereNull('store_id')->update(['store_id' => $store->id]);

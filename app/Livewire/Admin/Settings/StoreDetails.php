@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin\Settings;
 
 use App\Models\Store;
-use App\Services\StoreService;
+use App\Services\Admin\StoreService;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -48,13 +48,27 @@ class StoreDetails extends Component
     public $logo;
 
     public ?string $logo_path = null;
+    #[Validate('nullable|image|max:4096')]
+    public $cover;
+    public ?string $cover_path = null;
     public ?Store $currentStore = null;
+    private $storeService;
+
+    public bool $always_open = false;
+    /**
+     * @var array<int, array{day:string,enabled:bool,open:string|null,close:string|null}>
+     */
+    public array $hours = [];
+
+    public function boot()
+    {
+        $this->storeService = app(StoreService::class);
+    }
 
     public function mount()
     {
         // Load current store from StoreService
-        $storeService = app(StoreService::class);
-        $this->currentStore = $storeService->getCurrentStore();
+        $this->currentStore = $this->storeService->getCurrentStore();
 
         if ($this->currentStore) {
             $this->name = $this->currentStore->name ?? '';
@@ -68,15 +82,58 @@ class StoreDetails extends Component
             $this->phone = $this->currentStore->phone ?? '';
             $this->email = $this->currentStore->email ?? '';
             $this->logo_path = $this->currentStore->logo_path;
+            $this->cover_path = $this->currentStore->cover_path;
+
+            $settings = $this->currentStore->settings ?? [];
+            $this->always_open = (bool)($settings['always_open'] ?? false);
+            $this->hours = $this->loadOpeningHoursFromSettings($settings['opening_hours'] ?? null);
         } else {
             // Redirect to store selection if no store is selected
             $this->redirectRoute('admin.stores.select');
         }
     }
 
-    public function save()
+    /**
+     * @param mixed $saved
+     * @return array<int, array{day:string,enabled:bool,open:string|null,close:string|null}>
+     */
+    private function loadOpeningHoursFromSettings($saved): array
     {
-        // Update validation to ignore current store's slug
+        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        $defaults = [];
+        foreach ($days as $d) {
+            $defaults[] = [
+                'day' => ucfirst($d),
+                'enabled' => false,
+                'open' => '08:00',
+                'close' => '23:00',
+            ];
+        }
+
+        if (!is_array($saved)) {
+            return $defaults;
+        }
+
+        $out = [];
+        foreach ($defaults as $index => $row) {
+            $savedRow = $saved[$index] ?? null;
+            if (is_array($savedRow)) {
+                $out[] = [
+                    'day' => $row['day'],
+                    'enabled' => (bool)($savedRow['enabled'] ?? false),
+                    'open' => $savedRow['open'] ?? $row['open'],
+                    'close' => $savedRow['close'] ?? $row['close'],
+                ];
+            } else {
+                $out[] = $row;
+            }
+        }
+        return $out;
+    }
+
+    public function saveDetails()
+    {
+        // Validate details only (no media)
         $this->validate([
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:stores,slug,' . $this->currentStore->id,
@@ -88,7 +145,6 @@ class StoreDetails extends Component
             'postal_code' => 'required|string|max:20',
             'phone' => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/',
             'email' => 'required|email|max:255',
-            'logo' => 'nullable|image|max:2048',
         ]);
 
         if (!$this->currentStore) {
@@ -109,26 +165,99 @@ class StoreDetails extends Component
             'email' => $this->email,
         ];
 
+        // Update the current store details
+        $this->currentStore->update($data);
+        session()->flash('success', 'Store details updated successfully.');
+    }
+
+    public function saveMedia(): void
+    {
+        $this->validate([
+            'logo' => 'nullable|image|max:2048',
+            'cover' => 'nullable|image|max:4096',
+        ]);
+
+        if (!$this->currentStore) {
+            session()->flash('error', 'No store selected.');
+            return;
+        }
+
+        $data = [];
+
         // Handle logo upload
         if ($this->logo) {
-            // Delete old logo if exists
             if ($this->logo_path && Storage::disk('public')->exists($this->logo_path)) {
                 Storage::disk('public')->delete($this->logo_path);
             }
-
-            // Store new logo
             $logoPath = $this->logo->store('logos', 'public');
             $data['logo_path'] = $logoPath;
             $this->logo_path = $logoPath;
         }
 
-        // Update the current store
-        $this->currentStore->update($data);
+        // Handle cover upload
+        if ($this->cover) {
+            if ($this->cover_path && Storage::disk('public')->exists($this->cover_path)) {
+                Storage::disk('public')->delete($this->cover_path);
+            }
+            $coverPath = $this->cover->store('covers', 'public');
+            $data['cover_path'] = $coverPath;
+            $this->cover_path = $coverPath;
+        }
 
-        // Clear the logo upload after successful save
+        if (!empty($data)) {
+            $this->currentStore->update($data);
+        }
+
+        // Clear uploads after successful save
         $this->logo = null;
+        $this->cover = null;
 
-        session()->flash('success', 'Store details updated successfully.');
+        session()->flash('success', 'Store media updated successfully.');
+        $this->dispatch('media-saved');
+    }
+
+    public function saveHours(): void
+    {
+        if (!$this->currentStore) {
+            session()->flash('error', 'No store selected.');
+            return;
+        }
+
+        // Validate structure
+        foreach ($this->hours as $i => $row) {
+            $enabled = (bool)($row['enabled'] ?? false);
+            $open = $row['open'] ?? null;
+            $close = $row['close'] ?? null;
+            if ($enabled) {
+                if (!$open || !$close) {
+                    $this->addError("hours.$i", 'Opening and closing time are required for enabled days.');
+                    return;
+                }
+                // Simple HH:MM pattern check
+                if (!preg_match('/^\d{2}:\d{2}$/', $open) || !preg_match('/^\d{2}:\d{2}$/', $close)) {
+                    $this->addError("hours.$i", 'Time must be in HH:MM format.');
+                    return;
+                }
+                if (strtotime($open) >= strtotime($close)) {
+                    $this->addError("hours.$i", 'Closing time must be after opening time.');
+                    return;
+                }
+            }
+        }
+
+        $settings = $this->currentStore->settings ?? [];
+        $settings['always_open'] = $this->always_open;
+        $settings['opening_hours'] = $this->hours;
+        $this->currentStore->update(['settings' => $settings]);
+
+        session()->flash('success', 'Opening hours updated successfully.');
+        $this->dispatch('hours-saved');
+    }
+
+    public function updatedAlwaysOpen($value): void
+    {
+        // Don't modify the hours data when toggling always_open
+        // Just keep the current day data intact
     }
 
     public function render()
@@ -141,14 +270,7 @@ class StoreDetails extends Component
                 ['label' => 'Settings', 'url' => '#'],
                 ['label' => 'Store Details']
             ],
-            'actionButtons' => [
-                [
-                    'type' => 'button',
-                    'label' => 'Save Changes',
-                    'onclick' => '$wire.save()',
-                    'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>'
-                ]
-            ]
+            'actionButtons' => []
         ]);
     }
 }

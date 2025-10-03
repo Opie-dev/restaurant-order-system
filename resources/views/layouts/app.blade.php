@@ -25,7 +25,7 @@
                                 @click="open = !open"
                                 class="flex items-center gap-1 hover:underline"
                             >
-                                <span x-text="'{{ app(\App\Services\StoreService::class)->getCurrentStore()?->name ?? 'Select Store' }}'"></span>
+                                <span x-text="'{{ app(\App\Services\Admin\StoreService::class)->getCurrentStore()?->name ?? 'Select Store' }}'"></span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
@@ -38,8 +38,8 @@
                                 class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200"
                             >
                                 @php
-                                    $stores = app(\App\Services\StoreService::class)->getUserStores();
-                                    $currentStore = app(\App\Services\StoreService::class)->getCurrentStore();
+                                    $stores = app(\App\Services\Admin\StoreService::class)->getUserStores();
+                                    $currentStore = app(\App\Services\Admin\StoreService::class)->getCurrentStore();
                                 @endphp
                                 
                                 @foreach($stores as $store)
@@ -50,14 +50,6 @@
                                         {{ $store->name }}
                                     </a>
                                 @endforeach
-                                
-                                <div class="border-t border-gray-200 my-1"></div>
-                                <a 
-                                    href="{{ route('admin.stores.manage') }}"
-                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                >
-                                    Manage Stores
-                                </a>
                             </div>
                         </div>
                     @endif
@@ -69,6 +61,7 @@
                 @else
                     <a href="{{ route('login') }}" class="hover:underline">Login</a>
                     <a href="{{ route('register') }}" class="hover:underline">Register</a>
+                    <a href="{{ route('subscribe') }}" class="hover:underline">Subscribe</a>
                 @endauth
             </nav>
         </div>

@@ -4,8 +4,86 @@
         <!-- Left Panel - Menu -->
         <div class="flex-1 overflow-y-auto lg:mr-96">
             <div class="">
-            <!-- Store Header -->
-            @if($store)
+            <!-- Store Cover Image -->
+            @if($store && $store->cover_path)
+                <div class="relative h-64 lg:h-80 overflow-hidden rounded-b-lg">
+
+                    <div class="inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent h-full w-full">
+                        <img src="{{ \Illuminate\Support\Facades\Storage::url($store->cover_path) }}" 
+                        alt="{{ $store->name }} cover" 
+                        class="w-full h-full object-cover">
+                    </div>
+
+                    <!-- Navigation (top right) -->
+                    <div class="absolute top-4 right-4">
+                        <nav class="flex items-center space-x-4">
+                            @auth
+                                <a href="{{ route('cart') }}" class="flex relative items-center gap-2 px-3 py-2 rounded-lg bg-dark bg-opacity-20 text-white hover:bg-opacity-30 transition-colors backdrop-blur-sm">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                                    </svg>
+                                    <span class="text-sm font-medium">Cart</span>
+                                    @if($this->cartCount > 0)
+                                        <span class="absolute -top-2 -right-3 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold leading-none text-white bg-purple-600 rounded-full">{{ $this->cartCount > 99 ? '99+' : $this->cartCount }}</span>
+                                    @endif
+                                </a>
+
+                                <a href="{{ route('logout') }}" class="flex items-center gap-2 text-white  hover:bg-opacity-20 px-3 py-2 rounded-lg transition-colors font-medium backdrop-blur-sm">
+                                    Logout
+                                </a>
+                            @else
+                                <a href="{{ route('login') }}" class="flex items-center gap-2 text-white hover:bg-dark hover:bg-opacity-20 px-3 py-2 rounded-lg transition-colors font-medium backdrop-blur-sm">
+                                    Login
+                                </a>
+                                <a href="{{ route('register') }}" class="flex items-center gap-2 text-white hover:bg-dark hover:bg-opacity-20 px-3 py-2 rounded-lg transition-colors font-medium backdrop-blur-sm">
+                                    Register
+                                </a>
+                            @endif
+                        </nav>
+                    </div>
+                    
+                    <div class="absolute bottom-0 left-0 right-0 p-6 text-white" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6), 0 0 16px rgba(0,0,0,0.4);">
+                            <div class="flex items-center space-x-4 mb-3">
+                                @if($store->logo_path)
+                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($store->logo_path) }}" alt="{{ $store->name }}" class="hidden sm:block h-16 w-16 object-contain rounded-lg bg-white bg-opacity-90 p-2">
+                                @else
+                                    <div class="hidden sm:block h-16 w-16 bg-white bg-opacity-90 rounded-lg flex items-center justify-center">
+                                        <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 8h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                        </svg>
+                                    </div>
+                                @endif
+                            <div>
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-1">
+                                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-white">{{ $store->name }}</h1>
+                                    @if($store->isCurrentlyOpen())
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white self-start">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            Open Now
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500 text-white self-start">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8 7l7 7" clip-rule="evenodd"></path>
+                                            </svg>
+                                            Closed
+                                        </span>
+                                    @endif
+                                </div>
+                                <p class="text-gray-100 text-sm">{{ $store->address }}</p>
+                                @if(!$store->isCurrentlyOpen() && $store->getNextOpeningTime())
+                                    <p class="text-gray-300 text-xs mt-1">{{ $store->getNextOpeningTime() }}</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Store Header (when no cover image or for navigation) -->
+            @if($store && !$store->cover_path)
                 <div class="mb-6 p-4 border-b border-gray-200">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
@@ -19,9 +97,29 @@
                                 </div>
                             @endif
                             <div>
-                                <h1 class="text-2xl font-bold text-gray-900">{{ $store->name }}</h1>
+                                <div class="flex items-center gap-3">
+                                    <h1 class="text-2xl font-bold text-gray-900">{{ $store->name }}</h1>
+                                    @if($store->isCurrentlyOpen())
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            Open
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            Closed
+                                        </span>
+                                    @endif
+                                </div>
                                 @if($store->description)
                                     <p class="text-gray-600 text-sm">{{ $store->description }}</p>
+                                @endif
+                                @if(!$store->isCurrentlyOpen() && $store->getNextOpeningTime())
+                                    <p class="text-gray-500 text-xs mt-1">{{ $store->getNextOpeningTime() }}</p>
                                 @endif
                             </div>
                         </div>
@@ -78,18 +176,58 @@
                                                 My Addresses
                                             </div>
                                         </a>
+                                        <form method="POST" action="{{ route('logout') }}">
+                                            @csrf
+                                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                                <div class="flex items-center gap-2">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                                    </svg>
+                                                    Logout
+                                                </div>
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
-                            @else
+                            @elseif (auth()->user()?->role === 'admin')
                                 
                                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium px-3 py-2 rounded-lg">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    Admin Panel
+                                    Dashboard
                                 </a>
+                            @else
+                            <div class="flex items-center space-x-4">
+                                <a href="{{ route('login') }}" class="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium px-3 py-2 rounded-lg">
+                                    Login
+                                </a>
+                                <a href="{{ route('register') }}" class="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium px-3 py-2 rounded-lg">
+                                    Register
+                                </a>
+                            </div>
                             @endif
                         </nav>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Store Closed Notice -->
+            @if($store && !$store->isCurrentlyOpen())
+                <div class="mx-4 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <div>
+                            <h3 class="text-sm font-medium text-red-800">Store is currently closed</h3>
+                            <p class="text-sm text-red-600 mt-1">
+                                You can browse the menu, but ordering is not available right now.
+                                @if($store->getNextOpeningTime())
+                                    {{ $store->getNextOpeningTime() }}
+                                @endif
+                            </p>
+                        </div>
                     </div>
                 </div>
             @endif
@@ -98,7 +236,7 @@
             @php 
                 $rootCategories = $this->categories->whereNull('parent_id');
             @endphp
-            <div id="categories" class="flex items-center gap-2 lg:gap-3 mb-4 lg:mb-6 overflow-x-auto px-4">
+            <div id="categories" class="flex items-center gap-2 lg:gap-3 py-4 lg:py-6 overflow-x-auto px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
                     <button type="button" 
                         wire:click="$set('categoryId', null)" 
                         class="px-3 lg:px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer hover:bg-purple-600 hover:text-white whitespace-nowrap {{ !$categoryId ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
@@ -114,7 +252,7 @@
                 </div>
 
             <!-- Search Bar -->
-            <div id="search" class="relative mb-4 lg:mb-6 px-4">
+            <div id="search" class="relative mb-4 lg:mb-6 px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
                 <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
                     <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -134,7 +272,7 @@
                 @endphp
 
                 @forelse($itemsByCategory as $categoryName => $items)
-                    <div class="mb-6 lg:mb-8 px-4">
+                    <div class="mb-6 lg:mb-8 px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
                         <h2 class="text-lg lg:text-xl font-semibold text-gray-800 mb-3 lg:mb-4">{{ $categoryName }}</h2>
                         <!-- Responsive Grid: 1 item on mobile, 2 on tablet, 3 on desktop -->
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
@@ -147,7 +285,12 @@
                                     <!-- Item Image -->
                                     <div class="aspect-video bg-gray-100 overflow-hidden relative {{ (int)($item->stock ?? 0) <= 0 ? 'grayscale' : '' }}">
                                         @if($src)
-                                            <img src="{{ $src }}" class="w-full h-full object-cover" alt="{{ $item->name }}" />
+                                            <img 
+                                                src="{{ $src }}" 
+                                                alt="{{ $item->name }}" 
+                                                class="w-full h-full object-cover object-center max-h-48 sm:max-h-56 md:max-h-64 lg:max-h-72 xl:max-h-80 transition-all duration-200"
+                                                style="aspect-ratio: 16/9;"
+                                            />
                                         @else
                                             <div class="w-full h-full grid place-content-center text-gray-400">
                                                 <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,26 +322,35 @@
 
                                         <!-- Add Button -->
                                         <div class="w-full">
-                                            @auth
-                                                <button wire:click="addToCart({{ $item->id }})" 
-                                                    class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-50 cursor-not-allowed' : '' }}" 
-                                                    @disabled(($item->stock ?? 0) <= 0)>
-                                                    @if((int)($item->stock ?? 0) > 0)
+                                            @if($store && !$store->isCurrentlyOpen())
+                                                <button disabled class="w-full px-4 py-2 bg-gray-400 text-white rounded-lg text-sm font-medium cursor-not-allowed flex items-center justify-center gap-2">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
+                                                    </svg>
+                                                    Store Closed
+                                                </button>
+                                            @else
+                                                @auth
+                                                    <button wire:click="addToCart({{ $item->id }})" 
+                                                        class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-50 cursor-not-allowed' : '' }}" 
+                                                        @disabled(($item->stock ?? 0) <= 0)>
+                                                        @if((int)($item->stock ?? 0) > 0)
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                            </svg>
+                                                        @endif
+                                                        {{ (int)($item->stock ?? 0) <= 0 ? 'Out of stock' : 'Add to Order' }}
+                                                    </button>
+                                                @else
+                                                    <a href="{{ route('login') }}" 
+                                                        class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' }}">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                                         </svg>
-                                                    @endif
-                                                    {{ (int)($item->stock ?? 0) <= 0 ? 'Out of stock' : 'Add to Order' }}
-                                                </button>
-                                            @else
-                                                <a href="{{ route('login') }}" 
-                                                    class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' }}">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                                    </svg>
-                                                    {{ (int)($item->stock ?? 0) <= 0 ? 'Out of stock' : 'Add to Order' }}
-                                                </a>
-                                            @endauth
+                                                        {{ (int)($item->stock ?? 0) <= 0 ? 'Out of stock' : 'Add to Order' }}
+                                                    </a>
+                                                @endauth
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -220,10 +372,12 @@
                         <div class="text-gray-500 text-sm">
                             &copy; {{ date('Y') }} Gourmet Express. All rights reserved.
                         </div>
-                        <div class="flex items-center gap-4 text-sm">
-                            <a href="{{ route('cart') }}" class="text-purple-600 hover:underline">Cart</a>
-                            <a href="{{ route('orders') }}" class="text-purple-600 hover:underline">My Orders</a>
-                        </div>
+                        @if(auth()->check() && auth()->user()->role !== 'admin')
+                            <div class="flex items-center gap-4 text-sm">
+                                <a href="{{ route('cart') }}" class="text-purple-600 hover:underline">Cart</a>
+                                <a href="{{ route('orders') }}" class="text-purple-600 hover:underline">My Orders</a>
+                            </div>
+                        @endif
                     </div>
                 </footer>
             </div>
@@ -258,7 +412,7 @@
             <div id="cart" class="flex-1 overflow-y-auto p-4 space-y-4">
                 @if($this->cartCount > 0)
                     @foreach($this->cartLines as $line)
-                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 relative">
+                        <div class="bg-white border border-gray-200 rounded-lg p-3 relative">
                             <button wire:click="remove({{ $line['item']->id }}, {{ $line['id'] }})" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-500 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </button>

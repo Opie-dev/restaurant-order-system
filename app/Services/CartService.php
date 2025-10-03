@@ -12,15 +12,22 @@ class CartService
 {
     public function current(): Cart
     {
+        $storeId = session('current_store_id');
         if (Auth::check()) {
-            return Cart::firstOrCreate(['user_id' => Auth::id()]);
+            return Cart::firstOrCreate([
+                'user_id' => Auth::id(),
+                'store_id' => $storeId,
+            ]);
         }
         $token = session()->get('guest_cart_token');
         if (!$token) {
             $token = Str::uuid()->toString();
             session()->put('guest_cart_token', $token);
         }
-        return Cart::firstOrCreate(['guest_token' => $token]);
+        return Cart::firstOrCreate([
+            'guest_token' => $token,
+            'store_id' => $storeId,
+        ]);
     }
 
     public function add(int $menuItemId, int $qty = 1, array $selections = []): void
@@ -186,7 +193,9 @@ class CartService
 
     public function getTotals(Cart $cart): array
     {
-        $subtotal = $cart->items()->sum(\DB::raw('qty * unit_price'));
+        $subtotal = (float) ($cart->items()
+            ->selectRaw('SUM(qty * unit_price) as subtotal')
+            ->value('subtotal') ?? 0);
         $tax = $subtotal * 0.08; // 8% tax
         $total = $subtotal + $tax;
 

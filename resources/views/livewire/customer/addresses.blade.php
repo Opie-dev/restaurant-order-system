@@ -1,4 +1,4 @@
-<div class="max-w-5xl mx-auto px-6 py-8">
+<div class="max-w-7xl mx-auto px-6 py-8">
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900">My Addresses</h1>
         <p class="text-gray-600">Manage your delivery addresses</p>

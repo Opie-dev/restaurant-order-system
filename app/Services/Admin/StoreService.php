@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Admin;
 
 use App\Models\Store;
 use Illuminate\Support\Facades\Auth;
@@ -13,13 +13,19 @@ class StoreService
      */
     public function getCurrentStore(): ?Store
     {
+        $user = Auth::user();
+
+        if (!$user || $user->role !== 'admin') {
+            return null;
+        }
+
         $storeId = Session::get('current_store_id');
 
         if (!$storeId) {
             return null;
         }
 
-        return Store::find($storeId);
+        return $user->stores()->find($storeId);
     }
 
     /**

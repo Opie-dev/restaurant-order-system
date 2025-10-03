@@ -22,9 +22,9 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-4">
+                        <a href="{{ route('stores.index') }}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Stores</a>
                         @if (Route::has('login'))
                             @auth
-                                <a href="{{ route('menu') }}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Menu</a>
                                 <a href="{{ route('orders') }}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">My Orders</a>
                                 @if(auth()->user()->role === 'admin')
                                     <a href="{{ route('admin.dashboard') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700">Admin Panel</a>

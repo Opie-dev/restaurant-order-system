@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin\Stores;
 
 use App\Models\Store;
-use App\Services\StoreService;
+use App\Services\Admin\StoreService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;

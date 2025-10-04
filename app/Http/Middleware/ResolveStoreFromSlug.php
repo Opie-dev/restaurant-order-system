@@ -5,8 +5,9 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\Store;
 
-class EnsureSessionStore
+class ResolveStoreFromSlug
 {
     /**
      * Handle an incoming request.
@@ -15,13 +16,14 @@ class EnsureSessionStore
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Allow menu routes to work without session store (they set it themselves)
-        if ($request->routeIs('menu.store.index') && !session('current_store_id')) {
-            return $next($request);
-        }
+        // Check if the route has a store parameter
+        if ($request->route('store:slug')) {
+            $store = Store::where('slug', $request->route('store:slug'))->first();
+            if (!$store) {
+                return abort(404);
+            }
 
-        if (!session('current_store_id')) {
-            return redirect()->route('stores.index');
+            $request->merge(['store' => $store]);
         }
 
         return $next($request);

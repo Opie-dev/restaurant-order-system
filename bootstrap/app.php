@@ -26,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'store.selected' => \App\Http\Middleware\EnsureStoreSelected::class,
             'customer.only' => \App\Http\Middleware\EnsureCustomerRole::class,
-            'session.store' => \App\Http\Middleware\EnsureSessionStore::class,
+            'resolve.store' => \App\Http\Middleware\ResolveStoreFromSlug::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

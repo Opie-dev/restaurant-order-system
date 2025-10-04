@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use App\Models\Store;
+use App\Services\StoreService;
+use Illuminate\Http\Request;
 
 #[Layout('layouts.customer')]
 class Addresses extends Component
@@ -41,6 +44,12 @@ class Addresses extends Component
     public string $country = 'MY';
 
     public bool $is_default = false;
+    public ?Store $store = null;
+
+    public function boot(Request $request)
+    {
+        $this->store = $request->store;
+    }
 
     public function edit(int $id): void
     {

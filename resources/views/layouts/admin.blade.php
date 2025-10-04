@@ -63,11 +63,11 @@
         <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200">
             <div class="flex items-center space-x-3">
                 @php
-                    $storeSettings = \App\Models\StoreSetting::getSettings();
-                    $storeName = $storeSettings?->store_name ?? 'Restaurant Admin';
-                    $storeLogo = $storeSettings?->logo_path;
+                    $store = app(\App\Services\Admin\StoreService::class)->getCurrentStore();
+                    $storeName = $store?->name ?? 'Restaurant Admin';
+                    $storeLogo = $store?->logo_path;
                 @endphp
-                
+
                 @if($storeLogo)
                     <div class="flex-shrink-0">
                         <img src="{{ Storage::url($storeLogo) }}" alt="{{ $storeName }}" class="h-8 w-8 object-contain rounded">

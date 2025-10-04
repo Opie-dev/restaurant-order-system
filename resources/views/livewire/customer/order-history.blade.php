@@ -1,9 +1,10 @@
-<div class="max-w-7xl mx-auto px-6 py-8">
-    <div class="mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900">Order History</h1>
-            <p class="text-gray-600 mt-2">View all your past orders</p>
-        </div>
+<div class="mx-auto px-6 py-8">
+    <div class="fixed top-0 left-0 right-0 z-10 overflow-y-auto">
+        @include('livewire.customer._baner')
+    </div>
+    <div class="mt-[16rem] lg:mt-[20rem]">
+        <h1 class="text-3xl font-bold text-gray-900">Order History</h1>
+        <p class="text-gray-600 mt-2">View all your past orders</p>
     </div>
 
     <!-- Filters: separate container -->
@@ -214,7 +215,7 @@
             </div>
             <h3 class="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
             <p class="text-gray-600 mb-6">You haven't placed any orders yet. Start by browsing our menu!</p>
-            <a href="{{ route('menu') }}" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors">
+            <a href="{{ route('menu.store.index', ['store' => $store->slug]) }}" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>

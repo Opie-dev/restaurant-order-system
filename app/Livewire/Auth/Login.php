@@ -2,12 +2,15 @@
 
 namespace App\Livewire\Auth;
 
-use App\Services\Admin\StoreService;
+use App\Models\Store;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
-use App\Models\StoreSetting;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 
 #[Layout('layouts.auth')]
 class Login extends Component
@@ -19,12 +22,11 @@ class Login extends Component
     public string $password = '';
 
     public bool $remember = false;
+    public ?Store $store = null;
 
-    private $storeService;
-
-    public function boot()
+    public function mount(Request $request)
     {
-        $this->storeService = app(StoreService::class);
+        $this->store = $request->store;
     }
 
     public function authenticate(): void
@@ -40,37 +42,32 @@ class Login extends Component
                 request()->session()->invalidate();
                 request()->session()->regenerateToken();
 
-                // Get store settings for the message
-                $storeSettings = StoreSetting::getSettings();
-                $storeName = $storeSettings?->store_name ?? 'our store';
-                $storePhone = $storeSettings?->phone ?? 'our support team';
-
-                $this->addError('email', "Your account has been disabled by {$storeName}. Please contact {$storePhone} for support.");
+                $this->addError('email', "Your account has been disabled.");
                 return;
             }
 
             request()->session()->regenerate();
 
             if ($user->role === 'admin') {
-                // Check if user has stores
-                if (!$this->storeService->userHasStores()) {
-                    $this->redirect(route('admin.stores.create'), navigate: true);
-                } else {
-                    // Always redirect to store selection after login
-                    $this->redirect(route('admin.stores.select'), navigate: true);
-                }
+                $this->redirect(route('admin.stores.select'), navigate: true);
             } else {
-                $storeId = session('store');
-                if ($storeId) {
-                    $this->redirect(route('menu', ['store' => $storeId]), navigate: true);
-                } else {
-                    $this->redirect(route('stores.index'), navigate: true);
-                }
+                $this->redirect(route('menu.store.index', ['store' => $this->store->slug]), navigate: true);
             }
-            return;
-        }
+        } else {
 
-        $this->addError('email', 'Invalid credentials.');
+            $randomSixString = Str::random(6);
+
+            $user = User::create([
+                'name' => $this->email,
+                'email' => $this->email,
+                'password' => Hash::make($randomSixString),
+                'role' => 'customer',
+            ]);
+
+            Auth::login($user);
+            request()->session()->regenerate();
+            $this->redirect(route('menu.store.index', ['store' => $this->store->slug]), navigate: true);
+        }
     }
 
     public function render()

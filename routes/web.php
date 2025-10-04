@@ -28,15 +28,11 @@ use App\Livewire\Customer\OrderHistory as CustomerOrderHistory;
 use App\Livewire\Admin\Settings\StoreMedia as AdminStoreMedia;
 use App\Livewire\Admin\Settings\StoreAddress as AdminStoreAddress;
 use App\Livewire\Admin\Settings\StoreHours as AdminStoreHours;
+use App\Livewire\Welcome as WelcomePage;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', WelcomePage::class)->name('home');
 
-Route::middleware('guest')->group(function (): void {
-    Route::get('/login', LoginPage::class)->name('login');
-    Route::get('/register', RegisterPage::class)->name('register');
-});
+
 
 Route::post('/logout', function () {
     \Illuminate\Support\Facades\Auth::logout();
@@ -91,21 +87,20 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     });
 });
 
-// Customer-facing pages (admins can view but not interact)
-Route::get('/menu', CustomerMenu::class)->name('menu');
-Route::get('/stores', StoresShowcase::class)->name('stores.index');
-
-Route::get('/menu/{store:slug}', CustomerMenu::class)->name('menu.store');
-
-Route::middleware(['session.store', 'auth'])->group(function () {
+Route::group([
+    'domain' => config('app.url'),
+    'prefix' => 'menu/{store:slug}',
+    'middleware' => 'resolve.store',
+    'as' => 'menu.store.'
+], function (): void {
+    Route::get('/', CustomerMenu::class)->name('index');
     Route::get('/checkout', CustomerCheckout::class)->name('checkout');
     Route::get('/orders', CustomerOrderHistory::class)->name('orders');
-});
-
-Route::middleware('auth')->group(function () {
     Route::get('/cart', CustomerCart::class)->name('cart');
     Route::get('/addresses', CustomerAddresses::class)->name('addresses');
+    Route::get('/login', LoginPage::class)->name('login');
 });
 
 // Early access subscription page
 Route::get('/subscribe', Subscribe::class)->name('subscribe');
+Route::get('/stores', StoresShowcase::class)->name('stores.index');

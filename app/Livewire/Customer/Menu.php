@@ -9,6 +9,7 @@ use App\Services\CartService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Illuminate\Http\Request;
 
 #[Layout('layouts.customer')]
 class Menu extends Component
@@ -19,18 +20,14 @@ class Menu extends Component
 
     protected CartService $cartService;
 
-    public function boot(CartService $cartService): void
+    public function boot(CartService $cartService)
     {
         $this->cartService = $cartService;
     }
 
-    public function mount(?Store $store = null): void
+    public function mount(Request $request)
     {
-        $this->store = $store;
-        if ($this->store) {
-            // Persist current store for cart scoping and later visits
-            session(['current_store_id' => $this->store->id]);
-        }
+        $this->store = $request->store;
     }
 
     public array $config = [];

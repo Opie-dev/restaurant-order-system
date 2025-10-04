@@ -10,7 +10,7 @@
         @else
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($stores as $store)
-                    <a href="{{ route('menu.store', $store->slug) }}" class="group block bg-white rounded-xl border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all overflow-hidden">
+                    <a href="{{ route('menu.store.index', ['store' => $store->slug] ) }}" class="group block bg-white rounded-xl border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all overflow-hidden">
                         <!-- Store Cover Image -->
                         @if($store->cover_path)
                             <div class="relative h-48 overflow-hidden">

@@ -25,13 +25,12 @@
                         <a href="{{ route('stores.index') }}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Stores</a>
                         @if (Route::has('login'))
                             @auth
-                                <a href="{{ route('orders') }}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">My Orders</a>
+                                <a href="{{ route('menu.store.orders') }}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">My Orders</a>
                                 @if(auth()->user()->role === 'admin')
                                     <a href="{{ route('admin.dashboard') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700">Admin Panel</a>
                                 @endif
                             @else
-                                <a href="{{ route('login') }}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Log in</a>
-                                <a href="{{ route('register') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700">Register</a>
+                                <a href="{{ route('menu.store.login', ['store' => $store->slug]) }}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Log in</a>
                             @endauth
                         @endif
                     </div>
@@ -51,14 +50,11 @@
                     </p>
                     <div class="space-x-4">
                         @auth
-                            <a href="{{ route('menu') }}" class="bg-white text-indigo-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors">
+                            <a href="{{ route('menu.store.index', ['store' => $store->slug]) }}" class="bg-white text-indigo-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors">
                                 Mulakan Pesanan
                             </a>
                         @else
-                            <a href="{{ route('register') }}" class="bg-white text-indigo-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors">
-                                Daftar Percuma
-                            </a>
-                            <a href="{{ route('login') }}" class="border-2 border-white text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-white hover:text-indigo-600 transition-colors">
+                            <a href="{{ route('menu.store.login', ['store' => $store->slug]) }}" class="border-2 border-white text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-white hover:text-indigo-600 transition-colors">
                                 Log Masuk
                             </a>
                         @endauth

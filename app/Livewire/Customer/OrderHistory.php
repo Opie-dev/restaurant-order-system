@@ -6,7 +6,7 @@ use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use App\Models\Store;
-use App\Services\StoreService;
+use Illuminate\Http\Request;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.customer')]
@@ -21,21 +21,14 @@ class OrderHistory extends Component
         'search' => ['except' => ''],
     ];
 
+    public function mount(Request $request)
+    {
+        $this->store = $request->store;
+    }
+
     public function getStatusesProperty(): array
     {
         return ['all', 'unpaid', 'processing', 'paid', 'refunded', 'failed'];
-    }
-
-    public function mount(StoreService $storeService): void
-    {
-        $this->store = $storeService->getCurrentStore();
-    }
-
-    public function updatedSearch(): void
-    {
-        // This method ensures the component re-renders when search changes
-        // Force re-render by accessing the orders property
-        $this->getOrdersProperty();
     }
 
     public function getOrdersProperty()
@@ -50,6 +43,7 @@ class OrderHistory extends Component
             ->when(strlen($this->search) > 0, function ($q) {
                 $q->where('code', 'like', '%' . trim($this->search) . '%');
             })
+            ->where('store_id', $this->store->id)
             ->with('items')
             ->orderBy('created_at', 'desc')
             ->limit(5)

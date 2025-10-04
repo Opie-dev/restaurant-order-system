@@ -1,256 +1,34 @@
 <div class="min-h-screen bg-gray-50 flex flex-col">
     <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col lg:flex-row lg:h-[calc(100vh-80px)]">
+    <div class="lg:h-[calc(100vh-80px)] overflow-y-auto">
         <!-- Left Panel - Menu -->
-        <div class="flex-1 overflow-y-auto lg:mr-96">
-            <div class="">
-            <!-- Store Cover Image -->
-            @if($store && $store->cover_path)
-                <div class="relative h-64 lg:h-80 overflow-hidden rounded-b-lg">
-
-                    <div class="inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent h-full w-full">
-                        <img src="{{ \Illuminate\Support\Facades\Storage::url($store->cover_path) }}" 
-                        alt="{{ $store->name }} cover" 
-                        class="w-full h-full object-cover">
-                    </div>
-
-                    <!-- Navigation (top right) -->
-                    <div class="absolute top-4 right-4">
-                        <nav class="flex items-center space-x-4">
-                            @auth
-                                <a href="{{ route('cart') }}" class="flex relative items-center gap-2 px-3 py-2 rounded-lg bg-dark bg-opacity-20 text-white hover:bg-opacity-30 transition-colors backdrop-blur-sm">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
-                                    </svg>
-                                    <span class="text-sm font-medium">Cart</span>
-                                    @if($this->cartCount > 0)
-                                        <span class="absolute -top-2 -right-3 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold leading-none text-white bg-purple-600 rounded-full">{{ $this->cartCount > 99 ? '99+' : $this->cartCount }}</span>
-                                    @endif
-                                </a>
-
-                                <a href="{{ route('logout') }}" class="flex items-center gap-2 text-white  hover:bg-opacity-20 px-3 py-2 rounded-lg transition-colors font-medium backdrop-blur-sm">
-                                    Logout
-                                </a>
-                            @else
-                                <a href="{{ route('login') }}" class="flex items-center gap-2 text-white hover:bg-dark hover:bg-opacity-20 px-3 py-2 rounded-lg transition-colors font-medium backdrop-blur-sm">
-                                    Login
-                                </a>
-                                <a href="{{ route('register') }}" class="flex items-center gap-2 text-white hover:bg-dark hover:bg-opacity-20 px-3 py-2 rounded-lg transition-colors font-medium backdrop-blur-sm">
-                                    Register
-                                </a>
-                            @endif
-                        </nav>
-                    </div>
-                    
-                    <div class="absolute bottom-0 left-0 right-0 p-6 text-white" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6), 0 0 16px rgba(0,0,0,0.4);">
-                            <div class="flex items-center space-x-4 mb-3">
-                                @if($store->logo_path)
-                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($store->logo_path) }}" alt="{{ $store->name }}" class="hidden sm:block h-16 w-16 object-contain rounded-lg bg-white bg-opacity-90 p-2">
-                                @else
-                                    <div class="hidden sm:block h-16 w-16 bg-white bg-opacity-90 rounded-lg flex items-center justify-center">
-                                        <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 8h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                        </svg>
-                                    </div>
-                                @endif
-                            <div>
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-1">
-                                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-white">{{ $store->name }}</h1>
-                                    @if($store->isCurrentlyOpen())
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white self-start">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            Open Now
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500 text-white self-start">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8 7l7 7" clip-rule="evenodd"></path>
-                                            </svg>
-                                            Closed
-                                        </span>
-                                    @endif
-                                </div>
-                                <p class="text-gray-100 text-sm">{{ $store->address }}</p>
-                                @if(!$store->isCurrentlyOpen() && $store->getNextOpeningTime())
-                                    <p class="text-gray-300 text-xs mt-1">{{ $store->getNextOpeningTime() }}</p>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            <!-- Store Header (when no cover image or for navigation) -->
-            @if($store && !$store->cover_path)
-                <div class="mb-6 p-4 border-b border-gray-200">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            @if($store->logo_path)
-                                <img src="{{ \Illuminate\Support\Facades\Storage::url($store->logo_path) }}" alt="{{ $store->name }}" class="h-12 w-12 object-contain rounded-lg">
-                            @else
-                                <div class="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                                    <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                    </svg>
-                                </div>
-                            @endif
-                            <div>
-                                <div class="flex items-center gap-3">
-                                    <h1 class="text-2xl font-bold text-gray-900">{{ $store->name }}</h1>
-                                    @if($store->isCurrentlyOpen())
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            Open
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            Closed
-                                        </span>
-                                    @endif
-                                </div>
-                                @if($store->description)
-                                    <p class="text-gray-600 text-sm">{{ $store->description }}</p>
-                                @endif
-                                @if(!$store->isCurrentlyOpen() && $store->getNextOpeningTime())
-                                    <p class="text-gray-500 text-xs mt-1">{{ $store->getNextOpeningTime() }}</p>
-                                @endif
-                            </div>
-                        </div>
-                        
-                        <!-- Navigation Links -->
-                        <nav class="hidden lg:flex items-center space-x-4">
-                            @if(auth()->check() && auth()->user()->role !== 'admin')
-                                <a href="{{ route('cart') }}" class="flex relative items-center gap-2 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
-                                    </svg>
-                                    <span class="text-sm font-medium">Cart</span>
-                                    @if($this->cartCount > 0)
-                                        <span class="absolute -top-2 -right-3 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold leading-none text-white bg-purple-600 rounded-full ring-2 ring-white shadow">{{ $this->cartCount > 99 ? '99+' : $this->cartCount }}</span>
-                                    @endif
-                                </a>
-                                <div class="relative" x-data="{ open: false }">
-                                    <button @click="open = !open" class="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium px-3 py-2 rounded-lg">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                        </svg>
-                                        <span>{{ Auth::user()->name }}</span>
-                                        <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    </button>
-                                    <!-- Dropdown Menu -->
-                                    <div x-show="open"
-                                         @click.away="open = false"
-                                         x-transition:enter="transition ease-out duration-200"
-                                         x-transition:enter-start="opacity-0 scale-95"
-                                         x-transition:enter-end="opacity-100 scale-100"
-                                         x-transition:leave="transition ease-in duration-150"
-                                         x-transition:leave-start="opacity-100 scale-100"
-                                         x-transition:leave-end="opacity-0 scale-95"
-                                         class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                                        <div class="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
-                                            <div class="font-medium">{{ Auth::user()->name }}</div>
-                                            <div class="text-gray-500">{{ Auth::user()->email }}</div>
-                                        </div>
-                                        <a href="{{ route('orders') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                                            <div class="flex items-center gap-2">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                                </svg>
-                                                My Orders
-                                            </div>
-                                        </a>
-                                        <a href="{{ route('addresses') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                                            <div class="flex items-center gap-2">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-3-3h-2M9 20H4v-2a3 3 0 013-3h2m7-4a4 4 0 11-8 0 4 4 0 018 0z" />
-                                                </svg>
-                                                My Addresses
-                                            </div>
-                                        </a>
-                                        <form method="POST" action="{{ route('logout') }}">
-                                            @csrf
-                                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                                                <div class="flex items-center gap-2">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                                    </svg>
-                                                    Logout
-                                                </div>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            @elseif (auth()->user()?->role === 'admin')
-                                
-                                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium px-3 py-2 rounded-lg">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Dashboard
-                                </a>
-                            @else
-                            <div class="flex items-center space-x-4">
-                                <a href="{{ route('login') }}" class="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium px-3 py-2 rounded-lg">
-                                    Login
-                                </a>
-                                <a href="{{ route('register') }}" class="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium px-3 py-2 rounded-lg">
-                                    Register
-                                </a>
-                            </div>
-                            @endif
-                        </nav>
-                    </div>
-                </div>
-            @endif
-
-            <!-- Store Closed Notice -->
-            @if($store && !$store->isCurrentlyOpen())
-                <div class="mx-4 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                        </svg>
-                        <div>
-                            <h3 class="text-sm font-medium text-red-800">Store is currently closed</h3>
-                            <p class="text-sm text-red-600 mt-1">
-                                You can browse the menu, but ordering is not available right now.
-                                @if($store->getNextOpeningTime())
-                                    {{ $store->getNextOpeningTime() }}
-                                @endif
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            @endif
+       
+        <div class="fixed top-0 left-0 right-0 z-10">
+            @include('livewire.customer._baner')
 
             <!-- Category Filters -->
             @php 
-                $rootCategories = $this->categories->whereNull('parent_id');
+            $rootCategories = $this->categories->whereNull('parent_id');
             @endphp
-            <div id="categories" class="flex items-center gap-2 lg:gap-3 py-4 lg:py-6 overflow-x-auto px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
-                    <button type="button" 
-                        wire:click="$set('categoryId', null)" 
-                        class="px-3 lg:px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer hover:bg-purple-600 hover:text-white whitespace-nowrap {{ !$categoryId ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
-                        All Items
-                    </button>
-                    @foreach($rootCategories as $cat)
-                        <button type="button" 
-                            wire:click="$set('categoryId', {{ $cat->id }})" 
-                            class="px-3 lg:px-4 py-2 cursor-pointer hover:bg-purple-600 hover:text-white rounded-full text-sm font-medium transition-colors whitespace-nowrap {{ (int)$categoryId === (int)$cat->id ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
-                            {{ $cat->name }}
-                        </button>
-                    @endforeach
-                </div>
 
+            <div id="categories" class="flex rounded-lg bg-white items-center shadow-sm gap-2 lg:gap-3 py-2 overflow-x-auto px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
+                <button type="button" 
+                    wire:click="$set('categoryId', null)" 
+                    class="px-3 lg:px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer hover:bg-purple-600 hover:text-white whitespace-nowrap {{ !$categoryId ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
+                    All
+                </button>
+                @foreach($rootCategories as $cat)
+                    <button type="button" 
+                        wire:click="$set('categoryId', {{ $cat->id }})" 
+                        class="px-3 lg:px-4 py-2 cursor-pointer hover:bg-purple-600 hover:text-white rounded-full text-sm font-medium transition-colors whitespace-nowrap {{ (int)$categoryId === (int)$cat->id ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
+                        {{ $cat->name }}
+                    </button>
+                @endforeach
+            </div>
+        </div>
+        
+        <!-- Category Filters -->
+        <div class="mt-[21rem] lg:mt-[26rem]"> <!-- Add top padding to avoid overlap with fixed cart button on mobile -->
             <!-- Search Bar -->
             <div id="search" class="relative mb-4 lg:mb-6 px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
                 <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
@@ -264,467 +42,345 @@
                     class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
             </div>
 
-                <!-- Menu Items -->
-                @php
-                    $itemsByCategory = $this->items->groupBy(function($item) {
-                        return $item->category?->name ?? 'Uncategorized';
-                    });
-                @endphp
+            <!-- Menu Items -->
+            @php
+                $itemsByCategory = $this->items->groupBy(function($item) {
+                    return $item->category?->name ?? 'Uncategorized';
+                });
+            @endphp
 
-                @forelse($itemsByCategory as $categoryName => $items)
-                    <div class="mb-6 lg:mb-8 px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
-                        <h2 class="text-lg lg:text-xl font-semibold text-gray-800 mb-3 lg:mb-4">{{ $categoryName }}</h2>
-                        <!-- Responsive Grid: 1 item on mobile, 2 on tablet, 3 on desktop -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-                            @foreach($items as $item)
-                                <div class="bg-white rounded-lg lg:rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-60' : '' }}">
-                                    @php
-                                        $src = Str::startsWith($item->image_path, ['http://','https://']) ? $item->image_path : ($item->image_path ? asset('storage/' . $item->image_path) : null);
-                                    @endphp
-                                    
-                                    <!-- Item Image -->
-                                    <div class="aspect-video bg-gray-100 overflow-hidden relative {{ (int)($item->stock ?? 0) <= 0 ? 'grayscale' : '' }}">
-                                        @if($src)
-                                            <img 
-                                                src="{{ $src }}" 
-                                                alt="{{ $item->name }}" 
-                                                class="w-full h-full object-cover object-center max-h-48 sm:max-h-56 md:max-h-64 lg:max-h-72 xl:max-h-80 transition-all duration-200"
-                                                style="aspect-ratio: 16/9;"
-                                            />
-                                        @else
-                                            <div class="w-full h-full grid place-content-center text-gray-400">
-                                                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                                </svg>
-                                            </div>
-                                        @endif
-                                        
-                                        <!-- Item Label from tag -->
-                                        @if($item->tag)
-                                            <div class="absolute top-2 right-2">
-                                                <span class="px-2 py-1 text-xs font-semibold text-white rounded-full bg-purple-600">
-                                                    {{ ucfirst($item->tag) }}
-                                                </span>
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    <!-- Item Details -->
-                                    <div class="p-4">
-                                        <div class="flex items-start justify-between mb-2">
-                                            <h3 class="font-semibold text-gray-800 text-lg">{{ $item->name }}</h3>
-                                            <span class="text-lg font-bold text-purple-600">RM {{ number_format($item->price, 2) }}</span>
+            @forelse($itemsByCategory as $categoryName => $items)
+                <div class="mb-6 lg:mb-8 px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
+                    <h2 class="text-lg lg:text-xl font-semibold text-gray-800 mb-3 lg:mb-4">{{ $categoryName }}</h2>
+                    <!-- Responsive Grid: 1 item on mobile, 2 on tablet, 3 on desktop -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                        @foreach($items as $item)
+                            <div class="bg-white rounded-lg lg:rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-60' : '' }}">
+                                @php
+                                    $src = Str::startsWith($item->image_path, ['http://','https://']) ? $item->image_path : ($item->image_path ? asset('storage/' . $item->image_path) : null);
+                                @endphp
+                                
+                                <!-- Item Image -->
+                                <div class="aspect-video bg-gray-100 overflow-hidden relative {{ (int)($item->stock ?? 0) <= 0 ? 'grayscale' : '' }}">
+                                    @if($src)
+                                        <img 
+                                            src="{{ $src }}" 
+                                            alt="{{ $item->name }}" 
+                                            class="w-full h-full object-cover object-center max-h-48 sm:max-h-56 md:max-h-64 lg:max-h-72 xl:max-h-80 transition-all duration-200"
+                                            style="aspect-ratio: 16/9;"
+                                        />
+                                    @else
+                                        <div class="w-full h-full grid place-content-center text-gray-400">
+                                            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
                                         </div>
-                                        
-                                        @if($item->description)
-                                            <p class="text-gray-600 text-sm mb-3">{{ $item->description }}</p>
-                                        @endif
+                                    @endif
+                                    
+                                    <!-- Item Label from tag -->
+                                    @if($item->tag)
+                                        <div class="absolute top-2 right-2">
+                                            <span class="px-2 py-1 text-xs font-semibold text-white rounded-full bg-purple-600">
+                                                {{ ucfirst($item->tag) }}
+                                            </span>
+                                        </div>
+                                    @endif
+                                </div>
 
-                                        <!-- Add Button -->
-                                        <div class="w-full">
-                                            @if($store && !$store->isCurrentlyOpen())
-                                                <button disabled class="w-full px-4 py-2 bg-gray-400 text-white rounded-lg text-sm font-medium cursor-not-allowed flex items-center justify-center gap-2">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
-                                                    </svg>
-                                                    Store Closed
-                                                </button>
-                                            @else
-                                                @auth
-                                                    <button wire:click="addToCart({{ $item->id }})" 
-                                                        class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-50 cursor-not-allowed' : '' }}" 
-                                                        @disabled(($item->stock ?? 0) <= 0)>
-                                                        @if((int)($item->stock ?? 0) > 0)
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                                            </svg>
-                                                        @endif
-                                                        {{ (int)($item->stock ?? 0) <= 0 ? 'Out of stock' : 'Add to Order' }}
-                                                    </button>
-                                                @else
-                                                    <a href="{{ route('login') }}" 
-                                                        class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' }}">
+                                <!-- Item Details -->
+                                <div class="p-4">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <h3 class="font-semibold text-gray-800 text-lg">{{ $item->name }}</h3>
+                                        <span class="text-lg font-bold text-purple-600">RM {{ number_format($item->price, 2) }}</span>
+                                    </div>
+                                    
+                                    @if($item->description)
+                                        <p class="text-gray-600 text-sm mb-3">{{ $item->description }}</p>
+                                    @endif
+
+                                    <!-- Add Button -->
+                                    <div class="w-full">
+                                        @if($store && !$store->isCurrentlyOpen())
+                                            <button disabled class="w-full px-4 py-2 bg-gray-400 text-white rounded-lg text-sm font-medium cursor-not-allowed flex items-center justify-center gap-2">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
+                                                </svg>
+                                                Store Closed
+                                            </button>
+                                        @else
+                                            @auth
+                                                <button wire:click="addToCart({{ $item->id }})" 
+                                                    class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-50 cursor-not-allowed' : '' }}" 
+                                                    @disabled(($item->stock ?? 0) <= 0)>
+                                                    @if((int)($item->stock ?? 0) > 0)
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                                         </svg>
-                                                        {{ (int)($item->stock ?? 0) <= 0 ? 'Out of stock' : 'Add to Order' }}
-                                                    </a>
-                                                @endauth
-                                            @endif
-                                        </div>
+                                                    @endif
+                                                    {{ (int)($item->stock ?? 0) <= 0 ? 'Out of stock' : 'Add to Order' }}
+                                                </button>
+                                            @else
+                                                <a href="{{ route('menu.store.login', ['store' => $store->slug]) }}" 
+                                                    class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer {{ (int)($item->stock ?? 0) <= 0 ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' }}">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                    </svg>
+                                                    {{ (int)($item->stock ?? 0) <= 0 ? 'Out of stock' : 'Add to Order' }}
+                                                </a>
+                                            @endauth
+                                        @endif
                                     </div>
                                 </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @empty
-                    <div class="text-center py-12">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.709M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">No items found</h3>
-                        <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
-                    </div>
-                @endforelse
-
-                <footer class="mt-12 border-t border-gray-200 pt-8 pb-6 bg-white">
-                    <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div class="text-gray-500 text-sm">
-                            &copy; {{ date('Y') }} Gourmet Express. All rights reserved.
-                        </div>
-                        @if(auth()->check() && auth()->user()->role !== 'admin')
-                            <div class="flex items-center gap-4 text-sm">
-                                <a href="{{ route('cart') }}" class="text-purple-600 hover:underline">Cart</a>
-                                <a href="{{ route('orders') }}" class="text-purple-600 hover:underline">My Orders</a>
                             </div>
-                        @endif
+                        @endforeach
                     </div>
-                </footer>
-            </div>
+                </div>
+            @empty
+                <div class="text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.709M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No items found</h3>
+                    <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
+                </div>
+            @endforelse
+    
         </div>
 
         <!-- Mobile Cart Button (Fixed Bottom) -->
-        @if($this->cartCount > 0)
-            <div class="lg:hidden fixed bottom-4 right-4 z-50">
-                <a href="{{ route('cart') }}" class="bg-purple-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-700 transition-colors flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
-                    </svg>
-                    <span class="font-semibold">View Cart</span>
-                    <span class="bg-white text-purple-600 px-2 py-1 rounded-full text-xs font-bold">{{ $this->cartCount }}</span>
-                </a>
-            </div>
-        @endif
-
-        <!-- Right Panel - Cart (Desktop Only) -->
-        <div class="hidden lg:flex lg:w-96 bg-gray-50 border-l border-gray-200 flex-col fixed right-0 top-0 h-full z-10">
-            <!-- Cart Header -->
-            <div class="p-6 border-b border-gray-200 bg-white">
-                <div class="flex items-center gap-3">
-                    <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
-                    </svg>
-                    <h2 class="text-xl font-semibold text-gray-800">Your Order</h2>
-                </div>
-            </div>
-
-            <!-- Order Items -->
-            <div id="cart" class="flex-1 overflow-y-auto p-4 space-y-4">
-                @if($this->cartCount > 0)
-                    @foreach($this->cartLines as $line)
-                        <div class="bg-white border border-gray-200 rounded-lg p-3 relative">
-                            <button wire:click="remove({{ $line['item']->id }}, {{ $line['id'] }})" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-500 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            </button>
-                            
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <div class="flex items-center space-x-2">
-                                        <h4 class="text-sm font-medium text-gray-900">{{ $line['item']->name }}</h4>
-                                        <span class="text-xs text-gray-500">×{{ $line['qty'] }}</span>
-                                    </div>
-                                    <div class="text-xs text-gray-500 mt-1">
-                                        RM{{ number_format($line['unit_price'], 2) }} each
-                                    </div>
-                                    
-                                    @if(!empty($line['selections']))
-                                        @php
-                                            $selections = $line['selections'];
-                                        @endphp
-                                        
-                                        @if(!empty($selections['options']) || !empty($selections['addons']))
-                                            <div class="mt-2 space-y-1">
-                                                @if(!empty($selections['options']))
-                                                    @foreach($selections['options'] as $optionGroup)
-                                                        @if(!empty($optionGroup['options']))
-                                                            <div class="flex items-start space-x-2">
-                                                                <span class="text-xs font-medium text-gray-600 tracking-wide min-w-0 flex-shrink-0">
-                                                                    {{ $optionGroup['name'] }}:
-                                                                </span>
-                                                                <div class="flex flex-wrap gap-1">
-                                                                    @foreach($optionGroup['options'] as $option)
-                                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                                                            {{ $option['name'] }}
-                                                                        </span>
-                                                                    @endforeach
-                                                                </div>
-                                                            </div>
-                                                        @endif
-                                                    @endforeach
-                                                @endif
-                                                
-                                                @if(!empty($selections['addons']))
-                                                    @foreach($selections['addons'] as $addonGroup)
-                                                        @if(!empty($addonGroup['options']))
-                                                            <div class="flex items-start space-x-2">
-                                                                <span class="text-xs font-medium text-gray-600 tracking-wide min-w-0 flex-shrink-0">
-                                                                    {{ $addonGroup['name'] }}:
-                                                                </span>
-                                                                <div class="flex flex-wrap gap-1">
-                                                                    @foreach($addonGroup['options'] as $addon)
-                                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                                                            {{ $addon['name'] }}
-                                                                            @if(isset($addon['price']) && $addon['price'] > 0)
-                                                                                (+RM {{ number_format($addon['price'], 2) }})
-                                                                            @endif
-                                                                        </span>
-                                                                    @endforeach
-                                                                </div>
-                                                            </div>
-                                                        @endif
-                                                    @endforeach
-                                                @endif
-                                            </div>
-                                        @else
-                                            <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
-                                        @endif
-                                    @else
-                                        <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
-                                    @endif
-
-                                    <!-- Quantity Controls -->
-                                    <div class="mt-3 flex items-center justify-between">
-                                        @php $outOfStock = isset($line['item']->stock) && ((int)$line['item']->stock <= 0); @endphp
-                                        <div>
-                                            @if($outOfStock)
-                                                <span class="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700">Not available</span>
-                                            @else
-                                                <div class="flex items-center gap-3">
-                                                    <button wire:click="decrement({{ $line['item']->id }}, {{ $line['id'] }})" class="w-7 h-7 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-600 transition-colors" @disabled(isset($line['item']->stock) && $line['qty'] <= 1)>
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
-                                                    </button>
-                                                    <span class="min-w-[1.5rem] text-center font-medium text-sm px-2 py-0.5 rounded bg-gray-50">{{ $line['qty'] }}</span>
-                                                    <button wire:click="increment({{ $line['item']->id }}, {{ $line['id'] }})" class="w-7 h-7 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-600 transition-colors" @disabled(isset($line['item']->stock) && ((int)$line['item']->stock <= 0 || $line['qty'] >= (int)$line['item']->stock))>
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                                                    </button>
-                                                </div>
-                                            @endif
-                                        </div>
-                                        
-                                        <div class="text-right">
-                                            <div class="text-sm font-medium text-gray-900">
-                                                RM{{ number_format($line['line_total'], 2) }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach   
-                @else
-                    <div class="text-center py-12">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
-                        </svg>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">Your order is empty</h3>
-                        <p class="mt-1 text-sm text-gray-500">Add items from the menu to get started.</p>
-                    </div>
-                @endif
-            </div>
-
-        <!-- Order Summary -->
-    @if($this->cartCount > 0)
-        <div class="border-t border-gray-200 bg-white p-6 space-y-4">
-            <div class="space-y-3">
-                <div class="flex justify-between text-base">
-                    <span class="text-gray-600">Subtotal</span>
-                    <span class="text-gray-800 font-medium">RM {{ number_format($this->cartTotals['subtotal'], 2) }}</span>
-                </div>
-                <div class="flex justify-between text-base">
-                    <span class="text-gray-600">Tax (8%)</span>
-                    <span class="text-gray-800 font-medium">RM {{ number_format($this->cartTotals['tax'], 2) }}</span>
-                </div>
-                <div class="border-t border-gray-200 pt-3">
-                    <div class="flex justify-between text-xl font-bold">
-                        <span class="text-gray-800">Subtotal</span>
-                        <span class="text-gray-800">RM {{ number_format($this->cartTotals['total'], 2) }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="space-y-3 pt-2">
-                @if(auth()->check() && auth()->user()->role === 'admin')
-                    <button disabled
-                        class="w-full px-6 py-3 bg-gray-400 text-white rounded-xl font-semibold cursor-not-allowed flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
-                        </svg>
-                        Checkout Disabled for Admins
-                    </button>
-                @else
-                    <button wire:click="proceedToCheckout" class="w-full px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        Proceed to Checkout
-                    </button>
-                @endif
-                <button x-data @click.prevent="if (confirm('Clear all items from your order?')) { $wire.clear() }" class="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors cursor-pointer">
-                    Clear Order
-                </button>
-            </div>
+        <div class="fixed bottom-4 right-4 z-50">
+            <a href="{{ route('menu.store.cart', ['store' => $store->slug]) }}" class="bg-purple-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-700 transition-colors flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                </svg>
+                <span class="font-semibold">View Cart</span>
+                <span class="bg-white text-purple-600 px-2 py-1 rounded-full text-xs font-bold">{{ $this->cartCount }}</span>
+            </a>
         </div>
-        @endif
-    </div>
-   
 
-    <!-- Config Modal -->
-    <div x-data="{ open: false }" 
-         x-on:open-config.window="open = true" 
-         x-on:close-config.window="open = false; $wire.resetConfig()">
-        <div x-show="open" class="fixed inset-0 bg-black/40 z-50" @click="open=false; $wire.resetConfig()"></div>
-        <div x-show="open" class="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
-            <div class="bg-white w-full h-full md:h-auto md:max-w-lg md:max-h-[90vh] md:rounded-lg shadow-xl overflow-hidden flex flex-col" @click.stop>
-                <!-- Header with close button -->
-                <div class="flex items-center justify-end p-4 border-b">
-                    <button @click="open=false; $wire.resetConfig()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Scrollable content -->
-                <div class="flex-1 overflow-y-auto">
-                    @php $item = $this->items->firstWhere('id', $this->configItemId); @endphp
-                    @if($item)
-                        <!-- Item Image -->
-                        <div class="relative h-48 md:h-64 bg-gray-100">
-                            @php
-                                $src = Str::startsWith($item->image_path ?? '', ['http://','https://']) ? $item->image_path : (($item->image_path ?? null) ? asset('storage/' . $item->image_path) : null);
-                            @endphp
-                            @if($src)
-                                <img src="{{ $src }}" class="w-full h-full object-cover" alt="{{ $item->name }}" />
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-gray-400">
-                                    <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                </div>
+        <footer class="mt-12 border-t border-gray-200 pt-8 pb-6 bg-white">
+            @php
+                $facebook = $store->social_facebook ?? null;
+                $instagram = $store->social_instagram ?? null;
+                $tiktok = $store->social_tiktok ?? null;
+                $youtube = $store->social_youtube ?? null;
+                $other = $store->social_other ?? null;
+                $googleMap = $store->social_google_map ?? null;
+                $hasSocial = $facebook || $instagram || $tiktok || $youtube || $other || $googleMap;
+            @endphp
+            <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center {{ $hasSocial ? 'justify-between' : 'justify-end' }} gap-4">
+                @if($hasSocial)
+                    <div class="text-gray-500 text-sm">
+                        &copy; {{ date('Y') }} Gourmet Express. All rights reserved.
+                    </div>
+                @endif
+                <div class="flex items-center gap-6">
+                    @if($hasSocial)
+                        <!-- Social Media Links -->
+                        <div class="flex items-center gap-3">
+                            @if($facebook)
+                                <a href="https://facebook.com/{{ ltrim($facebook, '/') }}" target="_blank" rel="noopener" class="text-gray-400 hover:text-purple-600" aria-label="Facebook">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.522-4.477-10-10-10S2 6.478 2 12c0 5 3.657 9.127 8.438 9.877v-6.987h-2.54v-2.89h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.242 0-1.63.771-1.63 1.562v1.875h2.773l-.443 2.89h-2.33v6.987C18.343 21.127 22 17 22 12z"/></svg>
+                                </a>
                             @endif
-                        </div>
-
-                        <!-- Item Info -->
-                        <div class="p-4">
-                            <div class="flex items-start justify-between mb-3">
-                                <div class="flex-1">
-                                    <h2 class="text-xl font-bold text-gray-900 mb-1">{{ $item->name }}</h2>
-                                    @if($item->description)
-                                        <p class="text-gray-600 text-sm">{{ $item->description }}</p>
-                                    @endif
-                                </div>
-                                <div class="text-right ml-4">
-                                    <div class="text-lg font-bold text-gray-900">
-                                        RM {{ number_format(($item->type === 'set' ? $item->base_price : $item->price) ?? 0, 2) }}
-                                    </div>
-                                    <div class="text-xs text-gray-500">Base price</div>
-                                </div>
-                            </div>
-
-                            <!-- Options Section (for all items) -->
-                            @if(!empty($item->options))
-                                <div class="space-y-2 mb-2">
-                                    @foreach(($item->options ?? []) as $gIndex => $group)
-                                        @if(($group['enabled'] ?? true))
-                                        <div class="border rounded-lg p-4">
-                                            <div class="flex items-center justify-between mb-1">
-                                                <h3 class="font-semibold text-gray-900">{{ $group['name'] }}</h3>
-                                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                                    Pick {{ ($group['rules'][1] ?? 'one') === 'multiple' ? 'Multiple' : '1' }}
-                                                </span>
-                                            </div>
-                                            @if(($group['rules'][0] ?? 'required') === 'optional')
-                                                <div class="text-xs text-gray-500 mb-3">optional</div>
-                                            @else
-                                                <div class="mb-3"></div>
-                                            @endif
-                                            <div class="space-y-3">
-                                                @foreach($group['options'] as $oIndex => $opt)
-                                                    @php $multiple = ($group['rules'][1] ?? 'one') === 'multiple'; @endphp
-                                                    <label class="flex items-center gap-3 p-3 border rounded-lg {{ !($opt['enabled'] ?? true) ? 'opacity-60 bg-gray-50' : 'hover:bg-gray-50' }}">
-                                                        @if($multiple)
-                                                            <input type="checkbox" @change="
-                                                                let list = $wire.config.options[{{ $gIndex }}]?.options || [];
-                                                                if ($event.target.checked) { list.push({{ json_encode($opt) }}); } else { list = list.filter(o => o.name !== '{{ $opt['name'] }}'); }
-                                                                $wire.set('config.options.{{ $gIndex }}.name', '{{ $group['name'] }}');
-                                                                $wire.set('config.options.{{ $gIndex }}.options', list);
-                                                            " {{ !($opt['enabled'] ?? true) ? 'disabled' : '' }} class="w-4 h-4 text-purple-600" />
-                                                        @else
-                                                            <input type="radio" name="optionGroup{{ $gIndex }}" @change="
-                                                                $wire.set('config.options.{{ $gIndex }}', { name: '{{ $group['name'] }}', options: [{{ json_encode($opt) }}] });
-                                                            " {{ !($opt['enabled'] ?? true) ? 'disabled' : '' }} class="w-4 h-4 text-purple-600" />
-                                                        @endif
-                                                        <span class="flex-1 font-medium">{{ $opt['name'] }}</span>
-                                                    </label>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                        @endif
-                                    @endforeach
-                                </div>
+                            @if($instagram)
+                                <a href="https://instagram.com/{{ ltrim($instagram, '@/') }}" target="_blank" rel="noopener" class="text-gray-400 hover:text-purple-600" aria-label="Instagram">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5A4.25 4.25 0 0 0 16.25 3.5zm4.25 3.25a5.25 5.25 0 1 1-5.25 5.25A5.25 5.25 0 0 1 12 6.75zm0 1.5a3.75 3.75 0 1 0 3.75 3.75A3.75 3.75 0 0 0 12 8.25zm5.25-.75a1.25 1.25 0 1 1-1.25 1.25A1.25 1.25 0 0 1 17.25 7.5z"/></svg>
+                                </a>
                             @endif
-
-                            <!-- Addons Section (for all items) -->
-                            @if(!empty($item->addons))
-                                <div class="space-y-2">
-                                    @foreach(($item->addons ?? []) as $gIndex => $group)
-                                        @if(($group['enabled'] ?? true))
-                                        <div class="border rounded-lg p-4">
-                                            <div class="flex items-center justify-between mb-1">
-                                                <h3 class="font-semibold text-gray-900">{{ $group['name'] }}</h3>
-                                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                                    Pick {{ ($group['rules'][1] ?? 'one') === 'multiple' ? 'Multiple' : '1' }}
-                                                </span>
-                                            </div>
-                                            @if(($group['rules'][0] ?? 'required') === 'optional')
-                                                <div class="text-xs text-gray-500 mb-3">optional</div>
-                                            @else
-                                                <div class="mb-3"></div>
-                                            @endif
-                                            <div class="space-y-3">
-                                                @foreach($group['options'] as $oIndex => $opt)
-                                                    @php $multiple = ($group['rules'][1] ?? 'one') === 'multiple'; @endphp
-                                                    <label class="flex items-center gap-3 p-3 border rounded-lg {{ !($opt['enabled'] ?? true) ? 'opacity-60 bg-gray-50' : 'hover:bg-gray-50' }}">
-                                                        @if($multiple)
-                                                            <input type="checkbox" @change="
-                                                                let list = $wire.config.addons[{{ $gIndex }}]?.options || [];
-                                                                if ($event.target.checked) { list.push({{ json_encode($opt) }}); } else { list = list.filter(o => o.name !== '{{ $opt['name'] }}'); }
-                                                                $wire.set('config.addons.{{ $gIndex }}.name', '{{ $group['name'] }}');
-                                                                $wire.set('config.addons.{{ $gIndex }}.options', list);
-                                                            " {{ !($opt['enabled'] ?? true) ? 'disabled' : '' }} class="w-4 h-4 text-purple-600" />
-                                                        @else
-                                                            <input type="radio" name="group{{ $gIndex }}" @change="
-                                                                $wire.set('config.addons.{{ $gIndex }}', { name: '{{ $group['name'] }}', options: [{{ json_encode($opt) }}] });
-                                                            " {{ !($opt['enabled'] ?? true) ? 'disabled' : '' }} class="w-4 h-4 text-purple-600" />
-                                                        @endif
-                                                        @php $price = (float)($opt['price'] ?? 0); @endphp
-                                                        <span class="flex-1 font-medium flex items-center justify-between">
-                                                            <span>{{ $opt['name'] }}</span>
-                                                            <span class="text-sm text-gray-700">@if($price > 0)+RM {{ number_format($price, 2) }}@endif</span>
-                                                        </span>
-                                                    </label>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                        @endif
-                                    @endforeach
-                                </div>
+                            @if($tiktok)
+                                <a href="https://tiktok.com/@{{ ltrim($tiktok, '@/') }}" target="_blank" rel="noopener" class="text-gray-400 hover:text-purple-600" aria-label="Tiktok">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M21 8.306c-.638 0-1.262-.062-1.867-.183v6.61c0 3.41-2.77 6.187-6.18 6.187-1.65 0-3.2-.642-4.37-1.81A6.13 6.13 0 0 1 2.5 13.92c0-3.41 2.77-6.187 6.18-6.187.13 0 .26.003.39.01v2.07a4.13 4.13 0 0 0-.39-.02c-2.27 0-4.12 1.85-4.12 4.127 0 2.277 1.85 4.127 4.12 4.127 2.277 0 4.127-1.85 4.127-4.127V2.5h2.06c.19 1.13.98 2.07 2.01 2.47V8.3z"/></svg>
+                                </a>
+                            @endif
+                            @if($youtube)
+                                <a href="https://youtube.com/{{ ltrim($youtube, '@/') }}" target="_blank" rel="noopener" class="text-gray-400 hover:text-purple-600" aria-label="YouTube">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M21.8 8.001a2.75 2.75 0 0 0-1.94-1.94C18.13 5.5 12 5.5 12 5.5s-6.13 0-7.86.56a2.75 2.75 0 0 0-1.94 1.94C2.5 9.73 2.5 12 2.5 12s0 2.27.56 3.999a2.75 2.75 0 0 0 1.94 1.94C5.87 18.5 12 18.5 12 18.5s6.13 0 7.86-.56a2.75 2.75 0 0 0 1.94-1.94C21.5 14.27 21.5 12 21.5 12s0-2.27-.56-3.999zM10.75 15.02V8.98l6.25 3.02-6.25 3.02z"/></svg>
+                                </a>
+                            @endif
+                            @if($googleMap)
+                                <a href="{{ $googleMap }}" target="_blank" rel="noopener" class="text-gray-400 hover:text-purple-600" aria-label="Google Map">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 14.5 9 2.5 2.5 0 0 1 12 11.5z"/></svg>
+                                </a>
+                            @endif
+                            @if($other)
+                                <a href="{{ (str_starts_with($other, 'http') ? $other : 'https://' . ltrim($other, '/')) }}" target="_blank" rel="noopener" class="text-gray-400 hover:text-purple-600" aria-label="Website">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.418 0-8-3.582-8-8 0-1.657.672-3.157 1.757-4.243l10.486 10.486A7.963 7.963 0 0 1 12 20zm6.243-3.757L7.757 5.757A7.963 7.963 0 0 1 20 12c0 1.657-.672 3.157-1.757 4.243z"/></svg>
+                                </a>
                             @endif
                         </div>
                     @endif
+                    @if(auth()->check() && auth()->user()->role !== 'admin')
+                        <div class="flex items-center gap-4 text-sm ml-6">
+                            <a href="{{ route('menu.store.addresses', ['store' => $store->slug]) }}" class="text-purple-600 hover:underline">Addresses</a>
+                            <a href="{{ route('menu.store.orders', ['store' => $store->slug]) }}" class="text-purple-600 hover:underline">My Orders</a>
+                        </div>
+                    @endif
                 </div>
+                @if(!$hasSocial)
+                    <div class="text-gray-500 text-sm">
+                        &copy; {{ date('Y') }} Gourmet Express. All rights reserved.
+                    </div>
+                @endif
+            </div>
+        </footer>
+       
+        <!-- Config Modal -->
+        <div x-data="{ open: false }" 
+            x-on:open-config.window="open = true" 
+            x-on:close-config.window="open = false; $wire.resetConfig()">
+            <div x-show="open" class="fixed inset-0 bg-black/40 z-50" @click="open=false; $wire.resetConfig()"></div>
+            <div x-show="open" class="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
+                <div class="bg-white w-full h-full md:h-auto md:max-w-lg md:max-h-[90vh] md:rounded-lg shadow-xl overflow-hidden flex flex-col" @click.stop>
+                    <!-- Header with close button -->
+                    <div class="flex items-center justify-end p-4 border-b">
+                        <button @click="open=false; $wire.resetConfig()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
 
-                <!-- Fixed bottom button -->
-                <div class="border-t bg-white p-4">
-                    <button @click="$wire.addConfiguredToCart()" 
-                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
-                        Add to Basket - RM {{ number_format(($this->getTotalPrice() ?? 0), 2) }}
-                    </button>
+                    <!-- Scrollable content -->
+                    <div class="flex-1 overflow-y-auto">
+                        @php $item = $this->items->firstWhere('id', $this->configItemId); @endphp
+                        @if($item)
+                            <!-- Item Image -->
+                            <div class="relative h-48 md:h-64 bg-gray-100">
+                                @php
+                                    $src = Str::startsWith($item->image_path ?? '', ['http://','https://']) ? $item->image_path : (($item->image_path ?? null) ? asset('storage/' . $item->image_path) : null);
+                                @endphp
+                                @if($src)
+                                    <img src="{{ $src }}" class="w-full h-full object-cover" alt="{{ $item->name }}" />
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Item Info -->
+                            <div class="p-4">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex-1">
+                                        <h2 class="text-xl font-bold text-gray-900 mb-1">{{ $item->name }}</h2>
+                                        @if($item->description)
+                                            <p class="text-gray-600 text-sm">{{ $item->description }}</p>
+                                        @endif
+                                    </div>
+                                    <div class="text-right ml-4">
+                                        <div class="text-lg font-bold text-gray-900">
+                                            RM {{ number_format(($item->type === 'set' ? $item->base_price : $item->price) ?? 0, 2) }}
+                                        </div>
+                                        <div class="text-xs text-gray-500">Base price</div>
+                                    </div>
+                                </div>
+
+                                <!-- Options Section (for all items) -->
+                                @if(!empty($item->options))
+                                    <div class="space-y-2 mb-2">
+                                        @foreach(($item->options ?? []) as $gIndex => $group)
+                                            @if(($group['enabled'] ?? true))
+                                            <div class="border rounded-lg p-4">
+                                                <div class="flex items-center justify-between mb-1">
+                                                    <h3 class="font-semibold text-gray-900">{{ $group['name'] }}</h3>
+                                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                                                        Pick {{ ($group['rules'][1] ?? 'one') === 'multiple' ? 'Multiple' : '1' }}
+                                                    </span>
+                                                </div>
+                                                @if(($group['rules'][0] ?? 'required') === 'optional')
+                                                    <div class="text-xs text-gray-500 mb-3">optional</div>
+                                                @else
+                                                    <div class="mb-3"></div>
+                                                @endif
+                                                <div class="space-y-3">
+                                                    @foreach($group['options'] as $oIndex => $opt)
+                                                        @php $multiple = ($group['rules'][1] ?? 'one') === 'multiple'; @endphp
+                                                        <label class="flex items-center gap-3 p-3 border rounded-lg {{ !($opt['enabled'] ?? true) ? 'opacity-60 bg-gray-50' : 'hover:bg-gray-50' }}">
+                                                            @if($multiple)
+                                                                <input type="checkbox" @change="
+                                                                    let list = $wire.config.options[{{ $gIndex }}]?.options || [];
+                                                                    if ($event.target.checked) { list.push({{ json_encode($opt) }}); } else { list = list.filter(o => o.name !== '{{ $opt['name'] }}'); }
+                                                                    $wire.set('config.options.{{ $gIndex }}.name', '{{ $group['name'] }}');
+                                                                    $wire.set('config.options.{{ $gIndex }}.options', list);
+                                                                " {{ !($opt['enabled'] ?? true) ? 'disabled' : '' }} class="w-4 h-4 text-purple-600" />
+                                                            @else
+                                                                <input type="radio" name="optionGroup{{ $gIndex }}" @change="
+                                                                    $wire.set('config.options.{{ $gIndex }}', { name: '{{ $group['name'] }}', options: [{{ json_encode($opt) }}] });
+                                                                " {{ !($opt['enabled'] ?? true) ? 'disabled' : '' }} class="w-4 h-4 text-purple-600" />
+                                                            @endif
+                                                            <span class="flex-1 font-medium">{{ $opt['name'] }}</span>
+                                                        </label>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                <!-- Addons Section (for all items) -->
+                                @if(!empty($item->addons))
+                                    <div class="space-y-2">
+                                        @foreach(($item->addons ?? []) as $gIndex => $group)
+                                            @if(($group['enabled'] ?? true))
+                                            <div class="border rounded-lg p-4">
+                                                <div class="flex items-center justify-between mb-1">
+                                                    <h3 class="font-semibold text-gray-900">{{ $group['name'] }}</h3>
+                                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                                                        Pick {{ ($group['rules'][1] ?? 'one') === 'multiple' ? 'Multiple' : '1' }}
+                                                    </span>
+                                                </div>
+                                                @if(($group['rules'][0] ?? 'required') === 'optional')
+                                                    <div class="text-xs text-gray-500 mb-3">optional</div>
+                                                @else
+                                                    <div class="mb-3"></div>
+                                                @endif
+                                                <div class="space-y-3">
+                                                    @foreach($group['options'] as $oIndex => $opt)
+                                                        @php $multiple = ($group['rules'][1] ?? 'one') === 'multiple'; @endphp
+                                                        <label class="flex items-center gap-3 p-3 border rounded-lg {{ !($opt['enabled'] ?? true) ? 'opacity-60 bg-gray-50' : 'hover:bg-gray-50' }}">
+                                                            @if($multiple)
+                                                                <input type="checkbox" @change="
+                                                                    let list = $wire.config.addons[{{ $gIndex }}]?.options || [];
+                                                                    if ($event.target.checked) { list.push({{ json_encode($opt) }}); } else { list = list.filter(o => o.name !== '{{ $opt['name'] }}'); }
+                                                                    $wire.set('config.addons.{{ $gIndex }}.name', '{{ $group['name'] }}');
+                                                                    $wire.set('config.addons.{{ $gIndex }}.options', list);
+                                                                " {{ !($opt['enabled'] ?? true) ? 'disabled' : '' }} class="w-4 h-4 text-purple-600" />
+                                                            @else
+                                                                <input type="radio" name="group{{ $gIndex }}" @change="
+                                                                    $wire.set('config.addons.{{ $gIndex }}', { name: '{{ $group['name'] }}', options: [{{ json_encode($opt) }}] });
+                                                                " {{ !($opt['enabled'] ?? true) ? 'disabled' : '' }} class="w-4 h-4 text-purple-600" />
+                                                            @endif
+                                                            @php $price = (float)($opt['price'] ?? 0); @endphp
+                                                            <span class="flex-1 font-medium flex items-center justify-between">
+                                                                <span>{{ $opt['name'] }}</span>
+                                                                <span class="text-sm text-gray-700">@if($price > 0)+RM {{ number_format($price, 2) }}@endif</span>
+                                                            </span>
+                                                        </label>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Fixed bottom button -->
+                    <div class="border-t bg-white p-4">
+                        <button @click="$wire.addConfiguredToCart()" 
+                            class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
+                            Add to Basket - RM {{ number_format(($this->getTotalPrice() ?? 0), 2) }}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 </div>
 

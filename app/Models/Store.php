@@ -16,7 +16,6 @@ class Store extends Model
         'name',
         'slug',
         'description',
-        'address',
         'address_line1',
         'address_line2',
         'city',

@@ -7,19 +7,22 @@ use Livewire\Component;
 use App\Services\CartService;
 use App\Models\CartItem;
 use App\Models\Store;
-use App\Services\StoreService;
+use Illuminate\Http\Request;
 
 #[Layout('layouts.customer')]
 class Cart extends Component
 {
-    private $cartService;
+    protected CartService $cartService;
     public ?Store $store = null;
-    private StoreService $storeService;
 
-    public function boot(CartService $cartService, StoreService $storeService): void
+    public function boot(CartService $cartService)
     {
         $this->cartService = $cartService;
-        $this->store = $storeService->getCurrentStore();
+    }
+
+    public function mount(Request $request)
+    {
+        $this->store = $request->store;
     }
 
     public function increment(int $id): void
@@ -65,11 +68,6 @@ class Cart extends Component
         $tax = round($subtotal * 0.1, 2);
         $total = round($subtotal + $tax, 2);
         return compact('subtotal', 'tax', 'total');
-    }
-
-    public function getStoreProperty(): Store
-    {
-        return $this->storeService->getCurrentStore();
     }
 
     public function render()

@@ -68,11 +68,6 @@
                                 Log in
                             </button>
                         </form>
-
-                        <p class="mt-6 text-center text-sm text-gray-600">
-                            Don't have an account?
-                            <a href="{{ route('register') }}" class="font-medium text-purple-600 hover:text-purple-700">Create one</a>
-                        </p>
                     </div>
                 </div>
             </div>

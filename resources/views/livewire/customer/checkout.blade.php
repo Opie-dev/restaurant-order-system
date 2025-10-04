@@ -1,4 +1,8 @@
-<div class="max-w-5xl mx-auto px-6 py-8">
+<div class="mx-auto px-6 py-8 overflow-y-auto">
+    <div class="fixed top-0 left-0 right-0 z-10">
+        @include('livewire.customer._baner')
+    </div>
+    <div class="mt-[16rem] lg:mt-[20rem]">
     <h1 class="text-2xl font-bold text-gray-900 mb-6">Checkout</h1>
 
     @auth
@@ -21,12 +25,12 @@
         <div class="mb-6 bg-white border border-gray-200 rounded-xl shadow-sm p-6" x-data>
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-900">Delivery Address</h2>
-                <a href="{{ route('addresses') }}" class="text-sm text-purple-600 hover:text-purple-700">Manage addresses</a>
+                <a href="{{ route('menu.store.addresses', ['store' => $store->slug]) }}" class="text-sm text-purple-600 hover:text-purple-700">Manage addresses</a>
             </div>
             @if($deliver)
                 @php $default = auth()->user()->defaultAddress; @endphp
                 @if(!$default)
-                    <div class="text-gray-600 text-sm">No default address yet. <a href="{{ route('addresses') }}" class="text-purple-600">Add one</a> to proceed.</div>
+                    <div class="text-gray-600 text-sm">No default address yet. <a href="{{ route('menu.store.addresses', ['store' => $store->slug]) }}" class="text-purple-600">Add one</a> to proceed.</div>
                 @else
                     <div class="p-4 border rounded-lg bg-gray-50">
                         <div class="flex items-center gap-2 mb-1">
@@ -157,7 +161,7 @@
 
     <!-- Submit Order Button -->
     <div class="mt-8 flex items-center justify-between">
-        <a href="{{ route('cart') }}" class="text-gray-600 hover:text-gray-800 transition-colors font-medium">
+        <a href="{{ route('menu.store.cart', ['store' => $store->slug]) }}" class="text-gray-600 hover:text-gray-800 transition-colors font-medium">
             ← Back to Cart
         </a>
         
@@ -196,6 +200,8 @@
             </div>
         </div>
     @endif
+
+    </div>
 </div>
 
 

@@ -1,11 +1,11 @@
-<div class="p-6 space-y-6 max-w-7xl mx-auto px-6 py-8" x-data>
-    <div class="flex items-center justify-between">
+<div class="p-6 space-y-6 mx-auto px-6 py-8 overflow-y-auto" >
+    <div class="fixed top-0 left-0 right-0 z-10">
+        @include('livewire.customer._baner')
+    </div>
+    <div class="mt-[16rem] lg:mt-[20rem] flex items-center justify-between">
         <h1 class="text-2xl font-semibold text-gray-900">Your Cart</h1>
-        <a href="{{ route('menu.store', ['store' => $store]) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            Continue Ordering
+        <a href="{{ route('menu.store.index', ['store' => $store->slug]) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+            Menu
         </a>
     </div>
 
@@ -21,7 +21,7 @@
         <!-- Order Items -->
         <div class="space-y-3">
             @foreach($this->lines as $line)
-                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 relative">
+                <div class="bg-white border border-gray-200 rounded-lg p-3 relative">
                     <button 
                         wire:click="remove({{ $line['id'] }})" 
                         onclick="return confirm('Remove this item from your cart?')"
@@ -153,19 +153,16 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex items-center justify-between">
+        <div class="flex md:flex-row flex-col items-center justify-between gap-4">
             <button 
                 @click="if (confirm('Are you sure you want to clear all items from your cart?')) { $wire.clear() }" 
-                class="inline-flex items-center px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
+                class="inline-flex md:w-auto w-full md:text-center bg-white items-center px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
             >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
                 Clear Cart
             </button>
             <a 
-                href="{{ route('checkout') }}" 
-                class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                href="{{ route('menu.store.checkout', ['store' => $store->slug]) }}" 
+                class="px-6 py-2 md:w-auto w-full md:text-center bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
             >
                 Proceed to Checkout
             </a>

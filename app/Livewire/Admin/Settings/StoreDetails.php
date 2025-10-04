@@ -44,13 +44,16 @@ class StoreDetails extends Component
     #[Validate('required|email')]
     public ?string $email = '';
 
-    #[Validate('nullable|image|max:2048')]
+    #[Validate('nullable|mimes:jpg,jpeg,png,gif,bmp,svg,webp,avif|max:2048')]
     public $logo;
 
-    public ?string $logo_path = null;
-    #[Validate('nullable|image|max:4096')]
+    #[Validate('nullable|mimes:jpg,jpeg,png,gif,bmp,svg,webp,avif|max:4096')]
     public $cover;
-    public ?string $cover_path = null;
+
+    #[Validate('nullable|mimes:jpg,jpeg,png,gif,bmp,svg,webp,avif|max:8192')]
+    public $cover_desktop;
+
+    public ?string $cover_desktop_path = null;
     public ?Store $currentStore = null;
     private $storeService;
 
@@ -59,6 +62,20 @@ class StoreDetails extends Component
      * @var array<int, array{day:string,enabled:bool,open:string|null,close:string|null}>
      */
     public array $hours = [];
+
+    // Social media and links
+    #[Validate('nullable|string|max:500')]
+    public ?string $social_google_map = null;
+    #[Validate('nullable|string|max:255')]
+    public ?string $social_facebook = null;
+    #[Validate('nullable|string|max:255')]
+    public ?string $social_tiktok = null;
+    #[Validate('nullable|string|max:255')]
+    public ?string $social_other = null;
+    #[Validate('nullable|string|max:255')]
+    public ?string $social_instagram = null;
+    #[Validate('nullable|string|max:255')]
+    public ?string $social_youtube = null;
 
     public function boot()
     {
@@ -87,6 +104,15 @@ class StoreDetails extends Component
             $settings = $this->currentStore->settings ?? [];
             $this->always_open = (bool)($settings['always_open'] ?? false);
             $this->hours = $this->loadOpeningHoursFromSettings($settings['opening_hours'] ?? null);
+
+            // Load socials
+            $social = $settings['social'] ?? [];
+            $this->social_google_map = $social['google_map'] ?? null;
+            $this->social_facebook = $social['facebook'] ?? null;
+            $this->social_tiktok = $social['tiktok'] ?? null;
+            $this->social_other = $social['other'] ?? null;
+            $this->social_instagram = $social['instagram'] ?? null;
+            $this->social_youtube = $social['youtube'] ?? null;
         } else {
             // Redirect to store selection if no store is selected
             $this->redirectRoute('admin.stores.select');
@@ -131,50 +157,12 @@ class StoreDetails extends Component
         return $out;
     }
 
-    public function saveDetails()
-    {
-        // Validate details only (no media)
-        $this->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:stores,slug,' . $this->currentStore->id,
-            'description' => 'nullable|string|max:500',
-            'address_line1' => 'required|string|max:255',
-            'address_line2' => 'nullable|string|max:255',
-            'city' => 'required|string|max:100',
-            'state' => 'required|string|max:100',
-            'postal_code' => 'required|string|max:20',
-            'phone' => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/',
-            'email' => 'required|email|max:255',
-        ]);
-
-        if (!$this->currentStore) {
-            session()->flash('error', 'No store selected.');
-            return;
-        }
-
-        $data = [
-            'name' => $this->name,
-            'slug' => $this->slug,
-            'description' => $this->description,
-            'address_line1' => $this->address_line1,
-            'address_line2' => $this->address_line2,
-            'city' => $this->city,
-            'state' => $this->state,
-            'postal_code' => $this->postal_code,
-            'phone' => $this->phone,
-            'email' => $this->email,
-        ];
-
-        // Update the current store details
-        $this->currentStore->update($data);
-        session()->flash('success', 'Store details updated successfully.');
-    }
-
     public function saveMedia(): void
     {
         $this->validate([
-            'logo' => 'nullable|image|max:2048',
-            'cover' => 'nullable|image|max:4096',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:2048',
+            'cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:4096',
+            'cover_desktop' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:8192',
         ]);
 
         if (!$this->currentStore) {
@@ -258,6 +246,37 @@ class StoreDetails extends Component
     {
         // Don't modify the hours data when toggling always_open
         // Just keep the current day data intact
+    }
+
+    public function saveSocialMedia(): void
+    {
+        if (!$this->currentStore) {
+            session()->flash('error', 'No store selected.');
+            return;
+        }
+
+        $this->validate([
+            'social_google_map' => 'nullable|string|max:500',
+            'social_facebook' => 'nullable|string|max:255',
+            'social_tiktok' => 'nullable|string|max:255',
+            'social_other' => 'nullable|string|max:255',
+            'social_instagram' => 'nullable|string|max:255',
+            'social_youtube' => 'nullable|string|max:255',
+        ]);
+
+        $settings = $this->currentStore->settings ?? [];
+        $settings['social'] = [
+            'google_map' => $this->social_google_map,
+            'facebook' => $this->social_facebook,
+            'tiktok' => $this->social_tiktok,
+            'other' => $this->social_other,
+            'instagram' => $this->social_instagram,
+            'youtube' => $this->social_youtube,
+        ];
+        $this->currentStore->update(['settings' => $settings]);
+
+        session()->flash('success', 'Social media links updated successfully.');
+        $this->dispatch('social-saved');
     }
 
     public function render()

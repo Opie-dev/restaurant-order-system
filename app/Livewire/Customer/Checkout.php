@@ -10,6 +10,8 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use App\Models\UserAddress;
+use Illuminate\Http\Request;
+use App\Models\Store;
 
 #[Layout('layouts.customer')]
 class Checkout extends Component
@@ -17,21 +19,20 @@ class Checkout extends Component
     public bool $deliver = false;
     public ?int $addressId = null;
     public string $notes = '';
-
+    public ?Store $store = null;
     protected CartService $cartService;
 
-    public function boot(CartService $cartService): void
+    public function boot(CartService $cartService)
     {
         $this->cartService = $cartService;
     }
 
-    public function mount(): void
+
+    public function mount(Request $request)
     {
-        if (Auth::check()) {
-            $default = Auth::user()->defaultAddress;
-            $this->addressId = $default?->id;
-        }
+        $this->store = $request->store;
     }
+
 
     public function updatedDeliver(): void
     {

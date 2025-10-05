@@ -1,8 +1,6 @@
 <div class="min-h-screen bg-gray-50 flex flex-col" x-data="menuScroll()">
     <!-- Main Content Area -->
-    <div class="lg:h-[calc(100vh-80px)] overflow-y-auto">
-        <!-- Left Panel - Menu -->
-       
+    <div class="overflow-y-auto">
         <div class="fixed top-0 left-0 right-0 z-10">
             @include('livewire.customer._baner')
 

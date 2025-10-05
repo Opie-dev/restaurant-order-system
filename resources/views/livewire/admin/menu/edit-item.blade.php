@@ -45,7 +45,21 @@
                     <div class="p-4">
                         <div class="flex items-start justify-between mb-2">
                             <h3 class="font-semibold text-gray-800 text-lg truncate">{{ $name ?: 'Item name' }}</h3>
-                            <span class="text-lg font-bold text-purple-600">RM {{ number_format((float) ($type === 'set' ? ($base_price ?? 0) : ($price ?? 0)), 2) }}</span>
+                            <span class="text-lg font-bold text-purple-600">
+                                @if($type === 'set')
+                                    @if($base_price)
+                                        RM {{ number_format($base_price, 2) }}
+                                    @else
+                                        Price on request
+                                    @endif
+                                @else
+                                    @if($price)
+                                        RM {{ number_format($price, 2) }}
+                                    @else
+                                        Price on request
+                                    @endif
+                                @endif
+                            </span>
                         </div>
                         <p class="text-gray-600 text-sm line-clamp-2">{{ $description ?: 'Item description will appear here' }}</p>
                         <div class="mt-3">
@@ -94,7 +108,21 @@
                                 @endif
                             </div>
                             <div class="text-right ml-4">
-                                <div class="text-lg font-bold text-gray-900">RM {{ number_format((float) ($type === 'set' ? ($base_price ?? 0) : ($price ?? 0)), 2) }}</div>
+                                <div class="text-lg font-bold text-gray-900">
+                                    @if($type === 'set')
+                                        @if($base_price)
+                                            RM {{ number_format($base_price, 2) }}
+                                        @else
+                                            Price on request
+                                        @endif
+                                    @else
+                                        @if($price)
+                                            RM {{ number_format($price, 2) }}
+                                        @else
+                                            Price on request
+                                        @endif
+                                    @endif
+                                </div>
                                 <div class="text-xs text-gray-500">Base price</div>
                             </div>
                         </div>
@@ -202,6 +230,15 @@
                         @error('description') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
                     </div>
 
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                        <select wire:model.live="type" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            <option value="ala_carte">Ala Carte</option>
+                            <option value="set">Set</option>
+                        </select>
+                        @error('type') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         @if($type === 'set')
                             <div>
@@ -233,14 +270,6 @@
                             @error('category_id') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
-                            <select wire:model.live="type" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                                <option value="ala_carte">Ala Carte</option>
-                                <option value="set">Set</option>
-                            </select>
-                            @error('type') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
-                        </div>
-                        <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Tag</label>
                             <select wire:model.blur="tag" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                                 <option value="">None</option>
@@ -251,16 +280,6 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-8">
-                        <div class="flex items-center gap-3">
-                            <input id="is_active" type="checkbox" wire:model.live="is_active" class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2" />
-                            <label for="is_active" class="text-sm font-medium text-gray-700">Active</label>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <input id="enabled" type="checkbox" wire:model.live="enabled" class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2" />
-                            <label for="enabled" class="text-sm font-medium text-gray-700">Enabled</label>
-                        </div>
-                    </div>
 
                     <div class="space-y-4">
                         <div>
@@ -287,7 +306,20 @@
 
                     <!-- Options Section (for all items) -->
                     <div class="border border-gray-200 rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Option Groups</h3>
+                        <div class="mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Option Groups</h3>
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-800">What are Option Groups?</p>
+                                        <p class="text-xs text-blue-700 mt-1">These are choices included with the menu item (e.g., cooking style, size, included sides). No additional cost.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="space-y-4">
                             @foreach($options as $groupIndex => $group)
                                 <div class="border border-gray-200 rounded-lg p-4" wire:key="opt-group-{{ $groupIndex }}">
@@ -361,7 +393,20 @@
 
                     <!-- Addons Section (for all items) -->
                     <div class="border border-gray-200 rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Addon Groups</h3>
+                        <div class="mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Addon Groups</h3>
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-green-600 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm font-medium text-green-800">What are Addon Groups?</p>
+                                        <p class="text-xs text-green-700 mt-1">These are additional items customers can purchase (e.g., extra toppings, drinks, sides). Each addon has a price.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="space-y-4">
                             @foreach($addons as $groupIndex => $group)
                                 <div class="border border-gray-200 rounded-lg p-4" wire:key="addon-group-{{ $groupIndex }}">

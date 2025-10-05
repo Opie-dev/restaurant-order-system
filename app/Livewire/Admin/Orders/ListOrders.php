@@ -7,6 +7,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Cache;
+use App\Services\Admin\StoreService;
 
 #[Layout('layouts.admin')]
 class ListOrders extends Component
@@ -18,11 +19,23 @@ class ListOrders extends Component
     public string $search = '';
     public string $status = 'all';
     public ?int $user = null;
+    private $storeService;
+    public $storeId;
 
     protected $queryString = [
         'search' => ['except' => ''],
         'status' => ['except' => 'pending'],
     ];
+
+    public function boot()
+    {
+        $this->storeService = app(StoreService::class);
+    }
+
+    public function mount()
+    {
+        $this->storeId = $this->storeService->getCurrentStore()->id;
+    }
 
     public function updatingSearch(): void
     {
@@ -48,7 +61,7 @@ class ListOrders extends Component
 
     public function updateOrderStatus($orderId, $newStatus, $cancellationRemarks = null, $trackingUrl = null, $deliveryFee = null): void
     {
-        $order = Order::findOrFail($orderId);
+        $order = Order::where('store_id', $this->storeId)->findOrFail($orderId);
 
         if (!$order->canTransitionTo($newStatus)) {
             session()->flash('error', 'Invalid status transition from ' . $order->status . ' to ' . $newStatus);
@@ -82,6 +95,7 @@ class ListOrders extends Component
     public function getOrdersProperty()
     {
         return Order::with(['user', 'items'])
+            ->where('store_id', $this->storeId)
             ->when(strlen($this->search) > 0, function ($q) {
                 $q->where('code', 'like', '%' . trim($this->search) . '%');
             })
@@ -99,11 +113,11 @@ class ListOrders extends Component
     {
         return Cache::remember('orders.status_counts', 120, function () {
             return [
-                'pending' => Order::where('status', 'pending')->count(),
-                'preparing' => Order::where('status', 'preparing')->count(),
-                'delivering' => Order::where('status', 'delivering')->count(),
-                'completed' => Order::where('status', 'completed')->count(),
-                'cancelled' => Order::where('status', 'cancelled')->count(),
+                'pending' => Order::where('status', 'pending')->where('store_id', $this->storeId)->count(),
+                'preparing' => Order::where('status', 'preparing')->where('store_id', $this->storeId)->count(),
+                'delivering' => Order::where('status', 'delivering')->where('store_id', $this->storeId)->count(),
+                'completed' => Order::where('status', 'completed')->where('store_id', $this->storeId)->count(),
+                'cancelled' => Order::where('status', 'cancelled')->where('store_id', $this->storeId)->count(),
             ];
         });
     }

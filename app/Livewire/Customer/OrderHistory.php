@@ -28,7 +28,7 @@ class OrderHistory extends Component
 
     public function getStatusesProperty(): array
     {
-        return ['all', 'unpaid', 'processing', 'paid', 'refunded', 'failed'];
+        return ['all', 'pending', 'preparing', 'delivering', 'completed', 'cancelled'];
     }
 
     public function getOrdersProperty()
@@ -38,7 +38,7 @@ class OrderHistory extends Component
                 $q->where('store_id', $this->store->id);
             })
             ->when($this->status !== 'all', function ($q) {
-                $q->where('payment_status', $this->status);
+                $q->where('status', $this->status);
             })
             ->when(strlen($this->search) > 0, function ($q) {
                 $q->where('code', 'like', '%' . trim($this->search) . '%');

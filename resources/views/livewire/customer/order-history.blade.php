@@ -3,7 +3,12 @@
         @include('livewire.customer._baner')
     </div>
     <div class="mt-[16rem] lg:mt-[20rem]">
-        <h1 class="text-3xl font-bold text-gray-900">Order History</h1>
+        <div class="flex items-center justify-between">
+            <h1 class="text-3xl font-bold text-gray-900">Order History</h1>
+            <a href="{{ route('menu.store.index', ['store' => $store->slug]) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+                Menu
+            </a>
+        </div>
         <p class="text-gray-600 mt-2">View all your past orders</p>
     </div>
 
@@ -18,9 +23,9 @@
                 </div>
             </div>
 
-            <!-- Payment status filter -->
+            <!-- Order status filter -->
             <div>
-                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Filter by payment status</label>
+                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Filter by order status</label>
                 <div class="flex items-center gap-2">
                     <select id="status" wire:model.live="status" class="rounded-lg p-2 border border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
                         @foreach($this->statuses as $s)
@@ -76,37 +81,48 @@
 
                     <!-- Order Items -->
                     <div class="px-6 py-4">
-                        <h4 class="text-sm font-medium text-gray-900 mb-3">Items Ordered</h4>
-                        <div class="space-y-3">
+                        <h4 class="text-sm font-medium text-gray-900 mb-4">Items Ordered</h4>
+                        <div class="space-y-4">
                             @foreach($order->items as $item)
-                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                <div class="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
                                     <div class="flex items-start justify-between">
                                         <div class="flex-1">
-                                            <div class="flex items-center space-x-2">
-                                                <h4 class="text-sm font-medium text-gray-900">{{ $item->name_snapshot }}</h4>
-                                                <span class="text-xs text-gray-500">×{{ $item->qty }}</span>
-                                            </div>
-                                            <div class="text-xs text-gray-500 mt-1">
-                                                RM{{ number_format($item->unit_price, 2) }} each
+                                            <!-- Item Header -->
+                                            <div class="flex items-center space-x-3 mb-2">
+                                                <h4 class="text-base font-semibold text-gray-900">{{ $item->name_snapshot }}</h4>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                    ×{{ $item->qty }}
+                                                </span>
                                             </div>
                                             
+                                            <!-- Price Information -->
+                                            <div class="flex items-center space-x-4 mb-3">
+                                                <span class="text-sm text-gray-600">
+                                                    RM{{ number_format($item->unit_price, 2) }} each
+                                                </span>
+                                                <span class="text-sm font-semibold text-gray-900">
+                                                    Total: RM{{ number_format($item->line_total, 2) }}
+                                                </span>
+                                            </div>
+                                            
+                                            <!-- Selections/Addons -->
                                             @if($item->hasSelections())
                                                 @php
                                                     $selections = $item->getSelectionsArray();
                                                 @endphp
                                                 
                                                 @if(!empty($selections['options']) || !empty($selections['addons']))
-                                                    <div class="mt-2 space-y-1">
+                                                    <div class="space-y-3">
                                                         @if(!empty($selections['options']))
                                                             @foreach($selections['options'] as $optionGroup)
                                                                 @if(!empty($optionGroup['options']))
-                                                                    <div class="flex items-start space-x-2">
-                                                                        <span class="text-xs font-medium text-gray-600 uppercase tracking-wide min-w-0 flex-shrink-0">
-                                                                            {{ $optionGroup['name'] }}:
-                                                                        </span>
-                                                                        <div class="flex flex-wrap gap-1">
+                                                                    <div>
+                                                                        <h5 class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                                                                            {{ $optionGroup['name'] }}
+                                                                        </h5>
+                                                                        <div class="flex flex-wrap gap-2">
                                                                             @foreach($optionGroup['options'] as $option)
-                                                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                                                <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-green-50 text-green-700 border border-green-200">
                                                                                     {{ $option['name'] }}
                                                                                 </span>
                                                                             @endforeach
@@ -119,16 +135,16 @@
                                                         @if(!empty($selections['addons']))
                                                             @foreach($selections['addons'] as $addonGroup)
                                                                 @if(!empty($addonGroup['options']))
-                                                                    <div class="flex items-start space-x-2">
-                                                                        <span class="text-xs font-medium text-gray-600 uppercase tracking-wide min-w-0 flex-shrink-0">
-                                                                            {{ $addonGroup['name'] }}:
-                                                                        </span>
-                                                                        <div class="flex flex-wrap gap-1">
+                                                                    <div>
+                                                                        <h5 class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                                                                            {{ $addonGroup['name'] }}
+                                                                        </h5>
+                                                                        <div class="flex flex-wrap gap-2">
                                                                             @foreach($addonGroup['options'] as $addon)
-                                                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                                                <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
                                                                                     {{ $addon['name'] }}
                                                                                     @if(isset($addon['price']) && $addon['price'] > 0)
-                                                                                        (+RM {{ number_format($addon['price'], 2) }})
+                                                                                        <span class="ml-1 text-blue-600">(+RM {{ number_format($addon['price'], 2) }})</span>
                                                                                     @endif
                                                                                 </span>
                                                                             @endforeach
@@ -139,16 +155,11 @@
                                                         @endif
                                                     </div>
                                                 @else
-                                                    <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
+                                                    <div class="text-xs text-gray-400 italic">No special selections</div>
                                                 @endif
                                             @else
-                                                <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
+                                                <div class="text-xs text-gray-400 italic">No special selections</div>
                                             @endif
-                                        </div>
-                                        <div class="text-right ml-4">
-                                            <div class="text-sm font-medium text-gray-900">
-                                                RM{{ number_format($item->line_total, 2) }}
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -156,48 +167,70 @@
                         </div>
 
                         @if($order->notes)
-                            <div class="mt-4 py-4 border-y border-gray-200">
-                                <h5 class="text-sm font-medium text-gray-900 mb-1">Notes:</h5>
-                                <p class="text-sm text-gray-600">{{ $order->notes }}</p>
+                            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                                <div class="flex items-start space-x-2">
+                                    <svg class="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div>
+                                        <h5 class="text-sm font-semibold text-blue-900 mb-1">Special Instructions</h5>
+                                        <p class="text-sm text-blue-800">{{ $order->notes }}</p>
+                                    </div>
+                                </div>
                             </div>
                         @endif
 
                         <!-- Tracking Information -->
                         @if($order->status === 'delivering' && ($order->tracking_url || $order->delivery_fee))
-                            <div class="mt-4 py-4 border-y border-gray-200">
-                                <h5 class="text-sm font-medium text-gray-900 mb-3">Delivery Information</h5>
-                                <div class="space-y-2">
-                                    @if($order->tracking_url)
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-sm text-gray-600">Tracking:</span>
-                                            <a href="{{ $order->tracking_url }}" target="_blank" class="text-sm text-purple-600 hover:text-purple-800 underline">
-                                                Track your order
-                                            </a>
+                            <div class="mt-6 bg-purple-50 border border-purple-200 rounded-xl p-4">
+                                <div class="flex items-start space-x-2">
+                                    <svg class="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0zM13 16V6h3l3 4v6m-6 0H6"></path>
+                                    </svg>
+                                    <div class="flex-1">
+                                        <h5 class="text-sm font-semibold text-purple-900 mb-3">Delivery Information</h5>
+                                        <div class="space-y-2">
+                                            @if($order->tracking_url)
+                                                <div class="flex items-center justify-between">
+                                                    <span class="text-sm text-purple-700">Tracking:</span>
+                                                    <a href="{{ $order->tracking_url }}" target="_blank" class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-purple-100 text-purple-800 hover:bg-purple-200 transition-colors">
+                                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                                        </svg>
+                                                        Track Order
+                                                    </a>
+                                                </div>
+                                            @endif
                                         </div>
-                                    @endif
+                                    </div>
                                 </div>
                             </div>
                         @endif
 
                         <!-- Order Summary -->
-                        <div class="mt-4 pt-2">
-                            <div class="flex justify-end gap-2 text-sm">
-                                <span class="text-gray-600">Subtotal:</span>
-                                <span class="text-gray-900">RM{{ number_format($order->subtotal, 2) }}</span>
-                            </div>
-                            @if($order->delivery_fee)
-                                <div class="flex justify-end gap-2 text-sm mt-1">
-                                    <span class="text-gray-600">Delivery Fee:</span>
-                                    <span class="text-gray-900">RM{{ number_format($order->delivery_fee, 2) }}</span>
+                        <div class="mt-6 bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-4">
+                            <h5 class="text-sm font-semibold text-gray-900 mb-3">Order Summary</h5>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Subtotal:</span>
+                                    <span class="text-gray-900 font-medium">RM{{ number_format($order->subtotal, 2) }}</span>
                                 </div>
-                            @endif
-                            <div class="flex justify-end gap-2 text-sm mt-1">
-                                <span class="text-gray-600">Tax:</span>
-                                <span class="text-gray-900">RM{{ number_format($order->tax, 2) }}</span>
-                            </div>
-                            <div class="flex justify-end gap-2 text-lg font-semibold">
-                                <span class="text-gray-900">Total:</span>
-                                <span class="text-gray-900">RM{{ number_format($order->total, 2) }}</span>
+                                @if($order->delivery_fee)
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Delivery Fee:</span>
+                                        <span class="text-gray-900 font-medium">RM{{ number_format($order->delivery_fee, 2) }}</span>
+                                    </div>
+                                @endif
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Tax (8%):</span>
+                                    <span class="text-gray-900 font-medium">RM{{ number_format($order->tax, 2) }}</span>
+                                </div>
+                                <div class="border-t border-gray-300 pt-2 mt-3">
+                                    <div class="flex justify-between text-lg font-bold">
+                                        <span class="text-gray-900">Total:</span>
+                                        <span class="text-gray-900">RM{{ number_format($order->total, 2) }}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

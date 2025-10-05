@@ -27,12 +27,14 @@ class Store extends Model
         'cover_path',
         'settings',
         'is_active',
+        'is_onboarding',
         'admin_id',
     ];
 
     protected $casts = [
         'settings' => 'array',
         'is_active' => 'boolean',
+        'is_onboarding' => 'boolean',
     ];
 
     public function getRouteKeyName(): string

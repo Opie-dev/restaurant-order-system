@@ -30,7 +30,9 @@
                                     <a href="{{ route('admin.dashboard') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700">Admin Panel</a>
                                 @endif
                             @else
-                                <a href="{{ route('menu.store.login', ['store' => $store->slug]) }}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Log in</a>
+                                <a href="{{ route('menu.store.login', ['store' => $store->slug]) }}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Customer Login</a>
+                                <a href="{{ route('merchant.login') }}" class="bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700">Merchant Login</a>
+                                <a href="{{ route('merchant.register') }}" class="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700">Merchant Register</a>
                             @endauth
                         @endif
                     </div>
@@ -55,7 +57,13 @@
                             </a>
                         @else
                             <a href="{{ route('menu.store.login', ['store' => $store->slug]) }}" class="border-2 border-white text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-white hover:text-indigo-600 transition-colors">
-                                Log Masuk
+                                Customer Login
+                            </a>
+                            <a href="{{ route('merchant.login') }}" class="bg-purple-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-purple-700 transition-colors">
+                                Merchant Login
+                            </a>
+                            <a href="{{ route('merchant.register') }}" class="bg-green-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-green-700 transition-colors">
+                                Merchant Register
                             </a>
                         @endauth
                     </div>

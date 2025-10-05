@@ -102,7 +102,13 @@
                                 <div class="p-4">
                                     <div class="flex items-start justify-between mb-2">
                                         <h3 class="font-semibold text-gray-800 text-lg">{{ $item->name }}</h3>
-                                        <span class="text-lg font-bold text-purple-600">RM {{ number_format($item->price, 2) }}</span>
+                                        <span class="text-lg font-bold text-purple-600">
+                                            @if($item->price)
+                                                RM {{ number_format($item->price, 2) }}
+                                            @else
+                                                Price on request
+                                            @endif
+                                        </span>
                                     </div>
                                     
                                     @if($item->description)

@@ -16,8 +16,11 @@ use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Settings\StoreDetails;
 use App\Livewire\Admin\Settings\Security;
 use App\Livewire\Admin\Stores\StoreSelector;
+use App\Livewire\Admin\Stores\CreateStore;
 use App\Livewire\Auth\Login as LoginPage;
 use App\Livewire\Auth\Register as RegisterPage;
+use App\Livewire\Auth\MerchantLogin as MerchantLoginPage;
+use App\Livewire\Auth\MerchantRegister as MerchantRegisterPage;
 use App\Livewire\Customer\Menu as CustomerMenu;
 use App\Livewire\Customer\StoresShowcase;
 use App\Livewire\Customer\Cart as CustomerCart;
@@ -32,7 +35,9 @@ use App\Livewire\Welcome as WelcomePage;
 
 Route::get('/', WelcomePage::class)->name('home');
 
-
+// Merchant authentication routes
+Route::get('/merchant/login', MerchantLoginPage::class)->name('merchant.login');
+Route::get('/merchant/register', MerchantRegisterPage::class)->name('merchant.register');
 
 Route::post('/logout', function () {
     \Illuminate\Support\Facades\Auth::logout();
@@ -46,6 +51,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Store management routes (no store selection required)
     Route::get('/stores/select', StoreSelector::class)->name('stores.select');
+    Route::get('/stores/create', CreateStore::class)->name('stores.create');
 
     // Store selection handler
     Route::post('/stores/select', function () {

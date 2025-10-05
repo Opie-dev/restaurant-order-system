@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50 flex flex-col">
+<div class="min-h-screen bg-gray-50 flex flex-col" x-data="menuScroll()">
     <!-- Main Content Area -->
     <div class="lg:h-[calc(100vh-80px)] overflow-y-auto">
         <!-- Left Panel - Menu -->
@@ -13,14 +13,20 @@
 
             <div id="categories" class="flex rounded-lg bg-white items-center shadow-sm gap-2 lg:gap-3 py-2 overflow-x-auto px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
                 <button type="button" 
-                    wire:click="$set('categoryId', null)" 
-                    class="px-3 lg:px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer hover:bg-purple-600 hover:text-white whitespace-nowrap {{ !$categoryId ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
+                    @click="handleCategoryClick('all', 'all')"
+                    data-category="all"
+                    data-category-slug="all"
+                    :class="currentCategory === 'all' ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                    class="px-3 lg:px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer hover:bg-purple-600 hover:text-white whitespace-nowrap">
                     All
                 </button>
                 @foreach($rootCategories as $cat)
                     <button type="button" 
-                        wire:click="$set('categoryId', {{ $cat->id }})" 
-                        class="px-3 lg:px-4 py-2 cursor-pointer hover:bg-purple-600 hover:text-white rounded-full text-sm font-medium transition-colors whitespace-nowrap {{ (int)$categoryId === (int)$cat->id ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
+                        @click="handleCategoryClick({{ $cat->id }}, '{{ Str::slug($cat->name) }}')"
+                        data-category="{{ $cat->id }}"
+                        data-category-slug="{{ Str::slug($cat->name) }}"
+                        :class="currentCategory === '{{ Str::slug($cat->name) }}' ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                        class="px-3 lg:px-4 py-2 cursor-pointer hover:bg-purple-600 hover:text-white rounded-full text-sm font-medium transition-colors whitespace-nowrap">
                         {{ $cat->name }}
                     </button>
                 @endforeach
@@ -44,13 +50,33 @@
 
             <!-- Menu Items -->
             @php
-                $itemsByCategory = $this->items->groupBy(function($item) {
-                    return $item->category?->name ?? 'Uncategorized';
-                });
+                // Get categories in position order
+                $orderedCategories = $this->categories->whereNull('parent_id')->sortBy('position');
+                
+                // Group items by category ID to preserve position order
+                $itemsByCategoryId = $this->items->groupBy('category_id');
+                
+                // Create ordered items by category
+                $orderedItemsByCategory = collect();
+                foreach ($orderedCategories as $category) {
+                    if ($itemsByCategoryId->has($category->id)) {
+                        $orderedItemsByCategory->put($category->name, $itemsByCategoryId->get($category->id));
+                    }
+                }
+                
+                // Add uncategorized items at the end
+                $uncategorizedItems = $itemsByCategoryId->get(null, collect());
+                if ($uncategorizedItems->isNotEmpty()) {
+                    $orderedItemsByCategory->put('Uncategorized', $uncategorizedItems);
+                }
             @endphp
 
-            @forelse($itemsByCategory as $categoryName => $items)
-                <div class="mb-6 lg:mb-8 px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
+            @forelse($orderedItemsByCategory as $categoryName => $items)
+                @php
+                    $categoryId = $orderedCategories->where('name', $categoryName)->first()?->id ?? 'uncategorized';
+                    $categorySlug = Str::slug($categoryName);
+                @endphp
+                <div id="category-{{ $categorySlug }}" class="mb-6 lg:mb-8 px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
                     <h2 class="text-lg lg:text-xl font-semibold text-gray-800 mb-3 lg:mb-4">{{ $categoryName }}</h2>
                     <!-- Responsive Grid: 1 item on mobile, 2 on tablet, 3 on desktop -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
@@ -91,7 +117,13 @@
                                 <div class="p-4">
                                     <div class="flex items-start justify-between mb-2">
                                         <h3 class="font-semibold text-gray-800 text-lg">{{ $item->name }}</h3>
-                                        <span class="text-lg font-bold text-purple-600">RM {{ number_format($item->price, 2) }}</span>
+                                        <span class="text-lg font-bold text-purple-600">
+                                            @if($item->price)
+                                                RM {{ number_format($item->price, 2) }}
+                                            @else
+                                                Price on request
+                                            @endif
+                                        </span>
                                     </div>
                                     
                                     @if($item->description)
@@ -383,4 +415,147 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('menuScroll', () => ({
+        currentCategory: 'all',
+        isScrolling: false,
+        scrollTimeout: null,
+        
+        init() {
+            this.setupScrollDetection();
+        },
+        
+        setupScrollDetection() {
+            const scrollContainer = document.querySelector('.lg\\:h-\\[calc\\(100vh-80px\\)\\]');
+            if (!scrollContainer) return;
+            
+            scrollContainer.addEventListener('scroll', () => {
+                this.handleScroll();
+            });
+        },
+        
+        handleScroll() {
+            if (this.isScrolling) return;
+            
+            this.isScrolling = true;
+            clearTimeout(this.scrollTimeout);
+            
+            this.scrollTimeout = setTimeout(() => {
+                this.updateActiveCategory();
+                this.isScrolling = false;
+            }, 100);
+        },
+        
+        updateActiveCategory() {
+            const categories = document.querySelectorAll('[id^="category-"]');
+            const categoryButtons = document.querySelectorAll('[data-category-slug]');
+            const scrollContainer = document.querySelector('.lg\\:h-\\[calc\\(100vh-80px\\)\\]');
+            
+            if (!scrollContainer || categories.length === 0) return;
+            
+            const containerRect = scrollContainer.getBoundingClientRect();
+            const containerTop = containerRect.top;
+            const containerBottom = containerRect.bottom;
+            
+            let activeCategory = null;
+            let minDistance = Infinity;
+            
+            categories.forEach(category => {
+                const categoryRect = category.getBoundingClientRect();
+                const categoryTop = categoryRect.top;
+                const categoryBottom = categoryRect.bottom;
+                
+                // Check if category is visible in the viewport
+                const isVisible = categoryTop < containerBottom && categoryBottom > containerTop;
+                
+                if (isVisible) {
+                    // Calculate distance from top of container
+                    const distance = Math.abs(categoryTop - containerTop);
+                    
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        activeCategory = category.id.replace('category-', '');
+                    }
+                }
+            });
+            
+            // If no category is visible, find the closest one
+            if (!activeCategory && categories.length > 0) {
+                categories.forEach(category => {
+                    const categoryRect = category.getBoundingClientRect();
+                    const distance = Math.abs(categoryRect.top - containerTop);
+                    
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        activeCategory = category.id.replace('category-', '');
+                    }
+                });
+            }
+            
+            // Update active category button
+            if (activeCategory && activeCategory !== this.currentCategory) {
+                this.currentCategory = activeCategory;
+                this.highlightCategoryButton(activeCategory);
+            }
+        },
+        
+        highlightCategoryButton(categorySlug) {
+            const categoryButtons = document.querySelectorAll('[data-category-slug]');
+            
+            categoryButtons.forEach(button => {
+                const buttonSlug = button.getAttribute('data-category-slug');
+                
+                if (buttonSlug === categorySlug) {
+                    // Add active class
+                    button.classList.remove('bg-white', 'text-gray-700', 'hover:bg-gray-50');
+                    button.classList.add('bg-purple-600', 'text-white');
+                } else {
+                    // Remove active class
+                    button.classList.remove('bg-purple-600', 'text-white');
+                    button.classList.add('bg-white', 'text-gray-700', 'hover:bg-gray-50');
+                }
+            });
+        },
+        
+        handleCategoryClick(categoryId, categorySlug) {
+            // Only scroll to category, don't filter items
+            if (categorySlug !== 'all') {
+                this.scrollToCategory(categorySlug);
+            } else {
+                // Scroll to top for "All" category
+                const scrollContainer = document.querySelector('.lg\\:h-\\[calc\\(100vh-80px\\)\\]');
+                if (scrollContainer) {
+                    scrollContainer.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+            
+            // Update visual appearance
+            this.highlightCategoryButton(categorySlug);
+        },
+        
+        scrollToCategory(categorySlug) {
+            const categoryElement = document.getElementById(`category-${categorySlug}`);
+            if (categoryElement) {
+                const scrollContainer = document.querySelector('.lg\\:h-\\[calc\\(100vh-80px\\)\\]');
+                if (scrollContainer) {
+                    const containerRect = scrollContainer.getBoundingClientRect();
+                    const categoryRect = categoryElement.getBoundingClientRect();
+                    const scrollTop = scrollContainer.scrollTop;
+                    const targetScrollTop = scrollTop + categoryRect.top - containerRect.top - 20; // 20px offset
+                    
+                    scrollContainer.scrollTo({
+                        top: targetScrollTop,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        }
+    }));
+});
+</script>
 

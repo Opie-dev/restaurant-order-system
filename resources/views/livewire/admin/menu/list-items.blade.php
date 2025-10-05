@@ -110,7 +110,13 @@
                                     
                                     <!-- Price -->
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">RM {{ number_format($item->price, 2) }}</div>
+                                        <div class="text-sm font-medium text-gray-900">
+                                            @if($item->price)
+                                                RM {{ number_format($item->price, 2) }}
+                                            @else
+                                                Price on request
+                                            @endif
+                                        </div>
                                         @if($item->base_price && $item->type === 'set')
                                             <div class="text-xs text-gray-500">Base: RM {{ number_format($item->base_price, 2) }}</div>
                                         @endif

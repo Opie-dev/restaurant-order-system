@@ -21,8 +21,6 @@ class CreateItem extends Component
     public $price;
     public $base_price;
     public ?int $category_id = null;
-    public bool $is_active = true;
-    public bool $enabled = true;
     public int $stock = 0;
     public ?string $tag = null; // popular | bestseller
     public ?string $type = 'ala_carte'; // set | ala_carte
@@ -31,10 +29,16 @@ class CreateItem extends Component
     public $image;
     public $currentStore;
 
+    private $storeService;
+
+    public function boot(StoreService $storeService)
+    {
+        $this->storeService = $storeService;
+    }
+
     public function mount()
     {
-        $storeService = app(StoreService::class);
-        $this->currentStore = $storeService->getCurrentStore();
+        $this->currentStore = $this->storeService->getCurrentStore();
     }
 
     public function addOptionGroup(): void
@@ -95,14 +99,24 @@ class CreateItem extends Component
         $this->addons[$groupIndex]['options'] = array_values($this->addons[$groupIndex]['options']);
     }
 
+    public function toggleOptionGroupEnabled(int $groupIndex): void
+    {
+        $isEnabled = $this->options[$groupIndex]['enabled'] ?? true;
+        $this->options[$groupIndex]['enabled'] = !$isEnabled;
+    }
+
+    public function toggleAddonGroupEnabled(int $groupIndex): void
+    {
+        $isEnabled = $this->addons[$groupIndex]['enabled'] ?? true;
+        $this->addons[$groupIndex]['enabled'] = !$isEnabled;
+    }
+
     public function save(): void
     {
         $rules = [
             'name' => 'required|string|min:2|max:255',
             'description' => 'nullable|string|max:2000',
             'category_id' => 'required|integer|exists:categories,id',
-            'is_active' => 'boolean',
-            'enabled' => 'boolean',
             'stock' => 'required|integer|min:0',
             'tag' => 'nullable|in:popular,bestseller',
             'type' => 'required|in:set,ala_carte',
@@ -121,7 +135,7 @@ class CreateItem extends Component
         if ($this->type === 'set') {
             $rules['base_price'] = 'required|numeric|min:0|max:999999.99';
         } else {
-            $rules['price'] = 'required|numeric|min:0|max:999999.99';
+            $rules['price'] = 'nullable|numeric|min:0|max:999999.99';
         }
 
         $messages = [
@@ -147,6 +161,7 @@ class CreateItem extends Component
 
         $item = new MenuItem($validated);
         $item->store_id = $this->currentStore->id;
+        $item->is_active = true;
 
         if ($this->image) {
             $path = $this->image->store('menu', 'public');
@@ -156,7 +171,13 @@ class CreateItem extends Component
         $item->save();
 
         session()->flash('success', 'Menu item created.');
-        $this->redirectRoute('admin.menu.index');
+
+        // Check if store is in onboarding mode
+        if ($this->currentStore->is_onboarding) {
+            $this->redirectRoute('admin.dashboard');
+        } else {
+            $this->redirectRoute('admin.menu.index');
+        }
     }
 
     public function render()

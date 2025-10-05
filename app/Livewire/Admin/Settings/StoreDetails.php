@@ -53,6 +53,8 @@ class StoreDetails extends Component
     #[Validate('nullable|mimes:jpg,jpeg,png,gif,bmp,svg,webp,avif|max:8192')]
     public $cover_desktop;
 
+    public ?string $logo_path = null;
+    public ?string $cover_path = null;
     public ?string $cover_desktop_path = null;
     public ?Store $currentStore = null;
     private $storeService;
@@ -157,6 +159,47 @@ class StoreDetails extends Component
         return $out;
     }
 
+    public function saveDetails(): void
+    {
+        $this->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:stores,slug,' . $this->currentStore->id,
+            'description' => 'nullable|string|max:500',
+            'address_line1' => 'required|string|max:255',
+            'address_line2' => 'nullable|string|max:255',
+            'city' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'postal_code' => 'required|string|max:20',
+            'phone' => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/',
+            'email' => 'required|email',
+        ]);
+
+        if (!$this->currentStore) {
+            session()->flash('error', 'No store selected.');
+            return;
+        }
+
+        $this->currentStore->update([
+            'name' => $this->name,
+            'slug' => $this->slug,
+            'description' => $this->description,
+            'address_line1' => $this->address_line1,
+            'address_line2' => $this->address_line2,
+            'city' => $this->city,
+            'state' => $this->state,
+            'postal_code' => $this->postal_code,
+            'phone' => $this->phone,
+            'email' => $this->email,
+        ]);
+
+        session()->flash('success', 'Store details updated successfully.');
+
+        // Check if store is in onboarding mode
+        if ($this->currentStore->is_onboarding) {
+            $this->redirectRoute('admin.dashboard');
+        }
+    }
+
     public function saveMedia(): void
     {
         $this->validate([
@@ -201,6 +244,12 @@ class StoreDetails extends Component
         $this->cover = null;
 
         session()->flash('success', 'Store media updated successfully.');
+
+        // Check if store is in onboarding mode
+        if ($this->currentStore->is_onboarding) {
+            $this->redirectRoute('admin.dashboard');
+        }
+
         $this->dispatch('media-saved');
     }
 
@@ -239,6 +288,12 @@ class StoreDetails extends Component
         $this->currentStore->update(['settings' => $settings]);
 
         session()->flash('success', 'Opening hours updated successfully.');
+
+        // Check if store is in onboarding mode
+        if ($this->currentStore->is_onboarding) {
+            $this->redirectRoute('admin.dashboard');
+        }
+
         $this->dispatch('hours-saved');
     }
 

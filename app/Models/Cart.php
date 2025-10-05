@@ -27,4 +27,26 @@ class Cart extends Model
     {
         return $this->belongsTo(Store::class);
     }
+
+    // Session-based cart methods
+    public static function fromSession(array $cartData): self
+    {
+        $cart = new self();
+        $cart->sessionData = $cartData;
+        return $cart;
+    }
+
+    public function getSessionItems(): array
+    {
+        return $this->sessionData ?? [];
+    }
+
+    public function getSessionCount(): int
+    {
+        $count = 0;
+        foreach ($this->sessionData ?? [] as $item) {
+            $count += $item['qty'];
+        }
+        return $count;
+    }
 }

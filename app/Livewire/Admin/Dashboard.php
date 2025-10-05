@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\User;
 use App\Models\MenuItem;
 use App\Services\Admin\StoreService;
+use App\Services\Admin\OnboardingService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Carbon\Carbon;
@@ -20,6 +21,13 @@ class Dashboard extends Component
     public int $selectedOrdersPeriod = 7;
     public int $selectedRevenuePeriod = 7;
     public $currentStore;
+    private $storeService;
+    private $onboardingService;
+
+    public function boot()
+    {
+        $this->storeService = new StoreService();
+    }
 
     public function mount()
     {
@@ -27,8 +35,10 @@ class Dashboard extends Component
         $this->selectedYear = now()->year;
         $this->selectedWeek = $this->getCurrentWeekOfMonth();
 
-        $storeService = app(StoreService::class);
-        $this->currentStore = $storeService->getCurrentStore();
+        $this->currentStore = $this->storeService->getCurrentStore();
+
+        // Initialize onboarding service
+        $this->onboardingService = new OnboardingService($this->currentStore);
     }
 
     public function getCurrentWeekOfMonth()
@@ -199,6 +209,35 @@ class Dashboard extends Component
     public function getAvailableWeeksProperty()
     {
         return [1 => 'Week 1', 2 => 'Week 2', 3 => 'Week 3', 4 => 'Week 4'];
+    }
+
+    public function getOnboardingStepsProperty()
+    {
+        return $this->onboardingService->getSteps();
+    }
+
+    public function getOnboardingCompleteProperty()
+    {
+        return $this->onboardingService->isOnboardingComplete();
+    }
+
+    public function getCompletionPercentageProperty()
+    {
+        return $this->onboardingService->getCompletionPercentage();
+    }
+
+    public function getNextStepProperty()
+    {
+        return $this->onboardingService->getNextStep();
+    }
+
+    public function completeOnboarding()
+    {
+        $this->onboardingService->completeOnboarding();
+        $this->currentStore->refresh();
+        $this->onboardingService = new OnboardingService($this->currentStore);
+
+        session()->flash('success', 'Onboarding completed! Welcome to your dashboard.');
     }
 
     public function getOrderStatusCountsProperty()

@@ -96,8 +96,8 @@ class Menu extends Component
             $selections['addons'] = $this->config['addons'];
         }
 
-        $this->cartService->add($item->id, $qty, $selections);
-        $this->dispatch('flash', ['type' => 'success', 'message' => 'Added to cart']);
+        $this->cartService->add($item->id, $qty, $selections, $this->store?->id);
+        //$this->dispatch('flash', ['type' => 'success', 'message' => 'Added to cart']);
         $this->dispatch('close-config');
         $this->config = [];
         $this->configItemId = null;
@@ -128,8 +128,8 @@ class Menu extends Component
             $this->startConfigure($menuItemId);
             return;
         }
-        $this->cartService->add($menuItemId, 1, []);
-        $this->dispatch('flash', ['type' => 'success', 'message' => 'Added to cart']);
+        $this->cartService->add($menuItemId, 1, [], $this->store?->id);
+        //$this->dispatch('flash', ['type' => 'success', 'message' => 'Added to cart']);
     }
 
     public function getCategoriesProperty()
@@ -140,7 +140,7 @@ class Menu extends Component
             $query->where('store_id', $this->store->id);
         }
 
-        return $query->ordered()->get(['id', 'name']);
+        return $query->ordered()->get(['id', 'name', 'position']);
     }
 
     public function getItemsProperty()
@@ -204,14 +204,12 @@ class Menu extends Component
 
     public function getCartCountProperty(): int
     {
-        $cart = $this->cartService->current();
-        return (int) $cart->items()->sum('qty');
+        return $this->cartService->getCartCount($this->store?->id);
     }
 
     public function getCartLinesProperty(): array
     {
-        $cart = $this->cartService->current();
-        return $this->cartService->getLines($cart);
+        return $this->cartService->getLines($this->store?->id);
     }
 
     public function getTotalPrice(): float
@@ -260,8 +258,7 @@ class Menu extends Component
 
     public function getCartTotalsProperty(): array
     {
-        $cart = $this->cartService->current();
-        return $this->cartService->getTotals($cart);
+        return $this->cartService->getTotals($this->store?->id);
     }
 
     public function increment(int $menuItemId, ?int $lineId = null): void
@@ -277,9 +274,9 @@ class Menu extends Component
             return;
         }
         if ($lineId) {
-            $this->cartService->incrementLine($lineId);
+            $this->cartService->incrementLine($lineId, $this->store?->id);
         } else {
-            $this->cartService->increment($menuItemId);
+            $this->cartService->increment($menuItemId, $this->store?->id);
         }
         $this->dispatch('flash', ['type' => 'success', 'message' => 'Quantity updated']);
     }
@@ -297,9 +294,9 @@ class Menu extends Component
             return;
         }
         if ($lineId) {
-            $this->cartService->decrementLine($lineId);
+            $this->cartService->decrementLine($lineId, $this->store?->id);
         } else {
-            $this->cartService->decrement($menuItemId);
+            $this->cartService->decrement($menuItemId, $this->store?->id);
         }
         $this->dispatch('flash', ['type' => 'success', 'message' => 'Quantity updated']);
     }
@@ -317,9 +314,9 @@ class Menu extends Component
             return;
         }
         if ($lineId) {
-            $this->cartService->removeLine($lineId);
+            $this->cartService->removeLine($lineId, $this->store?->id);
         } else {
-            $this->cartService->remove($menuItemId);
+            $this->cartService->remove($menuItemId, $this->store?->id);
         }
         $this->dispatch('flash', ['type' => 'success', 'message' => 'Item removed from cart']);
     }
@@ -336,7 +333,7 @@ class Menu extends Component
             $this->redirectRoute('login');
             return;
         }
-        $this->cartService->clear();
+        $this->cartService->clear($this->store?->id);
         $this->dispatch('flash', ['type' => 'success', 'message' => 'Cart cleared']);
     }
 
@@ -353,8 +350,7 @@ class Menu extends Component
             return;
         }
 
-        $cart = $this->cartService->current();
-        $cartCount = $cart->items()->sum('qty');
+        $cartCount = $this->cartService->getCartCount($this->store?->id);
 
         if ($cartCount <= 0) {
             $this->dispatch('flash', ['type' => 'error', 'message' => 'Your cart is empty. Please add items before proceeding to checkout.']);
@@ -364,9 +360,10 @@ class Menu extends Component
         // Validate stock before proceeding
         $invalidNames = [];
         $overCapNames = [];
-        $cart->loadMissing(['items.menuItem']);
-        foreach ($cart->items as $line) {
-            $item = $line->menuItem;
+        $cartLines = $this->cartService->getLines($this->store?->id);
+
+        foreach ($cartLines as $line) {
+            $item = $line['item'];
             if (!$item) {
                 $invalidNames[] = 'Unknown item';
                 continue;
@@ -377,7 +374,7 @@ class Menu extends Component
                     $invalidNames[] = $item->name;
                     continue;
                 }
-                if ($line->qty > $stock) {
+                if ($line['qty'] > $stock) {
                     $overCapNames[] = $item->name;
                 }
             }

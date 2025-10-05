@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Categories;
 use App\Models\Category;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use App\Services\Admin\StoreService;
 
 #[Layout('layouts.admin')]
 class ListCategories extends Component
@@ -15,9 +16,17 @@ class ListCategories extends Component
     public $categories;
     public $rootCategories;
     public $hierarchicalCategories;
+    private $storeService;
+    public $storeId;
+
+    public function boot(StoreService $storeService)
+    {
+        $this->storeService = $storeService;
+    }
 
     public function mount()
     {
+        $this->storeId = $this->storeService->getCurrentStore()->id;
         $this->loadCategories();
     }
 
@@ -28,7 +37,7 @@ class ListCategories extends Component
 
     private function loadCategories()
     {
-        $query = Category::ordered();
+        $query = Category::ordered()->where('store_id', $this->storeId);
 
         if ($this->search) {
             $query->where('name', 'like', '%' . $this->search . '%');

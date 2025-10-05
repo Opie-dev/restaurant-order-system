@@ -2,73 +2,104 @@
 
 namespace App\Services;
 
-use App\Models\Cart;
-use App\Models\CartItem;
 use App\Models\MenuItem;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class CartService
 {
-    public function current(): Cart
+    public function getCartKey(?int $storeId = null): string
     {
-        $storeId = session('current_store_id');
         if (Auth::check()) {
-            return Cart::firstOrCreate([
-                'user_id' => Auth::id(),
-                'store_id' => $storeId,
-            ]);
+            return "cart_user_" . Auth::id() . "_store_" . $storeId;
         }
-        $token = session()->get('guest_cart_token');
-        if (!$token) {
-            $token = Str::uuid()->toString();
-            session()->put('guest_cart_token', $token);
-        }
-        return Cart::firstOrCreate([
-            'guest_token' => $token,
-            'store_id' => $storeId,
-        ]);
+        return "cart_guest_store_" . $storeId;
     }
 
-    public function add(int $menuItemId, int $qty = 1, array $selections = []): void
+    public function getCartTimerKey(?int $storeId = null): string
+    {
+        if (Auth::check()) {
+            return "cart_timer_user_" . Auth::id() . "_store_" . $storeId;
+        }
+        return "cart_timer_guest_store_" . $storeId;
+    }
+
+    public function getCart(?int $storeId = null): array
+    {
+        return session($this->getCartKey($storeId), []);
+    }
+
+    public function setCart(array $cart, ?int $storeId = null): void
+    {
+        session([$this->getCartKey($storeId) => $cart]);
+        // Reset timer when cart is updated
+        $this->resetCartTimer($storeId);
+    }
+
+    public function getCartTimer(?int $storeId = null): ?int
+    {
+        return session($this->getCartTimerKey($storeId));
+    }
+
+    public function resetCartTimer(?int $storeId = null): void
+    {
+        // Set timer to 15 minutes (900 seconds) from now
+        session([$this->getCartTimerKey($storeId) => time() + 900]);
+    }
+
+    public function isCartExpired(?int $storeId = null): bool
+    {
+        $timer = $this->getCartTimer($storeId);
+        if (!$timer) {
+            return true; // No timer means expired
+        }
+        return time() > $timer;
+    }
+
+    public function getCartTimeRemaining(?int $storeId = null): int
+    {
+        $timer = $this->getCartTimer($storeId);
+        if (!$timer) {
+            return 0;
+        }
+        return max(0, $timer - time());
+    }
+
+    public function add(int $menuItemId, int $qty = 1, array $selections = [], ?int $storeId = null): void
     {
         $item = MenuItem::where('is_active', true)->findOrFail($menuItemId);
-        $cart = $this->current();
-        // Find existing line with same selections; else create new
-        $line = CartItem::where('cart_id', $cart->id)
-            ->where('menu_item_id', $item->id)
-            ->where(function ($q) use ($selections) {
-                if (empty($selections)) {
-                    $q->whereNull('selections');
-                } else {
-                    $q->where('selections', json_encode($selections));
-                }
-            })->first();
+        $cart = $this->getCart($storeId);
 
-        if (!$line) {
-            $line = new CartItem([
-                'cart_id' => $cart->id,
-                'menu_item_id' => $item->id,
-                'qty' => 0,
-            ]);
-            $line->selections = !empty($selections) ? $selections : null;
-            $line->unit_price = $this->computeUnitPrice($item, $selections);
+        // Find existing line with same selections
+        $existingIndex = null;
+        foreach ($cart as $index => $line) {
+            if (
+                $line['menu_item_id'] == $menuItemId &&
+                json_encode($line['selections'] ?? []) === json_encode($selections)
+            ) {
+                $existingIndex = $index;
+                break;
+            }
         }
 
-        $currentQty = (int) ($line->qty ?? 0);
-        $desiredQty = $currentQty + $qty;
+        if ($existingIndex !== null) {
+            $currentQty = (int) $cart[$existingIndex]['qty'];
+            $desiredQty = $currentQty + $qty;
+        } else {
+            $currentQty = 0;
+            $desiredQty = $qty;
+        }
 
-        // If stock is defined, do not allow exceeding stock and avoid dropping below current when stock is 0
+        // If stock is defined, do not allow exceeding stock
         if (isset($item->stock)) {
             $availableStock = max(0, (int) $item->stock);
 
             // If creating a new line and there is no stock, do nothing
-            if (!$line->exists && $availableStock <= 0) {
+            if ($existingIndex === null && $availableStock <= 0) {
                 return;
             }
 
             // If line exists and already at or above stock, keep as-is (no-op)
-            if ($line->exists && $currentQty >= $availableStock) {
+            if ($existingIndex !== null && $currentQty >= $availableStock) {
                 return;
             }
 
@@ -78,16 +109,26 @@ class CartService
         }
 
         // Ensure minimum of 1 for existing lines; for new lines, ensure > 0
-        if ($line->exists) {
-            $line->qty = max(1, (int) $newQty);
+        if ($existingIndex !== null) {
+            $cart[$existingIndex]['qty'] = max(1, (int) $newQty);
         } else {
             if ($newQty <= 0) {
                 return;
             }
-            $line->qty = (int) $newQty;
+            $cart[] = [
+                'menu_item_id' => $menuItemId,
+                'qty' => (int) $newQty,
+                'unit_price' => $this->computeUnitPrice($item, $selections),
+                'selections' => !empty($selections) ? $selections : null,
+            ];
         }
 
-        $line->save();
+        $this->setCart($cart, $storeId);
+
+        // Initialize timer if this is the first item
+        if (count($cart) === 1 && $existingIndex === null) {
+            $this->resetCartTimer($storeId);
+        }
     }
 
     private function computeUnitPrice(MenuItem $item, array $selections): float
@@ -108,94 +149,122 @@ class CartService
         return round($base + $addonTotal, 2);
     }
 
-    public function setQty(int $menuItemId, int $qty): void
+    public function setQty(int $menuItemId, int $qty, ?int $storeId = null): void
     {
-        $cart = $this->current();
-        $line = CartItem::where('cart_id', $cart->id)->where('menu_item_id', $menuItemId)->first();
-        if (!$line) {
-            return;
+        $cart = $this->getCart($storeId);
+        foreach ($cart as $index => $line) {
+            if ($line['menu_item_id'] == $menuItemId) {
+                $item = MenuItem::find($menuItemId);
+                if ($item && isset($item->stock)) {
+                    $qty = min($qty, max(0, (int) $item->stock));
+                }
+                $cart[$index]['qty'] = max(1, $qty);
+                $this->setCart($cart, $storeId);
+                return;
+            }
         }
-        if (isset($line->menuItem->stock)) {
-            $qty = min($qty, max(0, (int) $line->menuItem->stock));
+    }
+
+    public function increment(int $menuItemId, ?int $storeId = null): void
+    {
+        $this->add($menuItemId, 1, [], $storeId);
+    }
+
+    public function decrement(int $menuItemId, ?int $storeId = null): void
+    {
+        $cart = $this->getCart($storeId);
+        foreach ($cart as $index => $line) {
+            if ($line['menu_item_id'] == $menuItemId) {
+                $cart[$index]['qty'] = max(1, $line['qty'] - 1);
+                $this->setCart($cart, $storeId);
+                return;
+            }
         }
-        $line->qty = max(1, $qty);
-        $line->save();
     }
 
-    public function increment(int $menuItemId): void
+    public function remove(int $menuItemId, ?int $storeId = null): void
     {
-        $this->add($menuItemId, 1);
+        $cart = $this->getCart($storeId);
+        $cart = array_filter($cart, function ($line) use ($menuItemId) {
+            return $line['menu_item_id'] != $menuItemId;
+        });
+        $this->setCart(array_values($cart), $storeId);
     }
 
-    public function decrement(int $menuItemId): void
+    public function clear(?int $storeId = null): void
     {
-        $cart = $this->current();
-        $line = CartItem::where('cart_id', $cart->id)->where('menu_item_id', $menuItemId)->first();
-        if (!$line) return;
-        $line->qty = max(1, $line->qty - 1);
-        $line->save();
+        $this->setCart([], $storeId);
     }
 
-    public function remove(int $menuItemId): void
+    public function getLines(?int $storeId = null): array
     {
-        $cart = $this->current();
-        CartItem::where('cart_id', $cart->id)->where('menu_item_id', $menuItemId)->delete();
-    }
+        $cart = $this->getCart($storeId);
+        $lines = [];
 
-    public function clear(): void
-    {
-        $cart = $this->current();
-        $cart->items()->delete();
-    }
-
-    public function getLines(Cart $cart): array
-    {
-        return $cart->items()->with('menuItem')->get()->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'item' => $item->menuItem,
-                'qty' => $item->qty,
-                'unit_price' => $item->unit_price,
-                'line_total' => $item->qty * $item->unit_price,
-                'selections' => $item->selections ?? null,
-            ];
-        })->toArray();
-    }
-
-    public function incrementLine(int $lineId): void
-    {
-        $cart = $this->current();
-        $line = CartItem::where('cart_id', $cart->id)->where('id', $lineId)->with('menuItem')->first();
-        if (!$line) return;
-        $item = $line->menuItem;
-        if ($item && isset($item->stock)) {
-            $cap = max(0, (int) $item->stock);
-            if ($line->qty >= $cap) return;
+        foreach ($cart as $line) {
+            $item = MenuItem::find($line['menu_item_id']);
+            if ($item) {
+                $lines[] = [
+                    'id' => $line['menu_item_id'], // Use menu_item_id as identifier
+                    'item' => $item,
+                    'qty' => $line['qty'],
+                    'unit_price' => $line['unit_price'],
+                    'line_total' => $line['qty'] * $line['unit_price'],
+                    'selections' => $line['selections'] ?? null,
+                ];
+            }
         }
-        $line->qty = $line->qty + 1;
-        $line->save();
+
+        return $lines;
     }
 
-    public function decrementLine(int $lineId): void
+    public function incrementLine(int $lineId, ?int $storeId = null): void
     {
-        $cart = $this->current();
-        $line = CartItem::where('cart_id', $cart->id)->where('id', $lineId)->first();
-        if (!$line) return;
-        $line->qty = max(1, $line->qty - 1);
-        $line->save();
+        $cart = $this->getCart($storeId);
+        foreach ($cart as $index => $line) {
+            if ($line['menu_item_id'] == $lineId) {
+                $item = MenuItem::find($lineId);
+                if ($item && isset($item->stock)) {
+                    $cap = max(0, (int) $item->stock);
+                    if ($line['qty'] >= $cap) return;
+                }
+                $cart[$index]['qty'] = $line['qty'] + 1;
+                $this->setCart($cart, $storeId);
+                return;
+            }
+        }
     }
 
-    public function removeLine(int $lineId): void
+    public function decrementLine(int $lineId, ?int $storeId = null): void
     {
-        $cart = $this->current();
-        CartItem::where('cart_id', $cart->id)->where('id', $lineId)->delete();
+        $cart = $this->getCart($storeId);
+        foreach ($cart as $index => $line) {
+            if ($line['menu_item_id'] == $lineId) {
+                $cart[$index]['qty'] = max(1, $line['qty'] - 1);
+                $this->setCart($cart, $storeId);
+                return;
+            }
+        }
     }
 
-    public function getTotals(Cart $cart): array
+    public function removeLine(int $lineId, ?int $storeId = null): void
     {
-        $subtotal = (float) ($cart->items()
-            ->selectRaw('SUM(qty * unit_price) as subtotal')
-            ->value('subtotal') ?? 0);
+        $cart = $this->getCart($storeId);
+        $cart = array_filter($cart, function ($line) use ($lineId) {
+            return $line['menu_item_id'] != $lineId;
+        });
+        $this->setCart(array_values($cart), $storeId);
+    }
+
+    public function getTotals(?int $storeId = null): array
+    {
+        $cart = $this->getCart($storeId);
+        $subtotal = 0.0;
+
+        foreach ($cart as $line) {
+            $subtotal += $line['qty'] * $line['unit_price'];
+        }
+
         $tax = $subtotal * 0.08; // 8% tax
         $total = $subtotal + $tax;
 
@@ -204,5 +273,24 @@ class CartService
             'tax' => $tax,
             'total' => $total,
         ];
+    }
+
+    public function getCartCount(?int $storeId = null): int
+    {
+        $cart = $this->getCart($storeId);
+        $count = 0;
+        foreach ($cart as $line) {
+            $count += $line['qty'];
+        }
+        return $count;
+    }
+
+    public function checkAndClearExpiredCart(?int $storeId = null): bool
+    {
+        if ($this->isCartExpired($storeId)) {
+            $this->clear($storeId);
+            return true; // Cart was cleared
+        }
+        return false; // Cart is still valid
     }
 }

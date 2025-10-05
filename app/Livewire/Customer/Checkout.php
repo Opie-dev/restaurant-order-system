@@ -5,7 +5,10 @@ namespace App\Livewire\Customer;
 use App\Services\CartService;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Mail\NewOrderNotification;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -43,18 +46,40 @@ class Checkout extends Component
 
     public function getCartLinesProperty(): array
     {
-        $cart = $this->cartService->current();
-        return $this->cartService->getLines($cart);
+        return $this->cartService->getLines($this->store?->id);
     }
 
     public function getCartTotalsProperty(): array
     {
-        $cart = $this->cartService->current();
-        return $this->cartService->getTotals($cart);
+        return $this->cartService->getTotals($this->store?->id);
+    }
+
+    public function getUserAddressesProperty()
+    {
+        if (!Auth::check()) {
+            return collect();
+        }
+
+        return UserAddress::where('user_id', Auth::id())
+            ->orderBy('is_default', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
     public function submitOrder()
     {
+        // Check if user is authenticated
+        if (!Auth::check()) {
+            $this->addError('auth', 'You must be logged in to place an order.');
+            return;
+        }
+
+        // Check if store exists
+        if (!$this->store) {
+            $this->addError('store', 'Store not found. Please try again.');
+            return;
+        }
+
         $this->validate([
             'deliver' => 'required|boolean',
             'addressId' => 'required_if:deliver,true|nullable|integer',
@@ -62,21 +87,40 @@ class Checkout extends Component
         ]);
 
         // Check if cart is not empty
-        $cart = $this->cartService->current();
-        if ($cart->items()->count() === 0) {
+        $cartLines = $this->cartService->getLines($this->store?->id);
+        if (empty($cartLines)) {
             $this->addError('cart', 'Your cart is empty. Please add items before placing an order.');
             return;
         }
 
         // Check delivery address if delivery is selected
-        if ($this->deliver && !$this->addressId) {
-            $this->addError('addressId', 'Please select a delivery address.');
-            return;
+        if ($this->deliver) {
+            // Check if user has any addresses at all
+            $userAddresses = UserAddress::where('user_id', Auth::id())->count();
+            if ($userAddresses === 0) {
+                $this->addError('address', 'You need to add a delivery address before placing a delivery order. Please go to "Manage addresses" to add one.');
+                return;
+            }
+
+            // Check if a specific address is selected
+            if (!$this->addressId) {
+                $this->addError('addressId', 'Please select a delivery address.');
+                return;
+            }
+
+            // Verify the selected address belongs to the user
+            $selectedAddress = UserAddress::where('user_id', Auth::id())
+                ->where('id', $this->addressId)
+                ->first();
+            if (!$selectedAddress) {
+                $this->addError('addressId', 'The selected address is invalid. Please select a valid delivery address.');
+                return;
+            }
         }
 
         try {
             // Get cart totals
-            $totals = $this->cartService->getTotals($cart);
+            $totals = $this->cartService->getTotals($this->store?->id);
 
             // Resolve address snapshot if delivering
             $address = null;
@@ -89,6 +133,7 @@ class Checkout extends Component
             // Create order
             $order = Order::create([
                 'user_id' => Auth::id(),
+                'store_id' => $this->store?->id,
                 'address_id' => $address?->id,
                 'code' => strtoupper(Str::random(6)),
                 'status' => Order::STATUS_PENDING,
@@ -108,29 +153,56 @@ class Checkout extends Component
             ]);
 
             // Create order items from cart
-            $cartItems = $cart->items()->with('menuItem')->get();
-            foreach ($cartItems as $cartItem) {
+            foreach ($cartLines as $cartLine) {
+                // Validate cart line structure
+                if (!isset($cartLine['item']) || !isset($cartLine['unit_price']) || !isset($cartLine['qty']) || !isset($cartLine['line_total'])) {
+                    throw new \Exception('Invalid cart line structure: ' . json_encode($cartLine));
+                }
+
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'menu_item_id' => $cartItem->menu_item_id,
-                    'name_snapshot' => $cartItem->menuItem->name,
-                    'unit_price' => $cartItem->unit_price,
-                    'qty' => $cartItem->qty,
-                    'line_total' => $cartItem->qty * $cartItem->unit_price,
-                    'selections' => $cartItem->selections,
+                    'menu_item_id' => $cartLine['item']->id,
+                    'name_snapshot' => $cartLine['item']->name,
+                    'unit_price' => $cartLine['unit_price'],
+                    'qty' => $cartLine['qty'],
+                    'line_total' => $cartLine['line_total'],
+                    'selections' => $cartLine['selections'],
                 ]);
             }
 
             // Clear the cart after successful order
-            $this->cartService->clear();
+            $this->cartService->clear($this->store?->id);
+
+            // Send notification email to store admin
+            try {
+                if ($this->store->admin && $this->store->admin->email) {
+                    Mail::to($this->store->admin->email)->send(new NewOrderNotification($order, $this->store));
+                }
+            } catch (\Exception $emailException) {
+                // Log email error but don't fail the order
+                Log::warning('Failed to send new order notification email', [
+                    'order_id' => $order->id,
+                    'store_id' => $this->store->id,
+                    'admin_email' => $this->store->admin?->email,
+                    'error' => $emailException->getMessage()
+                ]);
+            }
 
             // Show success message
             session()->flash('success', 'Order placed successfully! Order code: ' . $order->code);
 
             // Redirect to order history
-            return redirect()->route('orders');
+            return redirect()->route('menu.store.orders', ['store' => $this->store->slug]);
         } catch (\Exception $e) {
-            $this->addError('order', 'Failed to place order. Please try again.');
+            // Log the error for debugging
+            Log::error('Order placement failed: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'store_id' => $this->store?->id,
+                'cart_lines' => $cartLines,
+                'exception' => $e
+            ]);
+
+            $this->addError('order', 'Failed to place order. Please try again. Error: ' . $e->getMessage());
         }
     }
 

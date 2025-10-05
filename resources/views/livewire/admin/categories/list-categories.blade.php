@@ -132,8 +132,7 @@
 
                                 <!-- Delete Button -->
                                 <button 
-                                    wire:click="deleteCategory({{ $category->id }})"
-                                    onclick="return confirm('Are you sure you want to delete this category? Please be aware that this action will remove all menu items under this category.')"
+                                    @click="if (confirm('Are you sure you want to delete this category? Please be aware that this action will remove all menu items under this category.')) { $wire.deleteCategory({{ $category->id }}) }"
                                     class="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                                     title="Delete"
                                 >

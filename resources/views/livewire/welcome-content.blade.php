@@ -10,6 +10,7 @@
             </div>
             <div class="flex items-center space-x-4">
                 <a href="{{ route('stores.index') }}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Stores</a>
+                <a href="{{ route('merchant.login') }}" class="bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700">Merchant Login</a>
             </div>
         </div>
     </div>

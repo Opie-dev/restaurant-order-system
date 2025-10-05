@@ -28,10 +28,50 @@
                 <a href="{{ route('menu.store.addresses', ['store' => $store->slug]) }}" class="text-sm text-purple-600 hover:text-purple-700">Manage addresses</a>
             </div>
             @if($deliver)
-                @php $default = auth()->user()->defaultAddress; @endphp
-                @if(!$default)
-                    <div class="text-gray-600 text-sm">No default address yet. <a href="{{ route('menu.store.addresses', ['store' => $store->slug]) }}" class="text-purple-600">Add one</a> to proceed.</div>
+                @php 
+                    $userAddresses = $this->userAddresses;
+                    $default = auth()->user()->defaultAddress; 
+                @endphp
+                
+                @if($userAddresses->isEmpty())
+                    <!-- No addresses at all -->
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div class="flex items-start space-x-3">
+                            <svg class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                            <div>
+                                <h3 class="text-sm font-medium text-red-800">No delivery addresses found</h3>
+                                <p class="text-sm text-red-700 mt-1">You need to add a delivery address before placing a delivery order.</p>
+                                <a href="{{ route('menu.store.addresses', ['store' => $store->slug]) }}" 
+                                   class="inline-flex items-center mt-2 px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                    Add Delivery Address
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @elseif(!$default)
+                    <!-- Has addresses but no default -->
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div class="flex items-start space-x-3">
+                            <svg class="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                            <div>
+                                <h3 class="text-sm font-medium text-yellow-800">No default address set</h3>
+                                <p class="text-sm text-yellow-700 mt-1">Please set a default address or select one from your saved addresses.</p>
+                                <a href="{{ route('menu.store.addresses', ['store' => $store->slug]) }}" 
+                                   class="inline-flex items-center mt-2 px-3 py-2 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 transition-colors">
+                                    Manage Addresses
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 @else
+                    <!-- Default address available -->
                     <div class="p-4 border rounded-lg bg-gray-50">
                         <div class="flex items-center gap-2 mb-1">
                             <span class="font-medium text-gray-900">{{ $default->recipient_name }}</span>
@@ -49,132 +89,186 @@
     @endauth
 
     <!-- Order Summary -->
-    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 md:p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
         @php $lines = $this->cartLines; $totals = $this->cartTotals; @endphp
         @if(empty($lines))
-            <p class="text-gray-600 text-sm">Your cart is empty.</p>
+            <div class="text-center py-8">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                </svg>
+                <p class="mt-2 text-gray-600 text-sm">Your cart is empty.</p>
+            </div>
         @else
-            <div class="space-y-3">
+            <div class="space-y-4">
                 @foreach($lines as $line)
-                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                        <div class="flex items-start justify-between">
-                            <div class="flex-1">
-                                <div class="flex items-center space-x-2">
-                                    <h4 class="text-sm font-medium text-gray-900">{{ $line['item']->name }}</h4>
-                                    <span class="text-xs text-gray-500">×{{ $line['qty'] }}</span>
+                    <div class="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <!-- Item Header -->
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h4 class="text-base font-semibold text-gray-900 truncate">{{ $line['item']->name }}</h4>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 flex-shrink-0">
+                                        ×{{ $line['qty'] }}
+                                    </span>
                                 </div>
-                                <div class="text-xs text-gray-500 mt-1">
-                                    RM{{ number_format($line['unit_price'], 2) }} each
-                                </div>
-                                
-                                @if(!empty($line['selections']))
-                                    @php
-                                        $selections = $line['selections'];
-                                    @endphp
-                                    
-                                    @if(!empty($selections['options']) || !empty($selections['addons']))
-                                        <div class="mt-2 space-y-1">
-                                            @if(!empty($selections['options']))
-                                                @foreach($selections['options'] as $optionGroup)
-                                                    @if(!empty($optionGroup['options']))
-                                                        <div class="flex items-start space-x-2">
-                                                            <span class="text-xs font-medium text-gray-600 tracking-wide min-w-0 flex-shrink-0">
-                                                                {{ $optionGroup['name'] }}:
-                                                            </span>
-                                                            <div class="flex flex-wrap gap-1">
-                                                                @foreach($optionGroup['options'] as $option)
-                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                                                        {{ $option['name'] }}
-                                                                    </span>
-                                                                @endforeach
-                                                            </div>
-                                                        </div>
-                                                    @endif
-                                                @endforeach
-                                            @endif
-                                            
-                                            @if(!empty($selections['addons']))
-                                                @foreach($selections['addons'] as $addonGroup)
-                                                    @if(!empty($addonGroup['options']))
-                                                        <div class="flex items-start space-x-2">
-                                                            <span class="text-xs font-medium text-gray-600  tracking-wide min-w-0 flex-shrink-0">
-                                                                {{ $addonGroup['name'] }}:
-                                                            </span>
-                                                            <div class="flex flex-wrap gap-1">
-                                                                @foreach($addonGroup['options'] as $addon)
-                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                                                        {{ $addon['name'] }}
-                                                                        @if(isset($addon['price']) && $addon['price'] > 0)
-                                                                            (+RM {{ number_format($addon['price'], 2) }})
-                                                                        @endif
-                                                                    </span>
-                                                                @endforeach
-                                                            </div>
-                                                        </div>
-                                                    @endif
-                                                @endforeach
-                                            @endif
-                                        </div>
-                                    @else
-                                        <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
-                                    @endif
-                                @else
-                                    <div class="mt-2 text-xs text-gray-400 italic">No special selections</div>
-                                @endif
-                            </div>
-                            <div class="text-right ml-4">
-                                <div class="text-sm font-medium text-gray-900">
-                                    RM{{ number_format($line['line_total'], 2) }}
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">
+                                        RM{{ number_format($line['unit_price'], 2) }} each
+                                    </span>
+                                    <span class="text-lg font-bold text-gray-900">
+                                        RM{{ number_format($line['line_total'], 2) }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Selections/Addons -->
+                        @if(!empty($line['selections']))
+                            @php
+                                $selections = $line['selections'];
+                            @endphp
+                            
+                            @if(!empty($selections['options']) || !empty($selections['addons']))
+                                <div class="space-y-3 pt-3 border-t border-gray-100">
+                                    @if(!empty($selections['options']))
+                                        @foreach($selections['options'] as $optionGroup)
+                                            @if(!empty($optionGroup['options']))
+                                                <div class="space-y-2">
+                                                    <h5 class="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                                                        {{ $optionGroup['name'] }}
+                                                    </h5>
+                                                    <div class="flex flex-wrap gap-2">
+                                                        @foreach($optionGroup['options'] as $option)
+                                                            <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                                                                {{ $option['name'] }}
+                                                            </span>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    @endif
+                                    
+                                    @if(!empty($selections['addons']))
+                                        @foreach($selections['addons'] as $addonGroup)
+                                            @if(!empty($addonGroup['options']))
+                                                <div class="space-y-2">
+                                                    <h5 class="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                                                        {{ $addonGroup['name'] }}
+                                                    </h5>
+                                                    <div class="flex flex-wrap gap-2">
+                                                        @foreach($addonGroup['options'] as $addon)
+                                                            <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                                                                {{ $addon['name'] }}
+                                                                @if(isset($addon['price']) && $addon['price'] > 0)
+                                                                    <span class="ml-1 font-semibold">(+RM {{ number_format($addon['price'], 2) }})</span>
+                                                                @endif
+                                                            </span>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    @endif
+                                </div>
+                            @endif
+                        @endif
                     </div>
                 @endforeach
-                <div class="border-t border-gray-200 pt-4 space-y-2">
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Subtotal</span>
-                        <span class="text-gray-900">RM {{ number_format($totals['subtotal'], 2) }}</span>
+                
+                <!-- Order Totals -->
+                <div class="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-4 mt-6">
+                    <h3 class="text-base font-semibold text-gray-900 mb-4">Order Total</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-sm text-gray-600">Subtotal</span>
+                            <span class="text-sm font-medium text-gray-900">RM {{ number_format($totals['subtotal'], 2) }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-sm text-gray-600">Tax (8%)</span>
+                            <span class="text-sm font-medium text-gray-900">RM {{ number_format($totals['tax'], 2) }}</span>
+                        </div>
+                        <div class="border-t border-gray-200 pt-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-bold text-gray-900">Total</span>
+                                <span class="text-xl font-bold text-indigo-600">RM {{ number_format($totals['total'], 2) }}</span>
+                            </div>
+                        </div>
+                        @if($deliver)
+                            <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <p class="text-xs text-yellow-800">
+                                    <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Delivery fee will be confirmed by admin
+                                </p>
+                            </div>
+                        @endif
                     </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Tax (8%)</span>
-                        <span class="text-gray-900">RM {{ number_format($totals['tax'], 2) }}</span>
-                    </div>
-                    <div class="flex justify-between text-base font-semibold">
-                        <span class="text-gray-900">Total</span>
-                        <span class="text-gray-900">RM {{ number_format($totals['total'], 2) }}</span>
-                    </div>
-                    @if($deliver)
-                        <p class="text-xs text-gray-500">Delivery fee will be confirmed by admin if delivery selected.</p>
-                    @endif
                 </div>
             </div>
         @endif
     </div>
 
     <!-- Notes -->
-    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mt-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-3">Notes</h2>
-        <textarea wire:model.lazy="notes" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Any special instructions or delivery notes..."></textarea>
-        <p class="text-xs text-gray-500 mt-2">Example: Please ring the bell, no chili, etc.</p>
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 md:p-6 mt-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-3">Special Instructions</h2>
+        <textarea 
+            wire:model.lazy="notes" 
+            rows="3" 
+            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-sm"
+            placeholder="Any special instructions or delivery notes..."
+        ></textarea>
+        <p class="text-xs text-gray-500 mt-2 flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Example: Please ring the bell, no chili, extra sauce, etc.
+        </p>
     </div>
 
+    <!-- Error Messages -->
+    @if($errors->any())
+        <div class="mt-6 space-y-3">
+            @foreach($errors->all() as $error)
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <svg class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                            <h3 class="text-sm font-medium text-red-800">Order Error</h3>
+                            <p class="text-sm text-red-700 mt-1">{{ $error }}</p>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
+
     <!-- Submit Order Button -->
-    <div class="mt-8 flex items-center justify-between">
-        <a href="{{ route('menu.store.cart', ['store' => $store->slug]) }}" class="text-gray-600 hover:text-gray-800 transition-colors font-medium">
-            ← Back to Cart
+    <div class="mt-8 space-y-4">
+        <a 
+            href="{{ route('menu.store.cart', ['store' => $store->slug]) }}" 
+            class="flex items-center justify-center gap-2 bg-white px-6 py-3 rounded-xl text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors font-medium border border-gray-200"
+        >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Cart
         </a>
         
         <button 
             wire:click="submitOrder" 
             wire:loading.attr="disabled"
             wire:target="submitOrder"
-            class="px-8 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
+            class="w-full px-6 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-semibold flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
         >
-            <svg wire:loading.remove wire:target="submitOrder" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg wire:loading.remove wire:target="submitOrder" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <svg wire:loading wire:target="submitOrder" class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg wire:loading wire:target="submitOrder" class="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
             </svg>
             <span wire:loading.remove wire:target="submitOrder">Place Order</span>

@@ -3,9 +3,11 @@
 namespace App\Livewire\Admin\Categories;
 
 use App\Models\Category;
+use App\Services\Admin\OnboardingService;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use App\Services\Admin\StoreService;
 
 #[Layout('layouts.admin')]
 #[Title('Create Category')]
@@ -13,11 +15,21 @@ class CreateCategory extends Component
 {
     public string $name = '';
     public ?int $parentLevel1Id = null;
+    public ?int $storeId = null;
+    private $storeService;
 
-    protected $rules = [
-        'name' => 'required|string|max:255|unique:categories,name',
-        'parentLevel1Id' => 'nullable|exists:categories,id',
-    ];
+    protected function rules(): array
+    {
+        return [
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:categories,name,NULL,id,store_id,' . $this->storeId,
+            ],
+            'parentLevel1Id' => 'nullable|exists:categories,id',
+        ];
+    }
 
     protected $messages = [
         'name.required' => 'Category name is required.',
@@ -25,9 +37,14 @@ class CreateCategory extends Component
         'parentLevel1Id.exists' => 'Selected parent category does not exist.',
     ];
 
+    public function boot()
+    {
+        $this->storeService = new StoreService();
+    }
+
     public function mount()
     {
-        // Initialize component
+        $this->storeId = $this->storeService->getCurrentStore()->id;
     }
 
     public function create()
@@ -38,9 +55,16 @@ class CreateCategory extends Component
             'name' => $this->name,
             'parent_id' => $this->parentLevel1Id,
             'is_active' => true,
+            'store_id' => $this->storeId,
         ]);
 
         session()->flash('success', 'Category created successfully.');
+
+        // Check if store is in onboarding mode
+        $currentStore = $this->storeService->getCurrentStore();
+        if ($currentStore->is_onboarding) {
+            return redirect()->route('admin.dashboard');
+        }
 
         return redirect()->route('admin.categories.index');
     }

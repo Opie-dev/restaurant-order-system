@@ -30,9 +30,6 @@ class EditItem extends Component
     #[Validate('required|integer|exists:categories,id')]
     public ?int $category_id = null;
 
-    public bool $is_active = true;
-    public bool $enabled = true;
-
     #[Validate('required|integer|min:0')]
     public int $stock = 0;
 
@@ -90,8 +87,6 @@ class EditItem extends Component
             'price' => $menuItem->price,
             'base_price' => $menuItem->base_price,
             'category_id' => $menuItem->category_id,
-            'is_active' => (bool) $menuItem->is_active,
-            'enabled' => (bool) ($menuItem->enabled ?? true),
             'stock' => (int) ($menuItem->stock ?? 0),
             'tag' => $menuItem->tag,
             'type' => $menuItem->type ?? 'ala_carte',
@@ -162,18 +157,12 @@ class EditItem extends Component
     {
         $isEnabled = $this->options[$groupIndex]['enabled'] ?? true;
         $this->options[$groupIndex]['enabled'] = !$isEnabled;
-
-        // Note: We don't automatically disable individual options anymore
-        // This allows admins to edit disabled groups while seeing preview effect
     }
 
     public function toggleAddonGroupEnabled(int $groupIndex): void
     {
         $isEnabled = $this->addons[$groupIndex]['enabled'] ?? true;
         $this->addons[$groupIndex]['enabled'] = !$isEnabled;
-
-        // Note: We don't automatically disable individual addon options anymore
-        // This allows admins to edit disabled groups while seeing preview effect
     }
 
     public function toggleStatus(): void
@@ -192,8 +181,6 @@ class EditItem extends Component
             'name' => 'required|string|min:2|max:255',
             'description' => 'nullable|string|max:2000',
             'category_id' => 'required|integer|exists:categories,id',
-            'is_active' => 'boolean',
-            'enabled' => 'boolean',
             'stock' => 'required|integer|min:0',
             'tag' => 'nullable|in:popular,bestseller',
             'type' => 'required|in:set,ala_carte',
@@ -220,7 +207,7 @@ class EditItem extends Component
         if ($this->type === 'set') {
             $rules['base_price'] = 'required|numeric|min:0|max:999999.99';
         } else {
-            $rules['price'] = 'required|numeric|min:0|max:999999.99';
+            $rules['price'] = 'nullable|numeric|min:0|max:999999.99';
         }
 
         $messages = [

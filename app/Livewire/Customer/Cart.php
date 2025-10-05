@@ -8,12 +8,15 @@ use App\Services\CartService;
 use App\Models\CartItem;
 use App\Models\Store;
 use Illuminate\Http\Request;
+use Livewire\Attributes\On;
 
 #[Layout('layouts.customer')]
 class Cart extends Component
 {
     protected CartService $cartService;
     public ?Store $store = null;
+    public int $timeRemaining = 0;
+    public bool $cartExpired = false;
 
     public function boot(CartService $cartService)
     {
@@ -23,51 +26,66 @@ class Cart extends Component
     public function mount(Request $request)
     {
         $this->store = $request->store;
+
+        // Check if cart is expired and clear if necessary
+        if ($this->cartService->checkAndClearExpiredCart($this->store?->id)) {
+            $this->cartExpired = true;
+            return;
+        }
+
+        // Update timer
+        $this->updateTimer();
+    }
+
+    public function updateTimer(): void
+    {
+        $this->timeRemaining = $this->cartService->getCartTimeRemaining($this->store?->id);
+        $this->cartExpired = $this->cartService->isCartExpired($this->store?->id);
+    }
+
+    #[On('timer-tick')]
+    public function onTimerTick(): void
+    {
+        $this->updateTimer();
+
+        if ($this->cartExpired) {
+            // Cart has expired, dispatch event to refresh the page
+            $this->dispatch('cart-expired');
+        }
     }
 
     public function increment(int $id): void
     {
-        $this->cartService->incrementLine($id);
+        $this->cartService->incrementLine($id, $this->store?->id);
+        $this->updateTimer();
     }
 
     public function decrement(int $id): void
     {
-        $this->cartService->decrementLine($id);
+        $this->cartService->decrementLine($id, $this->store?->id);
+        $this->updateTimer();
     }
 
     public function remove(int $id): void
     {
-        $this->cartService->removeLine($id);
+        $this->cartService->removeLine($id, $this->store?->id);
+        $this->updateTimer();
     }
 
     public function clear(): void
     {
-        $this->cartService->clear();
+        $this->cartService->clear($this->store?->id);
+        $this->updateTimer();
     }
 
     public function getLinesProperty(): array
     {
-        $cart = $this->cartService->current();
-        return $cart->items()->with('menuItem')->get()->map(function (CartItem $line) {
-            return [
-                'id' => $line->id,
-                'menu_item_id' => $line->menu_item_id,
-                'name' => $line->menuItem->name,
-                'price' => (float) $line->unit_price,
-                'qty' => $line->qty,
-                'image_path' => $line->menuItem->image_path,
-                'selections' => $line->selections,
-                'line_total' => $line->qty * $line->unit_price,
-            ];
-        })->all();
+        return $this->cartService->getLines($this->store?->id);
     }
 
     public function getTotalsProperty(): array
     {
-        $subtotal = collect($this->lines)->reduce(fn($c, $l) => $c + ($l['price'] * $l['qty']), 0.0);
-        $tax = round($subtotal * 0.1, 2);
-        $total = round($subtotal + $tax, 2);
-        return compact('subtotal', 'tax', 'total');
+        return $this->cartService->getTotals($this->store?->id);
     }
 
     public function render()

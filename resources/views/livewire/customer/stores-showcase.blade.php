@@ -77,7 +77,7 @@
                             <div class="flex items-center gap-3">
                                 @if($store->logo_path && $store->cover_path)
                                     <!-- Show small logo when we have a cover -->
-                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($store->logo_path) }}" 
+                                    <img src="{{ Storage::url($store->logo_path) }}" 
                                          alt="{{ $store->name }}" 
                                          class="h-8 w-8 object-contain rounded-lg flex-shrink-0">
                                 @endif

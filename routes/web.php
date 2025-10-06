@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Menu\ListItems;
 use App\Livewire\Admin\Menu\EditItem;
 use App\Livewire\Admin\Menu\CreateItem;
-use App\Livewire\Admin\Menu\PreviewMenu;
 use App\Livewire\Admin\Categories\ListCategories;
 use App\Livewire\Admin\Categories\CreateCategory;
 use App\Livewire\Admin\Orders\ListOrders;
@@ -75,7 +74,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/menu', ListItems::class)->name('menu.index');
         Route::get('/menu/create', CreateItem::class)->name('menu.create');
         Route::get('/menu/{menuItem}/edit', EditItem::class)->whereNumber('menuItem')->name('menu.edit');
-        Route::get('/menu/preview', PreviewMenu::class)->name('menu.preview');
+        // Preview route removed
 
         Route::get('/categories', ListCategories::class)->name('categories.index');
         Route::get('/categories/create', CreateCategory::class)->name('categories.create');

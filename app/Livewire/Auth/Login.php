@@ -42,11 +42,11 @@ class Login extends Component
             ->first();
 
         if (!$user) {
-            $randomSixString = Str::random(6);
+
             $user = User::create([
                 'name' => $this->email,
                 'email' => $this->email,
-                'password' => Hash::make($randomSixString),
+                'password' => Hash::make($this->password),
                 'role' => 'customer',
                 'store_id' => $this->store->id,
                 'is_disabled' => false,

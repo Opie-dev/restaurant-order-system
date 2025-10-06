@@ -16,13 +16,8 @@ class StoresShowcase extends Component
             ->orderBy('name')
             ->get(['id', 'name', 'slug', 'description', 'logo_path', 'cover_path', 'city', 'state', 'settings']);
 
-        // Filter stores to only show currently open ones
-        $openStores = $stores->filter(function (Store $store) {
-            return $store->isCurrentlyOpen();
-        });
-
         return view('livewire.customer.stores-showcase', [
-            'stores' => $openStores,
+            'stores' => $stores,
         ]);
     }
 }

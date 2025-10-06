@@ -63,14 +63,6 @@ class OnboardingService
                 'completed' => $this->isMenuItemsComplete(),
                 'icon' => 'menu'
             ],
-            'test_order' => [
-                'title' => 'Test Order Flow',
-                'description' => 'Place a test order to ensure everything works correctly',
-                'route' => 'menu.store.index',
-                'route_params' => ['store' => $this->store->slug],
-                'completed' => $this->isTestOrderComplete(),
-                'icon' => 'shopping-cart'
-            ]
         ];
     }
 
@@ -170,7 +162,7 @@ class OnboardingService
      */
     protected function isStoreMediaComplete(): bool
     {
-        return !empty($this->store->logo_path);
+        return !empty($this->store->logo_path) && !empty($this->store->cover_path);
     }
 
     /**
@@ -190,16 +182,6 @@ class OnboardingService
     {
         return MenuItem::where('store_id', $this->store->id)
             ->where('is_active', true)
-            ->count() >= 3; // Require at least 3 menu items
-    }
-
-    /**
-     * Check if test order is complete
-     */
-    protected function isTestOrderComplete(): bool
-    {
-        // This could check if there's at least one order placed
-        // For now, we'll consider it complete if menu items exist
-        return $this->isMenuItemsComplete();
+            ->count() >= 1; // Require at least 1 menu item
     }
 }

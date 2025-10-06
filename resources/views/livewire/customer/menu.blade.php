@@ -1,15 +1,15 @@
 <div class="min-h-screen bg-gray-50 flex flex-col" x-data="menuScroll()">
     <!-- Main Content Area -->
     <div class="overflow-y-auto">
-        <div class="fixed top-0 left-0 right-0 z-10">
+        <div class="@if($this->items->isEmpty())  @else fixed  @endif top-0 left-0 right-0 z-10">
             @include('livewire.customer._baner')
 
             <!-- Category Filters -->
             @php 
-            $rootCategories = $this->categories->whereNull('parent_id');
+                $rootCategories = $this->categories->whereNull('parent_id');
             @endphp
 
-            <div id="categories" class="flex rounded-lg bg-white items-center shadow-sm gap-2 lg:gap-3 py-2 overflow-x-auto px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
+            <div id="categories" class="flex rounded-lg bg-white items-center shadow-sm gap-2 lg:gap-3 py-2 overflow-x-auto px-4 {{ $store && !$store->isCurrentlyOpen() ? 'pointer-events-none' : '' }}">
                 <button type="button" 
                     @click="handleCategoryClick('all', 'all')"
                     data-category="all"
@@ -29,11 +29,32 @@
                     </button>
                 @endforeach
             </div>
+
+            <!-- Store Closed Notice -->
+            @if($store && !$store->isCurrentlyOpen())
+                <div class="mx-4 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <div>
+                            <h3 class="text-sm font-medium text-red-800">Store is currently closed</h3>
+                            <p class="text-sm text-red-600 mt-1">
+                                You can browse the menu, but ordering is not available right now.
+                                @if($store->getNextOpeningTime())
+                                    {{ $store->getNextOpeningTime() }}
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
         
         <!-- Category Filters -->
-        <div class="mt-[21rem] lg:mt-[26rem]"> <!-- Add top padding to avoid overlap with fixed cart button on mobile -->
+        <div class="@if($this->items->isEmpty()) mt-[3rem] lg:mt-[3rem] @else mt-[21rem] lg:mt-[25rem] @endif"> <!-- Add top padding to avoid overlap with fixed cart button on mobile -->
             <!-- Search Bar -->
+            @if(!$this->items->isEmpty())
             <div id="search" class="relative mb-4 lg:mb-6 px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
                 <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
                     <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,6 +66,7 @@
                     placeholder="Search menu..." 
                     class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
             </div>
+            @endif
 
             <!-- Menu Items -->
             @php
@@ -85,13 +107,12 @@
                                 @endphp
                                 
                                 <!-- Item Image -->
-                                <div class="aspect-video bg-gray-100 overflow-hidden relative {{ (int)($item->stock ?? 0) <= 0 ? 'grayscale' : '' }}">
+                                <div class="relative bg-gray-100 overflow-hidden h-48 sm:h-56 md:h-64 lg:h-72 xl:h-80 {{ (int)($item->stock ?? 0) <= 0 ? 'grayscale' : '' }}">
                                     @if($src)
                                         <img 
                                             src="{{ $src }}" 
                                             alt="{{ $item->name }}" 
-                                            class="w-full h-full object-cover object-center max-h-48 sm:max-h-56 md:max-h-64 lg:max-h-72 xl:max-h-80 transition-all duration-200"
-                                            style="aspect-ratio: 16/9;"
+                                            class="absolute inset-0 w-full h-full object-cover object-center"
                                         />
                                     @else
                                         <div class="w-full h-full grid place-content-center text-gray-400">
@@ -116,7 +137,9 @@
                                     <div class="flex items-start justify-between mb-2">
                                         <h3 class="font-semibold text-gray-800 text-lg">{{ $item->name }}</h3>
                                         <span class="text-lg font-bold text-purple-600">
-                                            @if($item->price)
+                                            @if($item->type === 'set' && $item->base_price)
+                                                RM {{ number_format($item->base_price, 2) }}
+                                            @elseif($item->type === 'ala_carte' && $item->price)
                                                 RM {{ number_format($item->price, 2) }}
                                             @else
                                                 Price on request

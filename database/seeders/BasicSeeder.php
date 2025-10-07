@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class DatabaseSeeder extends Seeder
+class BasicSeeder extends Seeder
 {
     public function run(): void
     {
@@ -29,9 +29,13 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // Run comprehensive seeder for full dataset
+        // Run basic seeders for minimal dataset
         $this->call([
-            ComprehensiveSeeder::class,
+            StoreSeeder::class,
+            MenuItemSeeder::class,
+            OrderSeeder::class,
+            OrderItemSeeder::class,
+            UserAddressSeeder::class,
         ]);
     }
 }

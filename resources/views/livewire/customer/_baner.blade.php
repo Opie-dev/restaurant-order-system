@@ -28,15 +28,27 @@
                             </svg>
                         </button>
                         <div x-show="open" @click.away="open = false" x-transition
-                            class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg py-1 z-20">
-                            <a href="{{ route('menu.store.index', $store->slug) }}" class="dropdown-item">Menu</a>
-                            <a href="{{ route('menu.store.cart', $store->slug) }}" class="dropdown-item">My Cart</a>
-                            <a href="{{ route('menu.store.orders', $store->slug) }}" class="dropdown-item">My Orders</a>
-                            <a href="{{ route('menu.store.addresses', $store->slug) }}" class="dropdown-item">My Addresses</a>
-                            <form method="POST" action="{{ route('logout') }}">
+                            class="flex flex-col left-0 w-44 bg-white rounded-lg shadow-lg py-1 z-20 gap-2 p-2">
+                            <a href="{{ route('menu.store.index', $store->slug) }}"
+                               class="dropdown-item transition-all duration-200 px-2 rounded-md hover:bg-purple-50 hover:text-purple-700 hover:pl-4 focus:bg-purple-100 focus:text-purple-800">
+                                Menu
+                            </a>
+                            <a href="{{ route('menu.store.cart', $store->slug) }}"
+                               class="dropdown-item transition-all duration-200 px-2 rounded-md hover:bg-purple-50 hover:text-purple-700 hover:pl-4 focus:bg-purple-100 focus:text-purple-800">
+                                My Cart
+                            </a>
+                            <a href="{{ route('menu.store.orders', $store->slug) }}"
+                               class="dropdown-item transition-all duration-200 px-2 rounded-md hover:bg-purple-50 hover:text-purple-700 hover:pl-4 focus:bg-purple-100 focus:text-purple-800">
+                                My Orders
+                            </a>
+                            <a href="{{ route('menu.store.addresses', $store->slug) }}"
+                               class="dropdown-item transition-all duration-200 px-2 rounded-md hover:bg-purple-50 hover:text-purple-700 hover:pl-4 focus:bg-purple-100 focus:text-purple-800">
+                                My Addresses
+                            </a>
+                            <form method="POST" action="{{ route('logout') }}" class="w-full">
                                 @csrf
                                 <button type="submit"
-                                        class="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 text-sm">
+                                        class="w-full text-left text-gray-800 transition-all duration-200 text-sm cursor-pointer px-2 rounded-md hover:bg-purple-50 hover:text-purple-700 hover:pl-4 focus:bg-purple-100 focus:text-purple-800">
                                     Logout
                                 </button>
                             </form>

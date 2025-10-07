@@ -224,7 +224,7 @@
             <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center {{ $hasSocial ? 'justify-between' : 'justify-end' }} gap-4">
                 @if($hasSocial)
                     <div class="text-gray-500 text-sm">
-                        &copy; {{ date('Y') }} Gourmet Express. All rights reserved.
+                        &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
                     </div>
                 @endif
                 <div class="flex items-center gap-6">
@@ -272,7 +272,7 @@
                 </div>
                 @if(!$hasSocial)
                     <div class="text-gray-500 text-sm">
-                        &copy; {{ date('Y') }} Gourmet Express. All rights reserved.
+                        &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
                     </div>
                 @endif
             </div>

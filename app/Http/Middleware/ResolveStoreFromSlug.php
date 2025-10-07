@@ -18,7 +18,7 @@ class ResolveStoreFromSlug
     {
         // Check if the route has a store parameter
         if ($request->route('store:slug')) {
-            $store = Store::where('slug', $request->route('store:slug'))->first();
+            $store = Store::where('slug', $request->route('store:slug'))->where('is_active', true)->first();
             if (!$store) {
                 return abort(404);
             }

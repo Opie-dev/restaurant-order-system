@@ -13,8 +13,8 @@
                     <a href="{{ route('menu.store.index', ['store' => $store->slug] ) }}" class="group block bg-white rounded-xl border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all overflow-hidden">
                         <!-- Store Cover Image -->
                         @if($store->cover_path)
-                            <div class="relative h-48 overflow-hidden">
-                                <img src="{{ \Illuminate\Support\Facades\Storage::url($store->cover_path) }}" 
+                            <div class="relative h-32 md:h-42 lg:h-48 overflow-hidden">
+                                <img src="{{ Storage::url($store->cover_path) }}" 
                                      alt="{{ $store->name }} cover" 
                                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                 <div class="absolute top-3 left-3">
@@ -37,7 +37,7 @@
                             </div>
                         @else
                             <!-- No cover image - show logo prominently or placeholder -->
-                            <div class="relative h-32 bg-gradient-to-br from-purple-100 to-purple-200 overflow-hidden">
+                            <div class="relative h-32 md:h-42 lg:h-48 bg-gradient-to-br from-purple-100 to-purple-200 overflow-hidden">
                                 <div class="absolute inset-0 flex items-center justify-center">
                                     @if($store->logo_path)
                                         <img src="{{ \Illuminate\Support\Facades\Storage::url($store->logo_path) }}" 

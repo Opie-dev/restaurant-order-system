@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Gourmet Express - Restaurant Ordering System</title>
+        <title>{{ config('app.name') }}</title>
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -18,7 +18,7 @@
                 <div class="flex justify-between h-16">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <h1 class="text-2xl font-bold text-indigo-600">Gourmet Express</h1>
+                            <h1 class="text-2xl font-bold text-indigo-600">{{ config('app.name') }}</h1>
                         </div>
                     </div>
                     <div class="flex items-center space-x-4">
@@ -253,11 +253,8 @@
         <footer class="bg-gray-900 text-white">
             <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
                 <div class="text-center">
-                    <h3 class="text-2xl font-bold mb-4">Gourmet Express</h3>
+                    <h3 class="text-2xl font-bold mb-4">{{ config('app.name') }}</h3>
                     <p class="text-gray-400 mb-4">Sistem Pesanan Restoran Paling Mudah</p>
-                    <p class="text-gray-500 text-sm">
-                        Dibangunkan dengan Laravel 11, Livewire 3, Alpine.js 3, dan Tailwind CSS
-                    </p>
                 </div>
             </div>
         </footer>

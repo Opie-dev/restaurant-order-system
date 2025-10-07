@@ -5,12 +5,31 @@
         <div class="flex justify-between h-16">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <h1 class="text-2xl font-bold text-indigo-600">Gourmet Express</h1>
+                    <h1 class="text-2xl font-bold text-indigo-600">{{ config('app.name') }}</h1>
                 </div>
             </div>
-            <div class="flex items-center space-x-4">
-                <a href="{{ route('stores.index') }}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Stores</a>
-                <a href="{{ route('merchant.login') }}" class="bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700">Merchant Login</a>
+            <div x-data="{ open: false }" class="flex items-center">
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="{{ route('stores.index') }}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Stores</a>
+                    <a href="{{ route('merchant.login') }}" class="bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700">Merchant Login</a>
+                </div>
+                <!-- Mobile Hamburger -->
+                <div class="md:hidden flex items-center">
+                    <button @click="open = !open" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500" aria-controls="mobile-menu" :aria-expanded="open">
+                        <svg class="h-6 w-6" x-show="!open" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg class="h-6 w-6" x-show="open" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <!-- Mobile Dropdown -->
+                <div x-show="open" @click.away="open = false" class="absolute top-16 right-4 w-48 bg-white rounded-lg shadow-lg p-2 z-50 md:hidden" x-transition>
+                    <a href="{{ route('stores.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-indigo-600 rounded-md text-sm font-medium transition-colors duration-150">Stores</a>
+                    <a href="{{ route('merchant.login') }}" class="block px-4 py-2 text-white bg-purple-600 hover:bg-purple-700 hover:scale-105 rounded-md text-sm font-medium mt-1 transition-all duration-150">Merchant Login</a>
+                </div>
             </div>
         </div>
     </div>
@@ -23,7 +42,7 @@
             <h1 class="text-4xl md:text-6xl font-bold mb-6">
                 Sistem Pesanan Restoran Paling Mudah
             </h1>
-            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
+            <p class="text-xl md:text-2xl max-w-3xl mx-auto">
                 Memperkenalkan sistem pesanan restoran atas talian yang dibangunkan khas untuk kegunaan restoran dan pelanggan. Sistem ini direka secara ringkas untuk memudahkan penggunaan anda untuk mengurus menu, pesanan, dan juga menerima pembayaran dari pelanggan.
             </p>
         </div>
@@ -107,17 +126,37 @@
                 <h3 class="text-xl font-semibold text-gray-900 mb-2">Dashboard & Analitik</h3>
                 <p class="text-gray-600">Lihat prestasi restoran, pesanan yang belum selesai, serta jumlah pendapatan harian, mingguan, dan bulanan.</p>
             </div>
-
+            
             <!-- Payment Integration -->
-            <div class="bg-gray-50 p-6 rounded-lg">
-                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+            <div class="relative bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition hover:shadow-md">
+                <!-- Icon -->
+                <div class="w-14 h-14 bg-green-50 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-7 h-7 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">Integrasi Pembayaran</h3>
-                <p class="text-gray-600">Terima pembayaran dari pelanggan menggunakan Stripe dengan webhook untuk kemaskini status automatik.</p>
+
+                <!-- Title -->
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-1">
+                    Integrasi Pembayaran
+                </h3>
+
+                <!-- Description -->
+                <p class="text-gray-600 text-sm leading-relaxed">
+                    Sokongan pembayaran akan dilancarkan tidak lama lagi. Nantikan kemas kini terkini!
+                </p>
+
+                <!-- Coming Soon Overlay -->
+                <div class="absolute inset-0 bg-yellow-50/60 backdrop-blur-[1px] w-full h-full pointer-events-none">
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2">
+                        <span class="px-4 py-1.5 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full shadow-sm">
+                            🚧 Akan Datang
+                        </span>
+                    </div>
+                </div>
             </div>
+
 
             <!-- Order History -->
             <div class="bg-gray-50 p-6 rounded-lg">
@@ -145,52 +184,105 @@
     </div>
 </div>
 
-<!-- Tech Stack Section -->
+<!-- FAQ Section -->
 <div class="py-16 bg-gray-100">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Teknologi Moden</h2>
-            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                Dibangunkan dengan teknologi terkini untuk prestasi dan pengalaman pengguna yang terbaik
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Soalan Lazim (FAQ)</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Jawapan kepada soalan-soalan yang sering ditanya mengenai sistem pesanan restoran kami.
             </p>
         </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div class="text-center">
-                <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Laravel 11</h3>
-                    <p class="text-gray-600 text-sm">PHP Framework</p>
+        <div class="space-y-4" x-data="{ open: null }">
+            <!-- FAQ 1 -->
+            <div class="bg-white rounded-lg shadow-sm">
+                <button 
+                    @click="open === 1 ? open = null : open = 1"
+                    class="w-full flex justify-between items-center p-6 focus:outline-none"
+                    :aria-expanded="open === 1"
+                    aria-controls="faq-1"
+                >
+                    <span class="text-lg font-semibold text-gray-900 text-left">Bagaimana cara membuat pesanan?</span>
+                    <svg :class="{'rotate-180': open === 1}" class="w-5 h-5 text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div 
+                    x-show="open === 1"
+                    x-collapse
+                    id="faq-1"
+                    class="px-6 pb-6 text-gray-600 text-sm"
+                >
+                    Anda boleh melayari menu restoran, menambah item ke troli, dan membuat pembayaran secara dalam talian. Pesanan anda akan diproses serta-merta.
                 </div>
             </div>
-            <div class="text-center">
-                <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Livewire 3</h3>
-                    <p class="text-gray-600 text-sm">Full-stack Framework</p>
+            <!-- FAQ 2 -->
+            <div class="bg-white rounded-lg shadow-sm">
+                <button 
+                    @click="open === 2 ? open = null : open = 2"
+                    class="w-full flex justify-between items-center p-6 focus:outline-none"
+                    :aria-expanded="open === 2"
+                    aria-controls="faq-2"
+                >
+                    <span class="text-lg font-semibold text-gray-900 text-left">Adakah saya perlu mendaftar akaun?</span>
+                    <svg :class="{'rotate-180': open === 2}" class="w-5 h-5 text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div 
+                    x-show="open === 2"
+                    x-collapse
+                    id="faq-2"
+                    class="px-6 pb-6 text-gray-600 text-sm"
+                >
+                    Anda boleh membuat pesanan sebagai tetamu, tetapi mendaftar akaun membolehkan anda menjejak sejarah pesanan dan mendapat pengalaman yang lebih baik.
                 </div>
             </div>
-            <div class="text-center">
-                <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Alpine.js 3</h3>
-                    <p class="text-gray-600 text-sm">Lightweight JS</p>
+            <!-- FAQ 3 -->
+            <div class="bg-white rounded-lg shadow-sm">
+                <button 
+                    @click="open === 3 ? open = null : open = 3"
+                    class="w-full flex justify-between items-center p-6 focus:outline-none"
+                    :aria-expanded="open === 3"
+                    aria-controls="faq-3"
+                >
+                    <span class="text-lg font-semibold text-gray-900 text-left">Bagaimana saya boleh membayar?</span>
+                    <svg :class="{'rotate-180': open === 3}" class="w-5 h-5 text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div 
+                    x-show="open === 3"
+                    x-collapse
+                    id="faq-3"
+                    class="px-6 pb-6 text-gray-600 text-sm"
+                >
+                    Kami menyokong pembayaran dalam talian yang selamat melalui Stripe. Pilihan pembayaran lain akan ditambah pada masa akan datang.
                 </div>
             </div>
-            <div class="text-center">
-                <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Tailwind CSS</h3>
-                    <p class="text-gray-600 text-sm">Utility-first CSS</p>
+            <!-- FAQ 4 -->
+            <div class="bg-white rounded-lg shadow-sm">
+                <button 
+                    @click="open === 4 ? open = null : open = 4"
+                    class="w-full flex justify-between items-center p-6 focus:outline-none"
+                    :aria-expanded="open === 4"
+                    aria-controls="faq-4"
+                >
+                    <span class="text-lg font-semibold text-gray-900 text-left">Bagaimana untuk menghubungi sokongan pelanggan?</span>
+                    <svg :class="{'rotate-180': open === 4}" class="w-5 h-5 text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div 
+                    x-show="open === 4"
+                    x-collapse
+                    id="faq-4"
+                    class="px-6 pb-6 text-gray-600 text-sm"
+                >
+                    Anda boleh menghubungi kami melalui halaman <span class="font-medium text-indigo-600">Hubungi Kami</span> atau melalui <a href="mailto:assyaafi96@gmail.com" class="font-medium text-indigo-600">support@gourmetexpress.com</a>.
                 </div>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- CTA Section -->
-<div class="bg-indigo-600 text-white">
-    <div class="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold mb-4">Bersedia untuk Memulakan?</h2>
-        <p class="text-xl mb-8 max-w-2xl mx-auto">
-            Daftar akaun secara PERCUMA sekarang dan mulakan menguruskan restoran anda dengan lebih cekap.
-        </p>
     </div>
 </div>
 
@@ -198,11 +290,8 @@
 <footer class="bg-gray-900 text-white">
     <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div class="text-center">
-            <h3 class="text-2xl font-bold mb-4">Gourmet Express</h3>
-            <p class="text-gray-400 mb-4">Sistem Pesanan Restoran Paling Mudah</p>
-            <p class="text-gray-500 text-sm">
-                Dibangunkan dengan Laravel 11, Livewire 3, Alpine.js 3, dan Tailwind CSS
-            </p>
+            <h3 class="text-2xl font-bold mb-4">{{ config('app.name') }}</h3>
+            <p class="text-gray-400 mb-4">Sistem Pesanan Restoran Paling Mudah</p
         </div>
     </div>
 </footer>

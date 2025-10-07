@@ -82,17 +82,6 @@
                 <p class="text-gray-600">Terima dan uruskan pesanan pelanggan dengan status real-time dan notifikasi automatik.</p>
             </div>
 
-            <!-- Cart System -->
-            <div class="bg-gray-50 p-6 rounded-lg">
-                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
-                    </svg>
-                </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">Sistem Troli</h3>
-                <p class="text-gray-600">Pelanggan boleh menambah item ke troli, mengubah kuantiti, dan mengira jumlah secara automatik.</p>
-            </div>
-
             <!-- Address Management -->
             <div class="bg-gray-50 p-6 rounded-lg">
                 <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
@@ -126,37 +115,6 @@
                 <h3 class="text-xl font-semibold text-gray-900 mb-2">Dashboard & Analitik</h3>
                 <p class="text-gray-600">Lihat prestasi restoran, pesanan yang belum selesai, serta jumlah pendapatan harian, mingguan, dan bulanan.</p>
             </div>
-            
-            <!-- Payment Integration -->
-            <div class="relative bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition hover:shadow-md">
-                <!-- Icon -->
-                <div class="w-14 h-14 bg-green-50 rounded-xl flex items-center justify-center mb-4">
-                    <svg class="w-7 h-7 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
-                </div>
-
-                <!-- Title -->
-                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-1">
-                    Integrasi Pembayaran
-                </h3>
-
-                <!-- Description -->
-                <p class="text-gray-600 text-sm leading-relaxed">
-                    Sokongan pembayaran akan dilancarkan tidak lama lagi. Nantikan kemas kini terkini!
-                </p>
-
-                <!-- Coming Soon Overlay -->
-                <div class="absolute inset-0 bg-yellow-50/60 backdrop-blur-[1px] w-full h-full pointer-events-none">
-                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2">
-                        <span class="px-4 py-1.5 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full shadow-sm">
-                            🚧 Akan Datang
-                        </span>
-                    </div>
-                </div>
-            </div>
-
 
             <!-- Order History -->
             <div class="bg-gray-50 p-6 rounded-lg">
@@ -179,6 +137,54 @@
                 </div>
                 <h3 class="text-xl font-semibold text-gray-900 mb-2">Panel Admin</h3>
                 <p class="text-gray-600">Panel admin yang lengkap untuk menguruskan menu, kategori, pesanan, dan pelanggan dengan mudah.</p>
+            </div>
+
+              <!-- Payment Integration -->
+            <div class="relative bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition hover:shadow-md">
+                <!-- Icon -->
+                <div class="w-14 h-14 bg-green-50 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-7 h-7 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                </div>
+
+                <!-- Title -->
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-1">
+                    Integrasi Pembayaran
+                </h3>
+
+                <!-- Description -->
+                <p class="text-gray-600 text-sm leading-relaxed">
+                    Sokongan pembayaran akan dilancarkan tidak lama lagi. Nantikan kemas kini terkini!
+                </p>
+
+                <!-- Coming Soon Overlay -->
+                <div class="absolute inset-0 bg-yellow-50/20 backdrop-blur-[1px] w-full h-full pointer-events-none">
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2">
+                        <span class="px-4 py-1.5 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full shadow-sm">
+                            🚧 Akan Datang
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 p-6 rounded-lg relative overflow-hidden border border-gray-200 shadow-sm ">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Pesanan Meja QR</h3>
+                <p class="text-gray-600">Pelanggan imbas kod QR di meja untuk akses menu, buat pesanan, dan bayar terus dari telefon. Setiap pesanan dipautkan kepada nombor meja dan dihantar masa nyata ke dapur.</p>
+                <!-- Akan Datang overlay -->
+                <div class="absolute inset-0 bg-yellow-50/20 backdrop-blur-[1px] w-full h-full pointer-events-none">
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2">
+                        <span class="px-4 py-1.5 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full shadow-sm">
+                            🚧 Akan Datang
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

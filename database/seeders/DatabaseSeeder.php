@@ -10,28 +10,15 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create default admin and customer for testing
-        if (!User::where('email', 'admin@example.com')->exists()) {
-            User::create([
-                'name' => 'Admin',
-                'email' => 'admin@example.com',
-                'password' => Hash::make('password'),
-                'role' => 'admin',
-            ]);
-        }
-
-        if (!User::where('email', 'customer@example.com')->exists()) {
-            User::create([
-                'name' => 'Customer',
-                'email' => 'customer@example.com',
-                'password' => Hash::make('password'),
-                'role' => 'customer',
-            ]);
-        }
-
-        // Run comprehensive seeder for full dataset
+        // Organized seeding pipeline
         $this->call([
-            ComprehensiveSeeder::class,
+            MerchantSeeder::class,
+            StoresComprehensiveSeeder::class,
+            CategoriesComprehensiveSeeder::class,
+            MenuItemsComprehensiveSeeder::class,
+            CustomersSeeder::class,
+            OrdersComprehensiveSeeder::class,
+            CartsComprehensiveSeeder::class,
         ]);
     }
 }

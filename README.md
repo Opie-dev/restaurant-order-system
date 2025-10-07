@@ -1,6 +1,6 @@
-## Gourmet Express – Restaurant Ordering System (Laravel 11 + Livewire 3)
+## Order Sekarang – Restaurant Ordering System (Laravel 11 + Livewire 3)
 
-Gourmet Express is a full-featured restaurant ordering app built with Laravel 11, Livewire v3, Alpine.js v3 and Tailwind CSS. It supports customer ordering, carts, checkout with delivery/self‑pickup, order history, address management, and an admin back office for managing menu, availability, and orders. Payments integrate with Stripe (webhooks ready design).
+Order Sekarang is a full-featured restaurant ordering app built with Laravel 11, Livewire v3, Alpine.js v3 and Tailwind CSS. It supports customer ordering, carts, checkout with delivery/self‑pickup, order history, address management, and an admin back office for managing menu, availability, and orders. Payments integrate with Stripe (webhooks ready design).
 
 ### Tech Stack
 - Laravel 11 (PHP 8.2+)
@@ -10,6 +10,7 @@ Gourmet Express is a full-featured restaurant ordering app built with Laravel 11
 - Queues: database (default)
 - Cache: redis/file
 - Storage: public disk (storage/app/public)
+- Testing: Pest PHP with comprehensive test suite
 
 ### Key Features
 
@@ -21,7 +22,7 @@ Gourmet Express is a full-featured restaurant ordering app built with Laravel 11
 
 #### 2) Customer Experience
 - Responsive customer layout (`resources/views/layouts/customer.blade.php`)
-  - Modern header with brand “Gourmet Express”, user dropdown (orders, addresses, logout)
+  - Modern header with brand “Order Sekarang, user dropdown (orders, addresses, logout)
   - Cart link with a live quantity badge
   - Auto-dismissing toast notifications with progress and error styling
 - Menu page (Livewire): side-by-side menu and order panels on desktop, responsive on mobile
@@ -104,6 +105,14 @@ Gourmet Express is a full-featured restaurant ordering app built with Laravel 11
 - Queries automatically exclude soft-deleted records by default
 - Use `withTrashed()` to include deleted records, `onlyTrashed()` for deleted-only queries
 
+#### 10) Comprehensive Testing
+- **13 test files** covering all major functionality with Pest PHP
+- **Merchant functionality**: Authentication, store management, menu/category management, kitchen operations, order management, customer management, onboarding flow
+- **Customer functionality**: Authentication, cart operations, checkout flow, order history
+- **Store availability**: Status management, opening hours, menu availability, edge cases
+- **Test features**: Livewire component testing, file upload testing, notification testing, time mocking, comprehensive validation
+- **Quality assurance**: Edge cases, error conditions, security testing, data integrity validation
+
 ### Primary Routes
 - Public/Customer
   - `/menu` – Livewire customer menu
@@ -153,12 +162,56 @@ php artisan db:seed
 php artisan serve
 ```
 
+### Testing
+
+The project includes a comprehensive test suite built with Pest PHP, covering all major functionality:
+
+#### Test Coverage
+- **Merchant Tests (9 test files)**: Authentication, store management, menu/category management, kitchen operations, order management, customer management, onboarding flow
+- **Customer Tests (3 test files)**: Authentication, cart functionality, checkout flow
+- **Store Availability Tests**: Store status, opening hours, menu availability, edge cases
+
+#### Key Test Areas
+- **Authentication & Authorization**: Login/logout, role-based access, session management
+- **Store Management**: Creation, settings, availability, relationships
+- **Menu & Category Management**: CRUD operations, search/filtering, image uploads
+- **Order Management**: Creation, processing, status transitions, notifications
+- **Customer Experience**: Cart functionality, checkout flow, order history
+- **Kitchen Operations**: Order display, status updates, priority management
+- **Data Validation & Security**: Input validation, access control, error handling
+
+#### Running Tests
+```bash
+# Run all tests
+php artisan test
+
+# Run specific test suites
+php artisan test tests/Feature/Merchant/
+php artisan test tests/Feature/Customer/
+php artisan test tests/Feature/StoreAvailabilityTest.php
+
+# Run with coverage
+php artisan test --coverage
+```
+
+#### Test Features
+- Uses Pest PHP for readable test syntax
+- `RefreshDatabase` trait for clean test state
+- Livewire component testing with proper assertions
+- File upload testing with fake files
+- Email/SMS notification testing with `Notification::fake()`
+- Time-dependent functionality testing with `travelTo()`
+- Comprehensive edge case and error condition coverage
+
+See `tests/README.md` for detailed test documentation and specifications.
+
 ### Developer Notes
 - Livewire components live in `app/Livewire/**`; Blade in `resources/views/livewire/**`
 - Customer layout: `resources/views/layouts/customer.blade.php`
 - Error handling aims for early returns and clear user feedback
 - Code style targets PSR-12; prefer explicit typing and meaningful names
 - Soft deletes are implemented across all major models for data integrity and recovery
+- Comprehensive test suite ensures code quality and functionality reliability
 
 ### Roadmap / Ideas
 - Stripe PaymentIntent creation on checkout confirm + webhook handling

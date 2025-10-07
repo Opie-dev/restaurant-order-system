@@ -31,22 +31,39 @@ class MenuItemsComprehensiveSeeder extends Seeder
 
     private function createItem(int $storeId, int $categoryId): void
     {
-        $basePrice = fake()->randomFloat(2, 5.00, 25.00);
+        // Decide type per item: majority ala_carte, some set
+        $type = fake()->boolean(25) ? 'set' : 'ala_carte';
+
+        // Price rules based on type:
+        // - set: base_price is defined, price equals base_price
+        // - ala_carte: price is defined, base_price is null
+        $basePrice = null;
+        $price = null;
+
+        if ($type === 'set') {
+            $basePrice = fake()->randomFloat(2, 8.00, 28.00);
+            $price = null;
+        } else { // ala_carte
+            $price = fake()->randomFloat(2, 4.00, 20.00);
+            $basePrice = null;
+        }
+
         MenuItem::create([
             'store_id' => $storeId,
             'category_id' => $categoryId,
             'name' => fake()->unique()->words(2, true),
             'description' => fake()->sentence(8),
-            'price' => $basePrice,
+            'type' => $type,
+            'price' => $price,
             'base_price' => $basePrice,
-            'options' => $this->randomOptions(),
+            'options' => $this->randomOptionsForType($type),
             'addons' => $this->randomAddons(),
             'is_active' => fake()->boolean(90),
             'stock' => fake()->numberBetween(0, 100),
         ]);
     }
 
-    private function randomOptions(): ?array
+    private function randomOptionsForType(string $type): ?array
     {
         if (!fake()->boolean(60)) return null;
         $groups = [
@@ -60,16 +77,27 @@ class MenuItemsComprehensiveSeeder extends Seeder
             $out[] = [
                 'name' => $name,
                 'enabled' => true,
-                'rules' => fake()->randomElement([
-                    ['required', 'one'],
-                    ['required', 'multiple'],
-                    ['optional', 'one'],
-                    ['optional', 'multiple'],
-                ]),
+                'rules' => $this->rulesForType($type),
                 'options' => $opts,
             ];
         }
         return $out;
+    }
+
+    private function rulesForType(string $type): array
+    {
+        // Sets tend to have required selections; ala_carte can be optional
+        if ($type === 'set') {
+            return fake()->randomElement([
+                ['required', 'one'],
+                ['required', 'multiple'],
+            ]);
+        }
+        return fake()->randomElement([
+            ['required', 'one'],
+            ['optional', 'one'],
+            ['optional', 'multiple'],
+        ]);
     }
 
     private function randomAddons(): ?array

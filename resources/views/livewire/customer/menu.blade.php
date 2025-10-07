@@ -1,6 +1,6 @@
 <div class="min-h-screen bg-gray-50 flex flex-col" x-data="menuScroll()">
     <!-- Main Content Area -->
-    <div class="overflow-y-auto">
+    <div class="overflow-y-auto" id="menu-scroll">
         <div class="@if($this->items->isEmpty())  @else fixed  @endif top-0 left-0 right-0 z-10">
             @include('livewire.customer._baner')
 
@@ -52,7 +52,7 @@
         </div>
         
         <!-- Category Filters -->
-        <div class="@if($this->items->isEmpty()) mt-[3rem] lg:mt-[3rem] @else mt-[21rem] lg:mt-[25rem] @endif"> <!-- Add top padding to avoid overlap with fixed cart button on mobile -->
+        <div class="@if($this->items->isEmpty()) mt-[3rem] lg:mt-[3rem] @elseif(!$store->cover_image) mt-[14rem] @else mt-[17rem] lg:mt-[21rem] @endif"> <!-- Add top padding to avoid overlap with fixed cart button on mobile -->
             <!-- Search Bar -->
             @if(!$this->items->isEmpty())
             <div id="search" class="relative mb-4 lg:mb-6 px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
@@ -443,22 +443,21 @@ document.addEventListener('alpine:init', () => {
         currentCategory: 'all',
         isScrolling: false,
         scrollTimeout: null,
+        programmaticScroll: false,
         
         init() {
             this.setupScrollDetection();
         },
         
         setupScrollDetection() {
-            const scrollContainer = document.querySelector('.lg\\:h-\\[calc\\(100vh-80px\\)\\]');
-            if (!scrollContainer) return;
-            
-            scrollContainer.addEventListener('scroll', () => {
+            // Track window scroll so highlighting works regardless of which element scrolls
+            window.addEventListener('scroll', () => {
                 this.handleScroll();
-            });
+            }, { passive: true });
         },
         
         handleScroll() {
-            if (this.isScrolling) return;
+            if (this.isScrolling || this.programmaticScroll) return;
             
             this.isScrolling = true;
             clearTimeout(this.scrollTimeout);
@@ -471,51 +470,25 @@ document.addEventListener('alpine:init', () => {
         
         updateActiveCategory() {
             const categories = document.querySelectorAll('[id^="category-"]');
-            const categoryButtons = document.querySelectorAll('[data-category-slug]');
-            const scrollContainer = document.querySelector('.lg\\:h-\\[calc\\(100vh-80px\\)\\]');
-            
-            if (!scrollContainer || categories.length === 0) return;
-            
-            const containerRect = scrollContainer.getBoundingClientRect();
-            const containerTop = containerRect.top;
-            const containerBottom = containerRect.bottom;
-            
+            if (categories.length === 0) return;
+
+            // Determine a sticky header offset (height of categories bar + margin)
+            const header = document.getElementById('categories');
+            const headerHeight = header ? Math.max(header.getBoundingClientRect().height, 48) : 48;
+            const offset = headerHeight + 24; // extra padding
+
             let activeCategory = null;
             let minDistance = Infinity;
-            
+
             categories.forEach(category => {
-                const categoryRect = category.getBoundingClientRect();
-                const categoryTop = categoryRect.top;
-                const categoryBottom = categoryRect.bottom;
-                
-                // Check if category is visible in the viewport
-                const isVisible = categoryTop < containerBottom && categoryBottom > containerTop;
-                
-                if (isVisible) {
-                    // Calculate distance from top of container
-                    const distance = Math.abs(categoryTop - containerTop);
-                    
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        activeCategory = category.id.replace('category-', '');
-                    }
+                const rect = category.getBoundingClientRect();
+                const distance = Math.abs(rect.top - offset);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    activeCategory = category.id.replace('category-', '');
                 }
             });
-            
-            // If no category is visible, find the closest one
-            if (!activeCategory && categories.length > 0) {
-                categories.forEach(category => {
-                    const categoryRect = category.getBoundingClientRect();
-                    const distance = Math.abs(categoryRect.top - containerTop);
-                    
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        activeCategory = category.id.replace('category-', '');
-                    }
-                });
-            }
-            
-            // Update active category button
+
             if (activeCategory && activeCategory !== this.currentCategory) {
                 this.currentCategory = activeCategory;
                 this.highlightCategoryButton(activeCategory);
@@ -532,6 +505,10 @@ document.addEventListener('alpine:init', () => {
                     // Add active class
                     button.classList.remove('bg-white', 'text-gray-700', 'hover:bg-gray-50');
                     button.classList.add('bg-purple-600', 'text-white');
+                    // Auto-scroll the categories strip to reveal the active pill
+                    try {
+                        button.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    } catch (e) {}
                 } else {
                     // Remove active class
                     button.classList.remove('bg-purple-600', 'text-white');
@@ -541,39 +518,45 @@ document.addEventListener('alpine:init', () => {
         },
         
         handleCategoryClick(categoryId, categorySlug) {
+            // Disable scroll-driven highlighting during click navigation
+            this.programmaticScroll = true;
             // Only scroll to category, don't filter items
             if (categorySlug !== 'all') {
                 this.scrollToCategory(categorySlug);
             } else {
                 // Scroll to top for "All" category
-                const scrollContainer = document.querySelector('.lg\\:h-\\[calc\\(100vh-80px\\)\\]');
+                const scrollContainer = document.getElementById('menu-scroll');
                 if (scrollContainer) {
-                    scrollContainer.scrollTo({
-                        top: 0,
-                        behavior: 'smooth'
-                    });
+                    scrollContainer.scrollTo({ top: 0, behavior: 'auto' });
                 }
             }
             
             // Update visual appearance
             this.highlightCategoryButton(categorySlug);
+            this.currentCategory = categorySlug;
+            // Re-enable scroll-driven highlighting shortly after jump
+            clearTimeout(this.scrollTimeout);
+            this.scrollTimeout = setTimeout(() => {
+                this.programmaticScroll = false;
+            }, 200);
         },
         
         scrollToCategory(categorySlug) {
             const categoryElement = document.getElementById(`category-${categorySlug}`);
             if (categoryElement) {
-                const scrollContainer = document.querySelector('.lg\\:h-\\[calc\\(100vh-80px\\)\\]');
-                if (scrollContainer) {
-                    const containerRect = scrollContainer.getBoundingClientRect();
-                    const categoryRect = categoryElement.getBoundingClientRect();
-                    const scrollTop = scrollContainer.scrollTop;
-                    const targetScrollTop = scrollTop + categoryRect.top - containerRect.top - 20; // 20px offset
-                    
-                    scrollContainer.scrollTo({
-                        top: targetScrollTop,
-                        behavior: 'smooth'
-                    });
-                }
+                const header = document.getElementById('categories');
+                const headerHeight = header ? Math.max(header.getBoundingClientRect().height, 48) : 48;
+                const offset = headerHeight + 24;
+                const rect = categoryElement.getBoundingClientRect();
+                const currentY = window.scrollY;
+                const target = currentY + rect.top - offset;
+                // Instant jump (no animation) when clicking a category
+                window.scrollTo({ top: target, behavior: 'auto' });
+                // Allow scroll events to settle before resuming tracking
+                clearTimeout(this.scrollTimeout);
+                this.scrollTimeout = setTimeout(() => {
+                    this.programmaticScroll = false;
+                }, 500);
             }
         }
     }));

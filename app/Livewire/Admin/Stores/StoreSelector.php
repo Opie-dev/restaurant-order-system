@@ -13,26 +13,32 @@ use Livewire\Component;
 class StoreSelector extends Component
 {
 
-    public $stores;
+    public ?Store $stores;
     public $selectedStoreId;
+    private $storeService;
+
+
+    public function boot()
+    {
+        $this->storeService = new StoreService();
+    }
 
     public function mount()
     {
-        $storeService = app(StoreService::class);
-        $this->stores = $storeService->getUserStores();
+        $this->stores = $this->storeService->getUserStores();
 
         // Check if store is provided in URL
         $storeId = request('store');
         if ($storeId) {
             $store = $this->stores->find($storeId);
             if ($store) {
-                $storeService->setCurrentStore($store);
+                $this->storeService->setCurrentStore($store);
                 $storeName = $store->name;
                 return redirect()->route('admin.dashboard')->with('success', "Switched to " . $storeName);
             }
         }
 
-        $currentStore = $storeService->getCurrentStore();
+        $currentStore = $this->storeService->getCurrentStore();
         $this->selectedStoreId = $currentStore?->id ?? null;
     }
 
@@ -45,8 +51,7 @@ class StoreSelector extends Component
         $store = $this->stores->find($this->selectedStoreId);
 
         if ($store) {
-            $storeService = app(StoreService::class);
-            $storeService->setCurrentStore($store);
+            $this->storeService->setCurrentStore($store);
 
             $this->dispatch('store-selected', storeId: $store->id);
 
@@ -63,8 +68,7 @@ class StoreSelector extends Component
             $store->delete();
 
             // Refresh stores list
-            $storeService = app(StoreService::class);
-            $this->stores = $storeService->getUserStores();
+            $this->stores = $this->storeService->getUserStores();
 
             // Clear selection if deleted store was selected
             if ($this->selectedStoreId == $storeId) {

@@ -17,6 +17,47 @@
                     </span>
                     <input type="text" wire:model.blur="slug" class="flex-1 rounded-r-lg border-2 border-gray-300 px-3 py-2.5 focus:border-purple-500 focus:ring-purple-500" placeholder="store-slug" />
                 </div>
+                <div class="text-right mt-2">
+                    <button
+                        type="button"
+                        x-data="{
+                            copied: false,
+                            copyUrl() {
+                                const url = '{{ config('app.url') }}/menu/{{ $slug ?? $store->slug ?? '' }}';
+                                navigator.clipboard.writeText(url).then(() => {
+                                    this.copied = true;
+                                    setTimeout(() => this.copied = false, 1500);
+                                    $dispatch('notify', { type: 'success', message: 'URL copied to clipboard!' });
+                                }).catch(() => {
+                                    $dispatch('notify', { type: 'error', message: 'Failed to copy URL' });
+                                });
+                            }
+                        }"
+                        @click="copyUrl()"
+                        class="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 mr-2"
+                        title="Copy store URL"
+                    >
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16h8a2 2 0 002-2V8a2 2 0 00-2-2H8a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"></path>
+                        </svg>
+                        <span x-show="!copied">Copy</span>
+                        <span x-show="copied" x-cloak>Copied!</span>
+                    </button>
+                    <a
+                        href="{{ config('app.url') }}/menu/{{ $slug ?? $store->slug ?? '' }}"
+                        target="_blank"
+                        rel="noopener"
+                        class="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300"
+                        title="Open store page"
+                    >
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3h7m0 0v7m0-7L10 14"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10v11a1 1 0 001 1h11a1 1 0 001-1V10"></path>
+                        </svg>
+                        Open
+                    </a>
+                </div>
                 <p class="mt-1 text-xs text-gray-500">Only lowercase letters, numbers, and hyphens allowed. This will be your store's unique URL.</p>
                 @error('slug')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
             </div>

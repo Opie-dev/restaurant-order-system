@@ -8,12 +8,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Illuminate\Support\Collection;
 
 #[Layout('layouts.auth')]
 class StoreSelector extends Component
 {
 
-    public ?Store $stores;
+    public Collection $stores;
     public $selectedStoreId;
     private $storeService;
 
@@ -26,20 +27,6 @@ class StoreSelector extends Component
     public function mount()
     {
         $this->stores = $this->storeService->getUserStores();
-
-        // Check if store is provided in URL
-        $storeId = request('store');
-        if ($storeId) {
-            $store = $this->stores->find($storeId);
-            if ($store) {
-                $this->storeService->setCurrentStore($store);
-                $storeName = $store->name;
-                return redirect()->route('admin.dashboard')->with('success', "Switched to " . $storeName);
-            }
-        }
-
-        $currentStore = $this->storeService->getCurrentStore();
-        $this->selectedStoreId = $currentStore?->id ?? null;
     }
 
     public function selectStore()

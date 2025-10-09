@@ -285,9 +285,27 @@
                     id="faq-4"
                     class="px-6 pb-6 text-gray-600 text-sm"
                 >
-                    Anda boleh menghubungi kami melalui halaman <span class="font-medium text-indigo-600">Hubungi Kami</span> atau melalui <a href="mailto:assyaafi96@gmail.com" class="font-medium text-indigo-600">support@gourmetexpress.com</a>.
+                    Anda boleh menghubungi kami melalui halaman <span class="font-medium text-indigo-600">Hubungi Kami</span> atau melalui <a href="mailto:assyaafi96@gmail.com" class="font-medium text-indigo-600">assyaafi96@gmail.com</a>.
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Contact Us Section -->
+<div class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Hubungi Kami</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Ada soalan atau cadangan? Kami sedia membantu anda.
+            </p>
+        </div>
+
+        <div class="mt-12 max-w-3xl mx-auto">
+            @livewire('contact-form')
         </div>
     </div>
 </div>

@@ -99,11 +99,14 @@ Route::group([
     'as' => 'menu.store.'
 ], function (): void {
     Route::get('/', CustomerMenu::class)->name('index');
-    Route::get('/checkout', CustomerCheckout::class)->name('checkout');
-    Route::get('/orders', CustomerOrderHistory::class)->name('orders');
     Route::get('/cart', CustomerCart::class)->name('cart');
-    Route::get('/addresses', CustomerAddresses::class)->name('addresses');
     Route::get('/login', LoginPage::class)->name('login');
+
+    Route::middleware('auth')->group(function (): void {
+        Route::get('/checkout', CustomerCheckout::class)->name('checkout');
+        Route::get('/orders', CustomerOrderHistory::class)->name('orders');
+        Route::get('/addresses', CustomerAddresses::class)->name('addresses');
+    });
 });
 
 // Early access subscription page

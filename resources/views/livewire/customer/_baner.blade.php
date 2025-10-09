@@ -55,10 +55,12 @@
                         </div>
                     </div>
                 @else
-                    <a href="{{ route('menu.store.login', $store->slug) }}"
-                    class="flex items-center gap-2 text-white hover:bg-dark hover:bg-opacity-20 px-3 py-2 rounded-lg transition-colors font-medium backdrop-blur-sm">
-                        Login
-                    </a>
+                    @if($store->isCurrentlyOpen())
+                        <a href="{{ route('menu.store.login', $store->slug) }}"
+                        class="flex items-center gap-2 text-white hover:bg-dark hover:bg-opacity-20 px-3 py-2 rounded-lg transition-colors font-medium backdrop-blur-sm">
+                            Login
+                        </a>
+                    @endif
                 @endauth
             </nav>
         </div>

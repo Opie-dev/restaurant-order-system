@@ -91,7 +91,10 @@
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500 text-white self-start"> <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"> <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8 7l7 7" clip-rule="evenodd"></path> </svg> Closed </span>
                     @endif
                 </div>
-                <p class="text-white text-sm">{{ $store->address }}</p>
+                <p class="text-white text-sm">
+                    <span class="hidden sm:inline">{{ Str::limit($store->address, 50) }}</span>
+                    <span class="inline sm:hidden">{{ Str::limit($store->address, 20) }}</span>
+                </p>
                 @if(!$store->isCurrentlyOpen() && $store->getNextOpeningTime())
                     <p class="text-white text-xs mt-1">{{ $store->getNextOpeningTime() }}</p>
                 @endif

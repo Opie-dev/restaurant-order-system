@@ -9,7 +9,7 @@
                 $rootCategories = $this->categories->whereNull('parent_id');
             @endphp
 
-            <div id="categories" class="flex rounded-lg bg-white items-center shadow-sm gap-2 lg:gap-3 py-2 overflow-x-auto px-4 {{ $store && !$store->isCurrentlyOpen() ? 'pointer-events-none' : '' }}">
+            <div id="categories" class="flex rounded-lg bg-white items-center shadow-sm gap-2 lg:gap-3 py-2 overflow-x-auto px-4">
                 <button type="button" 
                     @click="handleCategoryClick('all', 'all')"
                     data-category="all"
@@ -55,7 +55,7 @@
         <div class="@if($this->items->isEmpty()) mt-[3rem] lg:mt-[3rem] @elseif(!$store->cover_image) mt-[14rem] @else mt-[17rem] lg:mt-[21rem] @endif"> <!-- Add top padding to avoid overlap with fixed cart button on mobile -->
             <!-- Search Bar -->
             @if(!$this->items->isEmpty())
-            <div id="search" class="relative mb-4 lg:mb-6 px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
+            <div id="search" class="relative mb-4 lg:mb-6 px-4">
                 <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
                     <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -96,7 +96,7 @@
                     $categoryId = $orderedCategories->where('name', $categoryName)->first()?->id ?? 'uncategorized';
                     $categorySlug = Str::slug($categoryName);
                 @endphp
-                <div id="category-{{ $categorySlug }}" class="mb-6 lg:mb-8 px-4 {{ $store && !$store->isCurrentlyOpen() ? 'opacity-50 pointer-events-none' : '' }}">
+                <div id="category-{{ $categorySlug }}" class="mb-6 lg:mb-8 px-4">
                     <h2 class="text-lg lg:text-xl font-semibold text-gray-800 mb-3 lg:mb-4">{{ $categoryName }}</h2>
                     <!-- Responsive Grid: 1 item on mobile, 2 on tablet, 3 on desktop -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">

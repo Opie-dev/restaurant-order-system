@@ -7,6 +7,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\WithPagination;
 use Livewire\Component;
+use App\Services\Admin\StoreService;
 
 #[Layout('layouts.admin')]
 class ListUsers extends Component
@@ -15,6 +16,18 @@ class ListUsers extends Component
 
     #[Url]
     public string $search = '';
+    public $currentStore;
+    private $storeService;
+
+    public function boot()
+    {
+        $this->storeService = new StoreService();
+    }
+
+    public function mount()
+    {
+        $this->currentStore = $this->storeService->getCurrentStore();
+    }
 
     public function updatingSearch(): void
     {
@@ -25,6 +38,7 @@ class ListUsers extends Component
     {
         return User::query()
             ->where('role', 'customer')
+            ->where('store_id', $this->currentStore->id)
             ->with(['defaultAddress'])
             ->when($this->search, function ($q) {
                 $q->where('name', 'like', "%{$this->search}%")

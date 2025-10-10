@@ -208,7 +208,7 @@
 
             <!-- Logout -->
             <div class="border-t border-gray-200 pt-4 mt-4">
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('admin.logout') }}">
                     @csrf
                     <button type="submit" 
                             class="group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -368,7 +368,7 @@
                          x-transition:leave-end="transform opacity-0 scale-95"
                          @click.away="open = false"
                          class="absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
-                        <form method="POST" action="{{ route('logout') }}">
+                        <form method="POST" action="{{ route('admin.logout') }}">
                             @csrf
                             <button type="submit" 
                                     class="block w-full px-3 py-1 text-left text-sm leading-6 text-gray-900 hover:bg-gray-50">

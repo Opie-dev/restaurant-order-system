@@ -1,7 +1,6 @@
 <div class="w-full px-6 py-8">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-900">Customers</h1>
-        <a href="{{ route('admin.customers.create') }}" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">New customer</a>
     </div>
 
     <div class="mb-4">
@@ -25,10 +24,13 @@
                         <td class="px-4 py-3">{{ $user->email }}</td>
                         <td class="px-4 py-3 text-sm text-gray-700">
                             @if($user->defaultAddress)
-                                <div>{{ $user->defaultAddress->recipient_name }}</div>
-                                <div class="text-gray-600">{{ $user->defaultAddress->line1 }}@if($user->defaultAddress->line2), {{ $user->defaultAddress->line2 }}@endif</div>
-                                <div class="text-gray-600">{{ $user->defaultAddress->postal_code }} {{ $user->defaultAddress->city }}@if($user->defaultAddress->state), {{ $user->defaultAddress->state }}@endif, {{ $user->defaultAddress->country }}</div>
-                                @if($user->defaultAddress->phone)<div class="text-gray-500">{{ $user->defaultAddress->phone }}</div>@endif
+                                <span>
+                                    {{ $user->defaultAddress->recipient_name }},
+                                    {{ $user->defaultAddress->line1 }}@if($user->defaultAddress->line2), {{ $user->defaultAddress->line2 }}@endif,
+                                    {{ $user->defaultAddress->postal_code }} {{ $user->defaultAddress->city }}@if($user->defaultAddress->state), {{ $user->defaultAddress->state }}@endif,
+                                    {{ $user->defaultAddress->country }}
+                                    @if($user->defaultAddress->phone) ({{ $user->defaultAddress->phone }})@endif
+                                </span>
                             @else
                                 <span class="text-gray-500">—</span>
                             @endif

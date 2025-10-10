@@ -27,6 +27,10 @@ class Dashboard extends Component
     public function boot()
     {
         $this->storeService = new StoreService();
+        // Initialize onboarding service
+
+        $this->currentStore = $this->storeService->getCurrentStore();
+        $this->onboardingService = new OnboardingService($this->currentStore);
     }
 
     public function mount()
@@ -34,11 +38,6 @@ class Dashboard extends Component
         $this->selectedMonth = now()->month;
         $this->selectedYear = now()->year;
         $this->selectedWeek = $this->getCurrentWeekOfMonth();
-
-        $this->currentStore = $this->storeService->getCurrentStore();
-
-        // Initialize onboarding service
-        $this->onboardingService = new OnboardingService($this->currentStore);
     }
 
     public function getCurrentWeekOfMonth()

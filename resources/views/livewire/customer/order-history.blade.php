@@ -1,8 +1,8 @@
 <div class="mx-auto px-6 py-8">
-    <div class="fixed top-0 left-0 right-0 z-10 overflow-y-auto">
+    <div class="fixed top-0 left-0 right-0 z-10">
         @include('livewire.customer._baner')
     </div>
-    <div class="mt-[16rem] lg:mt-[20rem]">
+    <div class="mt-[10rem] lg:mt-[20rem]">
         <div class="flex items-center justify-between">
             <h1 class="text-3xl font-bold text-gray-900">Order History</h1>
             <a href="{{ route('menu.store.index', ['store' => $store->slug]) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
@@ -180,6 +180,35 @@
                             </div>
                         @endif
 
+                        <!-- Delivery Address -->
+                        @if($order->ship_recipient_name || $order->ship_line1)
+                            <div class="mt-6 bg-green-50 border border-green-200 rounded-xl p-4">
+                                <div class="flex items-start space-x-2">
+                                    <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    <div class="flex-1">
+                                        <h5 class="text-sm font-semibold text-green-900 mb-2">Delivery Address</h5>
+                                        <div class="text-sm text-green-800 space-y-1">
+                                            @if($order->ship_recipient_name)
+                                                <div class="font-medium">{{ $order->ship_recipient_name }}</div>
+                                            @endif
+                                            @if($order->ship_line1)
+                                                <div>{{ $order->ship_line1 }}@if($order->ship_line2), {{ $order->ship_line2 }}@endif</div>
+                                            @endif
+                                            @if($order->ship_city || $order->ship_postal_code)
+                                                <div>{{ $order->ship_postal_code }} {{ $order->ship_city }}@if($order->ship_state), {{ $order->ship_state }}@endif@if($order->ship_country), {{ $order->ship_country }}@endif</div>
+                                            @endif
+                                            @if($order->ship_phone)
+                                                <div class="text-green-700">{{ $order->ship_phone }}</div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                         <!-- Tracking Information -->
                         @if($order->status === 'delivering' && ($order->tracking_url || $order->delivery_fee))
                             <div class="mt-6 bg-purple-50 border border-purple-200 rounded-xl p-4">
@@ -220,6 +249,17 @@
                                         <span class="text-gray-600">Delivery Fee:</span>
                                         <span class="text-gray-900 font-medium">RM{{ number_format($order->delivery_fee, 2) }}</span>
                                     </div>
+                                @else
+                                <div class="flex justify-between items-center text-sm bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2">
+                                    <span class="text-yellow-800">Delivery Fee:</span>
+                                    <span class="text-yellow-900 font-medium">
+                                        <svg class="w-4 h-4 inline-block mr-1 text-yellow-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path>
+                                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"></circle>
+                                        </svg>
+                                        Awaiting merchant confirmation
+                                    </span>
+                                </div>
                                 @endif
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600">Tax (8%):</span>
@@ -233,8 +273,6 @@
                                 </div>
                             </div>
                         </div>
-
-                       
                     </div>
                 </div>
             @endforeach

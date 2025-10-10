@@ -4,7 +4,7 @@
 @endphp
     
 @if($store)
-    <div class="relative shadow {{ $mobileCover ? 'h-64 lg:h-80 overflow-hidden' : 'bg-gray-900' }}">
+    <div class="relative shadow {{ $mobileCover ? 'h-43 lg:h-80' : 'bg-gray-900' }}">
         {{-- Background --}}
         @if($mobileCover)
             <div class="inset-0 h-full w-full">
@@ -15,7 +15,7 @@
         @endif
 
         {{-- Navigation --}}
-        <div class="absolute top-4 right-4">
+        <div class="absolute top-4 right-4 z-30">
             <nav class="flex items-center space-x-4">
                 @auth
                     <div x-data="{ open: false }" class="relative">
@@ -28,27 +28,27 @@
                             </svg>
                         </button>
                         <div x-show="open" @click.away="open = false" x-transition
-                            class="flex flex-col left-0 w-44 bg-white rounded-lg shadow-lg py-1 z-20 gap-2 p-2">
+                            class="absolute right-0 top-full mt-2 flex flex-col w-44 bg-white rounded-lg shadow-lg z-40 gap-2 p-2">
                             <a href="{{ route('menu.store.index', $store->slug) }}"
                                class="dropdown-item transition-all duration-200 px-2 rounded-md hover:bg-purple-50 hover:text-purple-700 hover:pl-4 focus:bg-purple-100 focus:text-purple-800">
                                 Menu
                             </a>
                             <a href="{{ route('menu.store.cart', $store->slug) }}"
                                class="dropdown-item transition-all duration-200 px-2 rounded-md hover:bg-purple-50 hover:text-purple-700 hover:pl-4 focus:bg-purple-100 focus:text-purple-800">
-                                My Cart
+                                Carts
                             </a>
                             <a href="{{ route('menu.store.orders', $store->slug) }}"
                                class="dropdown-item transition-all duration-200 px-2 rounded-md hover:bg-purple-50 hover:text-purple-700 hover:pl-4 focus:bg-purple-100 focus:text-purple-800">
-                                My Orders
+                                Orders
                             </a>
                             <a href="{{ route('menu.store.addresses', $store->slug) }}"
                                class="dropdown-item transition-all duration-200 px-2 rounded-md hover:bg-purple-50 hover:text-purple-700 hover:pl-4 focus:bg-purple-100 focus:text-purple-800">
-                                My Addresses
+                                Addresses
                             </a>
-                            <form method="POST" action="{{ route('logout') }}" class="w-full">
+                            <form method="POST" action="{{ route('menu.store.logout', $store->slug) }}" class="w-full">
                                 @csrf
                                 <button type="submit"
-                                        class="w-full text-left text-gray-800 transition-all duration-200 text-sm cursor-pointer px-2 rounded-md hover:bg-purple-50 hover:text-purple-700 hover:pl-4 focus:bg-purple-100 focus:text-purple-800">
+                                        class="text-md w-full text-left text-gray-800 transition-all duration-200 cursor-pointer px-2 rounded-md hover:bg-purple-50 hover:text-purple-700 hover:pl-4 focus:bg-purple-100 focus:text-purple-800">
                                     Logout
                                 </button>
                             </form>
@@ -66,7 +66,7 @@
         </div>
 
         {{-- Store Info --}}
-        <div class="{{ $mobileCover ? 'absolute bottom-0 left-0 right-0 p-6 text-white' : 'relative flex items-center space-x-6 p-6 w-full' }}"
+        <div class="{{ $mobileCover ? 'flex gap-2 absolute bottom-0 left-0 right-0 p-6 text-white z-10' : 'relative flex items-center space-x-6 p-6 w-full' }}"
             style="{{ $mobileCover ? 'text-shadow: 2px 2px 4px rgba(0,0,0,0.8)' : '' }}">
             @if($store->logo_path)
                 <img src="{{ Storage::url($store->logo_path) }}" alt="{{ $store->name }}"

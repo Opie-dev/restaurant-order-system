@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use App\Models\UserAddress;
 use Illuminate\Http\Request;
@@ -23,6 +24,8 @@ class Checkout extends Component
     public ?int $addressId = null;
     public string $notes = '';
     public ?Store $store = null;
+    public int $timeRemaining = 0;
+    public bool $cartExpired = false;
     protected CartService $cartService;
 
     public function boot(CartService $cartService)
@@ -34,13 +37,54 @@ class Checkout extends Component
     public function mount(Request $request)
     {
         $this->store = $request->store;
+
+        // Check if cart is expired and clear if necessary
+        if ($this->cartService->checkAndClearExpiredCart($this->store?->id)) {
+            $this->cartExpired = true;
+            return;
+        }
+
+        // Restart timer when navigating to checkout page
+        $this->cartService->restartTimer($this->store?->id);
+
+        // Update timer
+        $this->updateTimer();
+    }
+
+    public function updateTimer(): void
+    {
+        $this->timeRemaining = $this->cartService->getCartTimeRemaining($this->store?->id);
+        $this->cartExpired = $this->cartService->isCartExpired($this->store?->id);
+    }
+
+    #[On('timer-tick')]
+    public function onTimerTick(): void
+    {
+        $this->updateTimer();
+
+        if ($this->cartExpired) {
+            // Cart has expired, dispatch event to refresh the page
+            $this->dispatch('cart-expired');
+        }
     }
 
 
     public function updatedDeliver(): void
     {
         if ($this->deliver && Auth::check()) {
-            $this->addressId = Auth::user()->defaultAddress?->id;
+            // Auto-select default address if available
+            $defaultAddress = Auth::user()->defaultAddress;
+            if ($defaultAddress) {
+                $this->addressId = $defaultAddress->id;
+            } else {
+                // If no default, select the first available address
+                $firstAddress = $this->userAddresses->first();
+                if ($firstAddress) {
+                    $this->addressId = $firstAddress->id;
+                }
+            }
+        } else {
+            $this->addressId = null;
         }
     }
 
@@ -98,13 +142,13 @@ class Checkout extends Component
             // Check if user has any addresses at all
             $userAddresses = UserAddress::where('user_id', Auth::id())->count();
             if ($userAddresses === 0) {
-                $this->addError('address', 'You need to add a delivery address before placing a delivery order. Please go to "Manage addresses" to add one.');
+                $this->addError('address', 'You need to create a delivery address before placing a delivery order. Please click "Create Delivery Address" above or choose "Self-pickup" instead.');
                 return;
             }
 
             // Check if a specific address is selected
             if (!$this->addressId) {
-                $this->addError('addressId', 'Please select a delivery address.');
+                $this->addError('addressId', 'Please select a delivery address from the list above.');
                 return;
             }
 

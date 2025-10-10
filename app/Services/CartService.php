@@ -31,8 +31,10 @@ class CartService
     public function setCart(array $cart, ?int $storeId = null): void
     {
         session([$this->getCartKey($storeId) => $cart]);
-        // Reset timer when cart is updated
-        $this->resetCartTimer($storeId);
+        // Reset timer when cart is updated (only if cart has items)
+        if (!empty($cart)) {
+            $this->resetCartTimer($storeId);
+        }
     }
 
     public function getCartTimer(?int $storeId = null): ?int
@@ -49,8 +51,11 @@ class CartService
     public function isCartExpired(?int $storeId = null): bool
     {
         $timer = $this->getCartTimer($storeId);
+        // If there is no timer, do not treat as expired. This can happen after
+        // session regeneration (e.g., login). Callers should decide whether to
+        // restart the timer based on cart contents.
         if (!$timer) {
-            return true; // No timer means expired
+            return false;
         }
         return time() > $timer;
     }
@@ -287,10 +292,27 @@ class CartService
 
     public function checkAndClearExpiredCart(?int $storeId = null): bool
     {
+        $timer = $this->getCartTimer($storeId);
+        $cart = $this->getCart($storeId);
+
+        // If timer is missing but there are items, restart timer (common after login)
+        if (!$timer && !empty($cart)) {
+            $this->resetCartTimer($storeId);
+            return false;
+        }
+
         if ($this->isCartExpired($storeId)) {
             $this->clear($storeId);
             return true; // Cart was cleared
         }
         return false; // Cart is still valid
+    }
+
+    public function restartTimer(?int $storeId = null): void
+    {
+        $cart = $this->getCart($storeId);
+        if (!empty($cart)) {
+            $this->resetCartTimer($storeId);
+        }
     }
 }

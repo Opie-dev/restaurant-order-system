@@ -33,6 +33,9 @@ class Cart extends Component
             return;
         }
 
+        // Restart timer when navigating to cart page
+        $this->cartService->restartTimer($this->store?->id);
+
         // Update timer
         $this->updateTimer();
     }

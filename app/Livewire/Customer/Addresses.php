@@ -40,13 +40,10 @@ class Addresses extends Component
     #[Validate('required|string|max:20')]
     public string $postal_code = '';
 
-    #[Validate('required|string|max:2')]
-    public string $country = 'MY';
-
     public bool $is_default = false;
     public ?Store $store = null;
 
-    public function boot(Request $request)
+    public function mount(Request $request)
     {
         $this->store = $request->store;
     }
@@ -55,7 +52,7 @@ class Addresses extends Component
     {
         $addr = Auth::user()->addresses()->findOrFail($id);
         $this->editingId = $addr->id;
-        $this->fill($addr->only(['label', 'recipient_name', 'phone', 'line1', 'line2', 'city', 'state', 'postal_code', 'country', 'is_default']));
+        $this->fill($addr->only(['label', 'recipient_name', 'phone', 'line1', 'line2', 'city', 'state', 'postal_code', 'is_default']));
     }
 
     public function cancel(): void
@@ -68,13 +65,19 @@ class Addresses extends Component
         $this->validate();
 
         $user = Auth::user();
-        $data = $this->only(['label', 'recipient_name', 'phone', 'line1', 'line2', 'city', 'state', 'postal_code', 'country']);
+        $data = $this->only(['label', 'recipient_name', 'phone', 'line1', 'line2', 'city', 'state', 'postal_code']);
 
         if ($this->editingId) {
             $address = $user->addresses()->findOrFail($this->editingId);
             $address->update($data);
         } else {
             $address = $user->addresses()->create($data);
+
+            // Auto-assign as default if this is the user's first address
+            $totalAddresses = $user->addresses()->count();
+            if ($totalAddresses === 1) {
+                $this->is_default = true;
+            }
         }
 
         if ($this->is_default) {
@@ -105,8 +108,7 @@ class Addresses extends Component
 
     private function resetForm(): void
     {
-        $this->reset(['editingId', 'label', 'recipient_name', 'phone', 'line1', 'line2', 'city', 'state', 'postal_code', 'country', 'is_default']);
-        $this->country = 'MY';
+        $this->reset(['editingId', 'label', 'recipient_name', 'phone', 'line1', 'line2', 'city', 'state', 'postal_code', 'is_default']);
         $this->is_default = false;
     }
 

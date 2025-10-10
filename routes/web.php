@@ -31,19 +31,13 @@ use App\Livewire\Admin\Settings\StoreMedia as AdminStoreMedia;
 use App\Livewire\Admin\Settings\StoreAddress as AdminStoreAddress;
 use App\Livewire\Admin\Settings\StoreHours as AdminStoreHours;
 use App\Livewire\Welcome as WelcomePage;
+use App\Http\Controllers\AuthController;
 
 Route::get('/', WelcomePage::class)->name('home');
 
 // Merchant authentication routes
 Route::get('/merchant/login', MerchantLoginPage::class)->name('merchant.login');
 Route::get('/merchant/register', MerchantRegisterPage::class)->name('merchant.register');
-
-Route::post('/logout', function () {
-    \Illuminate\Support\Facades\Auth::logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-    return redirect()->route('home');
-})->name('logout');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function (): void {
     Route::redirect('/', '/admin/dashboard');
@@ -89,6 +83,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/settings/store-address', AdminStoreAddress::class)->name('settings.store-address');
         Route::get('/settings/store-hours', AdminStoreHours::class)->name('settings.store-hours');
         Route::get('/settings/security', Security::class)->name('settings.security');
+        Route::post('/logout', [AuthController::class, 'merchantLogout'])->name('logout');
     });
 });
 
@@ -106,6 +101,7 @@ Route::group([
         Route::get('/checkout', CustomerCheckout::class)->name('checkout');
         Route::get('/orders', CustomerOrderHistory::class)->name('orders');
         Route::get('/addresses', CustomerAddresses::class)->name('addresses');
+        Route::post('/logout', [AuthController::class, 'customerLogout'])->name('logout');
     });
 });
 

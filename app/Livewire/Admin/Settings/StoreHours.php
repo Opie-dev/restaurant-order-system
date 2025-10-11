@@ -74,6 +74,8 @@ class StoreHours extends Component
         $settings['always_open'] = $this->always_open;
         $settings['opening_hours'] = $this->hours;
         $this->currentStore->update(['settings' => $settings]);
+
+        $this->dispatch('flash', type: 'success', message: 'Opening hours updated successfully.');
     }
 
     public function updatedAlwaysOpen($value): void

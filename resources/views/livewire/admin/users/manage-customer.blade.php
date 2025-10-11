@@ -134,7 +134,7 @@
     <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-semibold text-gray-900">Address Management</h2>
-            <button wire:click="showAddAddressForm" 
+            <button wire:click="$dispatch('showAddAddress')" 
                     class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                 Add Address
             </button>
@@ -157,8 +157,11 @@
                                 </div>
                                 <div class="text-sm text-gray-700">
                                     <div class="font-medium">{{ $address->recipient_name }}</div>
-                                    <div>{{ $address->line1 }}@if($address->line2), {{ $address->line2 }}@endif</div>
-                                    <div>{{ $address->postal_code }} {{ $address->city }}, {{ $address->state }}, {{ $address->country }}</div>
+                                    <div>
+                                        {{ $address->line1 }}
+                                        @if($address->line2), {{ $address->line2 }}@endif,
+                                        {{ $address->postal_code }} {{ $address->city }}, {{ $address->state }}, {{ $address->country }}
+                                    </div>
                                     @if($address->phone)
                                         <div class="text-gray-600">{{ $address->phone }}</div>
                                     @endif
@@ -171,7 +174,7 @@
                                         Set Default
                                     </button>
                                 @endif
-                                <button wire:click="showEditAddressForm({{ $address->id }})" 
+                                <button wire:click="$dispatch('showEditAddress', { addressId: {{ $address->id }} })" 
                                         class="text-sm text-blue-600 hover:text-blue-700">
                                     Edit
                                 </button>
@@ -191,128 +194,6 @@
             </div>
         @endif
 
-        <!-- Add/Edit Address Form -->
-        @if($showAddAddress || $showEditAddress)
-            <div class="border-t border-gray-200 pt-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">
-                    {{ $showEditAddress ? 'Edit Address' : 'Add New Address' }}
-                </h3>
-                <form wire:submit.prevent="saveAddress" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="addressLabel" class="block text-sm font-medium text-gray-700 mb-1">Label</label>
-                            <input type="text" 
-                                   wire:model="addressLabel" 
-                                   id="addressLabel"
-                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                   placeholder="e.g., Home, Office">
-                            @error('addressLabel')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
-                        </div>
-                        <div>
-                            <label for="recipientName" class="block text-sm font-medium text-gray-700 mb-1">Recipient Name</label>
-                            <input type="text" 
-                                   wire:model="recipientName" 
-                                   id="recipientName"
-                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                   placeholder="Full name">
-                            @error('recipientName')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                            <input type="tel" 
-                                   wire:model="phone" 
-                                   id="phone"
-                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                   placeholder="Phone number">
-                            @error('phone')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" 
-                                   wire:model="isDefault" 
-                                   id="isDefault"
-                                   class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
-                            <label for="isDefault" class="ml-2 block text-sm text-gray-900">
-                                Set as default address
-                            </label>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="line1" class="block text-sm font-medium text-gray-700 mb-1">Address Line 1</label>
-                        <input type="text" 
-                               wire:model="line1" 
-                               id="line1"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                               placeholder="Street address, building number">
-                        @error('line1')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
-                    </div>
-
-                    <div>
-                        <label for="line2" class="block text-sm font-medium text-gray-700 mb-1">Address Line 2 (Optional)</label>
-                        <input type="text" 
-                               wire:model="line2" 
-                               id="line2"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                               placeholder="Apartment, suite, unit, building, floor, etc.">
-                        @error('line2')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
-                            <input type="text" 
-                                   wire:model="city" 
-                                   id="city"
-                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                   placeholder="City">
-                            @error('city')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
-                        </div>
-                        <div>
-                            <label for="state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
-                            <input type="text" 
-                                   wire:model="state" 
-                                   id="state"
-                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                   placeholder="State">
-                            @error('state')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
-                        </div>
-                        <div>
-                            <label for="postalCode" class="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
-                            <input type="text" 
-                                   wire:model="postalCode" 
-                                   id="postalCode"
-                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                   placeholder="Postal code">
-                            @error('postalCode')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="country" class="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                        <input type="text" 
-                               wire:model="country" 
-                               id="country"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                               placeholder="Country">
-                        @error('country')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
-                    </div>
-
-                    <div class="flex justify-end space-x-3">
-                        <button type="button" 
-                                wire:click="cancelAddressForm"
-                                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                            Cancel
-                        </button>
-                        <button type="submit" 
-                                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
-                            {{ $showEditAddress ? 'Update Address' : 'Add Address' }}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        @endif
-    </div>
+    <!-- Address Form Component -->
+    <livewire:shared.address-form />
 </div>

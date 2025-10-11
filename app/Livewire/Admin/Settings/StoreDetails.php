@@ -4,11 +4,13 @@ namespace App\Livewire\Admin\Settings;
 
 use App\Models\Store;
 use App\Services\Admin\StoreService;
+use App\Constants\CountryCodes;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
+use App\Services\Admin\OnboardingService;
 
 #[Layout('layouts.admin')]
 class StoreDetails extends Component
@@ -44,6 +46,9 @@ class StoreDetails extends Component
     #[Validate('required|email')]
     public ?string $email = '';
 
+    #[Validate('nullable|string|max:10')]
+    public ?string $country_code = null;
+
     #[Validate('nullable|mimes:jpg,jpeg,png,gif,bmp,svg,webp,avif|max:2048')]
     public $logo;
 
@@ -57,7 +62,9 @@ class StoreDetails extends Component
     public ?string $cover_path = null;
     public ?string $cover_desktop_path = null;
     public ?Store $currentStore = null;
+
     private $storeService;
+    private $onboardingService;
 
     public bool $always_open = false;
     /**
@@ -79,15 +86,42 @@ class StoreDetails extends Component
     #[Validate('nullable|string|max:255')]
     public ?string $social_youtube = null;
 
+    #[Validate('nullable|numeric|min:0|max:100')]
+    public ?float $tax_rate = null;
+
+    protected function taxRules()
+    {
+        return [
+            'tax_rate' => 'nullable|numeric|min:0|max:100',
+        ];
+    }
+
+    protected function socialMediaRules()
+    {
+        return [
+            'social_google_map' => 'nullable|string|max:500',
+            'social_facebook' => 'nullable|string|max:255',
+            'social_tiktok' => 'nullable|string|max:255',
+            'social_other' => 'nullable|string|max:255',
+            'social_instagram' => 'nullable|string|max:255',
+            'social_youtube' => 'nullable|string|max:255',
+        ];
+    }
+
     public function boot()
     {
-        $this->storeService = app(StoreService::class);
+        $this->storeService = new StoreService();
+        // Load current store from StoreService
+        $this->currentStore = $this->storeService->getCurrentStore();
+        $this->onboardingService = new OnboardingService($this->currentStore);
     }
 
     public function mount()
     {
-        // Load current store from StoreService
-        $this->currentStore = $this->storeService->getCurrentStore();
+        if (!$this->currentStore) {
+            $this->redirectRoute('admin.stores.select');
+            return;
+        }
 
         if ($this->currentStore) {
             $this->name = $this->currentStore->name ?? '';
@@ -100,6 +134,7 @@ class StoreDetails extends Component
             $this->postal_code = $this->currentStore->postal_code ?? '';
             $this->phone = $this->currentStore->phone ?? '';
             $this->email = $this->currentStore->email ?? '';
+            $this->country_code = $this->currentStore->country_code ?? CountryCodes::getByCode('+60')['code'];
             $this->logo_path = $this->currentStore->logo_path;
             $this->cover_path = $this->currentStore->cover_path;
 
@@ -115,10 +150,36 @@ class StoreDetails extends Component
             $this->social_other = $social['other'] ?? null;
             $this->social_instagram = $social['instagram'] ?? null;
             $this->social_youtube = $social['youtube'] ?? null;
-        } else {
-            // Redirect to store selection if no store is selected
-            $this->redirectRoute('admin.stores.select');
+
+            // Load tax rate
+            $this->tax_rate = $this->currentStore->tax_rate;
         }
+    }
+
+    protected function rules()
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:stores,slug,' . ($this->currentStore ? $this->currentStore->id : 'NULL'),
+            'description' => 'nullable|string|max:500',
+            'address_line1' => 'required|string|max:255',
+            'address_line2' => 'nullable|string|max:255',
+            'city' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'postal_code' => 'required|string|max:20',
+            'country_code' => 'required|string',
+            'phone' => [
+                'required',
+                'integer',
+                function ($attribute, $value, $fail) {
+                    $error = CountryCodes::getPhoneNumberValidationError($this->country_code, (string)$value);
+                    if ($error) {
+                        $fail($error);
+                    }
+                }
+            ],
+            'email' => 'required|email',
+        ];
     }
 
     /**
@@ -161,21 +222,10 @@ class StoreDetails extends Component
 
     public function saveDetails(): void
     {
-        $this->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:stores,slug,' . $this->currentStore->id,
-            'description' => 'nullable|string|max:500',
-            'address_line1' => 'required|string|max:255',
-            'address_line2' => 'nullable|string|max:255',
-            'city' => 'required|string|max:100',
-            'state' => 'required|string|max:100',
-            'postal_code' => 'required|string|max:20',
-            'phone' => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/',
-            'email' => 'required|email',
-        ]);
+        $this->validate($this->rules());
 
         if (!$this->currentStore) {
-            session()->flash('error', 'No store selected.');
+            $this->dispatch('flash', type: 'error', message: 'No store selected.');
             return;
         }
 
@@ -190,12 +240,12 @@ class StoreDetails extends Component
             'postal_code' => $this->postal_code,
             'phone' => $this->phone,
             'email' => $this->email,
+            'country_code' => $this->country_code,
         ]);
 
-        session()->flash('success', 'Store details updated successfully.');
+        $this->dispatch('flash', type: 'success', message: 'Store details updated successfully.');
 
-        // Check if store is in onboarding mode
-        if ($this->currentStore->is_onboarding) {
+        if (!$this->onboardingService->isOnboardingComplete()) {
             $this->redirectRoute('admin.dashboard');
         }
     }
@@ -209,7 +259,7 @@ class StoreDetails extends Component
         ]);
 
         if (!$this->currentStore) {
-            session()->flash('error', 'No store selected.');
+            $this->dispatch('flash', type: 'error', message: 'No store selected.');
             return;
         }
 
@@ -243,10 +293,10 @@ class StoreDetails extends Component
         $this->logo = null;
         $this->cover = null;
 
-        session()->flash('success', 'Store media updated successfully.');
+        $this->dispatch('flash', type: 'success', message: 'Store media updated successfully.');
 
         // Check if store is in onboarding mode
-        if ($this->currentStore->is_onboarding) {
+        if (!$this->onboardingService->isOnboardingComplete()) {
             $this->redirectRoute('admin.dashboard');
         }
 
@@ -256,7 +306,7 @@ class StoreDetails extends Component
     public function saveHours(): void
     {
         if (!$this->currentStore) {
-            session()->flash('error', 'No store selected.');
+            $this->dispatch('flash', type: 'error', message: 'No store selected.');
             return;
         }
 
@@ -287,7 +337,7 @@ class StoreDetails extends Component
         $settings['opening_hours'] = $this->hours;
         $this->currentStore->update(['settings' => $settings]);
 
-        session()->flash('success', 'Opening hours updated successfully.');
+        $this->dispatch('flash', type: 'success', message: 'Opening hours updated successfully.');
 
         // Check if store is in onboarding mode
         if ($this->currentStore->is_onboarding) {
@@ -306,18 +356,11 @@ class StoreDetails extends Component
     public function saveSocialMedia(): void
     {
         if (!$this->currentStore) {
-            session()->flash('error', 'No store selected.');
+            $this->dispatch('flash', type: 'error', message: 'No store selected.');
             return;
         }
 
-        $this->validate([
-            'social_google_map' => 'nullable|string|max:500',
-            'social_facebook' => 'nullable|string|max:255',
-            'social_tiktok' => 'nullable|string|max:255',
-            'social_other' => 'nullable|string|max:255',
-            'social_instagram' => 'nullable|string|max:255',
-            'social_youtube' => 'nullable|string|max:255',
-        ]);
+        $this->validate($this->socialMediaRules());
 
         $settings = $this->currentStore->settings ?? [];
         $settings['social'] = [
@@ -330,21 +373,73 @@ class StoreDetails extends Component
         ];
         $this->currentStore->update(['settings' => $settings]);
 
-        session()->flash('success', 'Social media links updated successfully.');
+        $this->dispatch('flash', type: 'success', message: 'Social media links updated successfully.');
         $this->dispatch('social-saved');
+    }
+
+    public function saveTax(): void
+    {
+        $this->validate($this->taxRules());
+
+        if (!$this->currentStore) {
+            $this->dispatch('flash', type: 'error', message: 'No store selected.');
+            return;
+        }
+
+        $this->currentStore->update([
+            'tax_rate' => $this->tax_rate,
+        ]);
+
+        $this->dispatch('flash', type: 'success', message: 'Tax settings updated successfully.');
+    }
+
+    public function getCountryCodesProperty(): array
+    {
+        return CountryCodes::getAll();
+    }
+
+    public function phone_validation($attribute, $value, $fail)
+    {
+        $countryCode = $this->country_code;
+        if (!$countryCode) {
+            $fail('Country code is required for phone validation.');
+            return;
+        }
+
+        $error = CountryCodes::getPhoneNumberValidationError($countryCode, (string)$value);
+        if ($error) {
+            $fail($error);
+        }
+    }
+
+    public function parsePhoneNumber(string $phone): array
+    {
+        // Remove any non-digit characters except +
+        $cleanPhone = preg_replace('/[^\d+]/', '', $phone);
+
+        // Find matching country code
+        $countries = CountryCodes::getAll();
+        $matchedCountry = null;
+        $phoneNumber = $phone;
+
+        foreach ($countries as $country) {
+            $code = ltrim($country['code'], '+');
+            if (str_starts_with($cleanPhone, $code)) {
+                $matchedCountry = $country;
+                $phoneNumber = substr($cleanPhone, strlen($code));
+                break;
+            }
+        }
+
+        return [
+            'country' => $matchedCountry,
+            'phone_number' => $phoneNumber,
+            'full_phone' => $phone
+        ];
     }
 
     public function render()
     {
-        return view('livewire.admin.settings.store-details', [
-            'navigationBar' => true,
-            'showBackButton' => true,
-            'pageTitle' => 'Store Details',
-            'breadcrumbs' => [
-                ['label' => 'Settings', 'url' => '#'],
-                ['label' => 'Store Details']
-            ],
-            'actionButtons' => []
-        ]);
+        return view('livewire.admin.settings.store-details');
     }
 }

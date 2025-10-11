@@ -10,6 +10,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use App\Services\Admin\StoreService;
+use Illuminate\Http\Request;
 
 #[Layout('layouts.admin')]
 class Security extends Component
@@ -60,12 +61,12 @@ class Security extends Component
         $this->reset(['current_password', 'new_password', 'new_password_confirmation']);
 
         // Show success message
-        session()->flash('success', 'Password updated successfully. You will be logged out for security.');
+        $this->dispatch('flash', type: 'success', message: 'Password updated successfully. You will be logged out for security.');
 
         // Logout and redirect to login
         Auth::logout();
 
-        return redirect()->route('login')->with('message', 'Password updated successfully. Please login with your new password.');
+        return redirect()->route('merchant.login')->with('message', 'Password updated successfully. Please login with your new password.');
     }
 
     public function deactivateStore()
@@ -95,10 +96,10 @@ class Security extends Component
         $this->reset(['store_deactivation_password']);
 
         // Show success message
-        session()->flash('success', 'Store has been deactivated successfully. Your store is no longer visible to customers.');
+        $this->dispatch('flash', type: 'success', message: 'Store has been deactivated successfully. Your store is no longer visible to customers.');
     }
 
-    public function deleteAccount()
+    public function deleteAccount(Request $request)
     {
         $this->validate([
             'account_deletion_password' => 'required|string|min:8',
@@ -120,11 +121,58 @@ class Security extends Component
         DB::transaction(function () {
             $user = Auth::user();
 
-            // Get user's stores
+            // Delete all user-owned store data and related content
             $stores = $user->stores;
 
-            // Soft delete all stores (this will cascade to related data)
             foreach ($stores as $store) {
+                // Delete categories
+                $store->categories()->each(function ($category) {
+                    $category->delete();
+                });
+
+                // Delete menu items
+                $store->menuItems()->each(function ($item) {
+                    $item->delete();
+                });
+
+                // Delete orders and their items/payments
+                $store->orders()->each(function ($order) {
+                    $order->items()->delete();
+                    $order->payments()->delete();
+                    $order->delete();
+                });
+
+                // Delete customers that only belong to this store (optional, clarify business rule if re-used elsewhere)
+                if (method_exists($store, 'customers')) {
+                    $store->customers()->each(function ($customer) {
+                        // Only delete customer if they belong exclusively to this store
+                        if (method_exists($customer, 'stores') && $customer->stores()->count() === 1) {
+                            $customer->delete();
+                        }
+                    });
+                }
+
+                // Delete addresses (if related by hasMany)
+                if (method_exists($store, 'addresses')) {
+                    $store->addresses()->delete();
+                }
+
+                // Delete store settings
+                if (method_exists($store, 'settings')) {
+                    $store->settings()->delete();
+                }
+
+                // Delete daily menu availabilities
+                if (method_exists($store, 'dailyMenuAvailabilities')) {
+                    $store->dailyMenuAvailabilities()->delete();
+                }
+
+                // Delete/clear store media (if implemented)
+                if (method_exists($store, 'clearMedia')) {
+                    $store->clearMedia();
+                }
+
+                // Finally, delete the store itself
                 $store->delete();
             }
 
@@ -134,20 +182,14 @@ class Security extends Component
 
         // Logout and redirect
         Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        return redirect()->route('welcome')->with('message', 'Your account and all associated data have been permanently deleted.');
+        return redirect()->route('merchant.login')->with('message', 'Your account and all associated data have been permanently deleted.');
     }
 
     public function render()
     {
-        return view('livewire.admin.settings.security', [
-            'navigationBar' => true,
-            'showBackButton' => false,
-            'pageTitle' => 'Security Settings',
-            'breadcrumbs' => [
-                ['name' => 'Settings', 'url' => '#'],
-                ['name' => 'Security', 'url' => '#'],
-            ],
-        ]);
+        return view('livewire.admin.settings.security');
     }
 }

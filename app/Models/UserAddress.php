@@ -16,6 +16,7 @@ class UserAddress extends Model
         'label',
         'recipient_name',
         'phone',
+        'country_code',
         'line1',
         'line2',
         'city',

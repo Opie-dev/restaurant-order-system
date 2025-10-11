@@ -44,15 +44,13 @@ class PendingOrders extends Component
         $order = Order::findOrFail($orderId);
 
         if (!$order->canTransitionTo($newStatus)) {
-            session()->flash('error', 'Invalid status transition from ' . $order->status . ' to ' . $newStatus);
-            $this->dispatch('flash', 'Invalid status transition from ' . $order->status . ' to ' . $newStatus);
+            $this->dispatch('flash', type: 'error', message: 'Invalid status transition from ' . $order->status . ' to ' . $newStatus);
             return;
         }
 
         // Require cancellation reason when cancelling
         if ($newStatus === Order::STATUS_CANCELLED && (!is_string($cancellationRemarks) || trim($cancellationRemarks) === '')) {
-            session()->flash('error', 'Cancellation reason is required.');
-            $this->dispatch('flash', 'Cancellation reason is required.');
+            $this->dispatch('flash', type: 'error', message: 'Cancellation reason is required.');
             return;
         }
 
@@ -76,8 +74,7 @@ class PendingOrders extends Component
             ? 'Order cancelled successfully'
             : 'Order status updated to ' . ucfirst($newStatus);
 
-        session()->flash('success', $message);
-        $this->dispatch('flash', $message);
+        $this->dispatch('flash', type: 'success', message: $message);
         if ($newStatus === Order::STATUS_DELIVERING) {
             $this->dispatch('close-tracking-modal');
         }
@@ -94,7 +91,7 @@ class PendingOrders extends Component
         $order = Order::findOrFail($this->trackingOrderId);
 
         if (!$order->canTransitionTo(Order::STATUS_DELIVERING)) {
-            session()->flash('error', 'Invalid status transition from ' . $order->status . ' to delivering');
+            $this->dispatch('flash', type: 'error', message: 'Invalid status transition from ' . $order->status . ' to delivering');
             return;
         }
 
@@ -108,8 +105,7 @@ class PendingOrders extends Component
             'total' => $newTotal,
         ]);
 
-        session()->flash('success', 'Order status updated to Delivering');
-        $this->dispatch('flash', 'Order status updated to Delivering');
+        $this->dispatch('flash', type: 'success', message: 'Order status updated to Delivering');
         $this->dispatch('close-tracking-modal');
 
         // Reset form state

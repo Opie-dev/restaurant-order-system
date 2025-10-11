@@ -183,6 +183,7 @@ class Checkout extends Component
                 'status' => Order::STATUS_PENDING,
                 'subtotal' => $totals['subtotal'],
                 'tax' => $totals['tax'],
+                'tax_rate' => $totals['tax_rate'],
                 'total' => $totals['total'],
                 'payment_status' => Order::PAYMENT_STATUS_UNPAID,
                 'notes' => $this->notes,

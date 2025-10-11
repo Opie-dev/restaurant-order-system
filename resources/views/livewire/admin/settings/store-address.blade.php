@@ -30,18 +30,14 @@
                 </div>
             </div>
 
-            <div class="pt-4 border-t border-gray-200 flex items-center justify-end gap-3" x-data="{saved:false}" x-on:address-saved.window="saved=true; setTimeout(()=> saved=false, 1200)">
-                <div x-show="saved" x-cloak class="text-sm text-green-700 bg-green-100 px-3 py-1 rounded inline-flex items-center gap-2"
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 translate-y-1"
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     x-transition:leave="transition ease-in duration-200"
-                     x-transition:leave-start="opacity-100 translate-y-0"
-                     x-transition:leave-end="opacity-0 translate-y-1">
-                    <svg class="w-4 h-4 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    Saved
-                </div>
-                <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Save Address</button>
+            <div class="pt-4 border-t border-gray-200 flex items-center justify-end gap-3">
+                <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700" wire:loading.attr="disabled" wire:target="save">
+                    <svg wire:loading wire:target="save" class="animate-spin -ml-1 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4z"/>
+                    </svg>
+                    <span>Save</span>
+                </button>
             </div>
         </div>
     </form>

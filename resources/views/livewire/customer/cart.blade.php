@@ -143,7 +143,7 @@
                                 <span class="text-gray-900">RM {{ number_format($this->totals['subtotal'], 2) }}</span>
                             </div>
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Tax (8%)</span>
+                                <span class="text-gray-600">Tax ({{ number_format($this->totals['tax_rate'], 1) }}%)</span>
                                 <span class="text-gray-900">RM {{ number_format($this->totals['tax'], 2) }}</span>
                             </div>
                             <div class="border-t border-gray-200 pt-2">

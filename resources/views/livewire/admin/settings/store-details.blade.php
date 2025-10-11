@@ -69,9 +69,64 @@
             </div>   
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                    <input type="tel" wire:model.blur="phone" pattern="[0-9+\-\s()]+" class="w-full rounded-lg border-2 border-gray-300 px-3 py-2.5 focus:border-purple-500 focus:ring-purple-500" placeholder="e.g. +60 12-345-6789" />
+                <div class="w-full">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                    <div class="flex w-full" x-data="phoneInput()">
+                        <!-- Country Code Dropdown -->
+                        <div class="relative">
+                            <button type="button" 
+                                    @click="toggleDropdown()" 
+                                    class="flex items-center justify-between w-32 px-3 py-3 border-2 border-gray-300 rounded-l-lg focus:border-purple-500 focus:ring-purple-500 bg-white hover:bg-gray-50">
+                                <span class="text-sm font-medium" x-text="selectedCountry.label"></span>
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div x-show="isOpen" 
+                                 @click.away="closeDropdown()" 
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="absolute z-50 mt-1 w-80 bg-white border border-gray-300 rounded-lg shadow-lg  overflow-y-auto max-h-60">
+                                
+                                <!-- Search Input -->
+                                <div class="p-3 border-b border-gray-200">
+                                    <input type="text" 
+                                           x-model="searchQuery" 
+                                           @input="filterCountries()"
+                                           placeholder="Search country..." 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                </div>
+                                
+                                <!-- Countries List -->
+                                <div class="px-3 py-2.5 overflow-y-auto">
+                                    <template x-for="country in filteredCountries" :key="country.code">
+                                        <button type="button"
+                                                @click="selectCountry(country)"
+                                                class="w-full px-4 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-sm font-medium" x-text="country.label"></span>
+                                                <span class="text-xs text-gray-500" x-text="country.country"></span>
+                                            </div>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Phone Number Input -->
+                        <input type="tel" 
+                               wire:model.blur="phone" 
+                               x-model="phoneNumber"
+                               @input="updatePhoneNumber()"
+                               class="flex-1 rounded-r-lg border-2 border-gray-300 border-l-0 w-full px-3 py-2.5 focus:border-purple-500 focus:ring-purple-500" 
+                               placeholder="Enter phone number" />
+                    </div>
                     @error('phone')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
                 </div>
                 <div>
@@ -88,8 +143,44 @@
                     </div>
                     <div class="flex space-x-3">
                        
-                        <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-                            Save
+                        <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2" wire:loading.attr="disabled" wire:target="saveTax">
+                            <svg wire:loading wire:target="saveDetails" class="animate-spin -ml-1 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4z"/>
+                            </svg>
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <form wire:submit.prevent="saveTax" class="space-y-6 mb-4">
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-6">
+            <h2 class="text-lg font-semibold text-gray-900">Tax Settings</h2>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tax Rate (%)</label>
+                <div class="flex">
+                    <input type="number" wire:model.blur="tax_rate" step="0.01" min="0" max="100" class="flex-1 rounded-l-lg border-2 border-gray-300 px-3 py-2.5 focus:border-purple-500 focus:ring-purple-500" placeholder="0.00" />
+                    <span class="inline-flex items-center px-3 rounded-r-lg border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">%</span>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Enter the tax rate as a percentage (e.g., 6.5 for 6.5%)</p>
+                @error('tax_rate')<div class="text-sm text-red-600 mt-1">{{ $message }}</div>@enderror
+            </div>
+
+            <div class="pt-4 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-500">
+                        Tax rate will be applied to all orders
+                    </div>
+                    <div class="flex space-x-3">
+                        <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2" wire:loading.attr="disabled" wire:target="saveTax">
+                            <svg wire:loading wire:target="saveTax" class="animate-spin -ml-1 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4z"/>
+                            </svg>
+                            <span>Save</span>
                         </button>
                     </div>
                 </div>
@@ -140,18 +231,105 @@
             </div>
 
             <div class="pt-4 border-t border-gray-200 flex items-center justify-end" x-data="{saved:false}" x-on:social-saved.window="saved=true; setTimeout(()=> saved=false, 1200)">
-                <div x-show="saved" x-cloak class="text-sm text-green-700 bg-green-100 px-3 py-1 rounded inline-flex items-center gap-2"
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 translate-y-1"
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     x-transition:leave="transition ease-in duration-200"
-                     x-transition:leave-start="opacity-100 translate-y-0"
-                     x-transition:leave-end="opacity-0 translate-y-1">
-                    <svg class="w-4 h-4 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    Saved
-                </div>
-                <button type="submit" class="ml-auto px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Save</button>
+                <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2" wire:loading.attr="disabled" wire:target="saveTax">
+                    <svg wire:loading wire:target="saveSocialMedia" class="animate-spin -ml-1 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4z"/>
+                    </svg>
+                    <span>Save</span>
+                </button>
             </div>
         </div>
     </form>
 </div>
+
+<script>
+function phoneInput() {
+    return {
+        isOpen: false,
+        searchQuery: '',
+        phoneNumber: '',
+        selectedCountry: {
+            code: '+60',
+            label: 'MY (+60)',
+            country: 'Malaysia'
+        },
+        countries: @json($this->countryCodes),
+        filteredCountries: @json($this->countryCodes),
+        
+        init() {
+            // Set default country based on current store country_code
+            const currentCountryCode = @json($this->country_code);
+            if (currentCountryCode) {
+                const country = this.countries.find(c => c.code === currentCountryCode);
+                if (country) {
+                    this.selectedCountry = country;
+                }
+            }
+            
+            // Parse existing phone number
+            const currentPhone = @json($this->phone) || '';
+            if (currentPhone) {
+                this.parseExistingPhone(currentPhone);
+            }
+        },
+        
+        parseExistingPhone(phone) {
+            // Find country code in phone number
+            const countries = this.countries.sort((a, b) => b.code.length - a.code.length);
+            
+            for (const country of countries) {
+                if (phone.startsWith(country.code)) {
+                    this.selectedCountry = country;
+                    this.phoneNumber = phone.substring(country.code.length);
+                    return;
+                }
+            }
+            
+            // If no country code found, use the phone as is
+            this.phoneNumber = phone;
+        },
+        
+        toggleDropdown() {
+            this.isOpen = !this.isOpen;
+            if (this.isOpen) {
+                this.searchQuery = '';
+                this.filterCountries();
+            }
+        },
+        
+        closeDropdown() {
+            this.isOpen = false;
+        },
+        
+        filterCountries() {
+            if (!this.searchQuery) {
+                this.filteredCountries = this.countries;
+                return;
+            }
+            
+            const query = this.searchQuery.toLowerCase();
+            this.filteredCountries = this.countries.filter(country => 
+                country.label.toLowerCase().includes(query) ||
+                country.country.toLowerCase().includes(query) ||
+                country.code.includes(query)
+            );
+        },
+        
+        selectCountry(country) {
+            this.selectedCountry = country;
+            this.isOpen = false;
+            this.searchQuery = '';
+            this.updatePhoneNumber();
+            
+            // Update Livewire country_code
+            @this.set('country_code', country.code);
+        },
+        
+        updatePhoneNumber() {
+            // Update Livewire phone with just the phone number (continuation of country code)
+            @this.set('phone', this.phoneNumber);
+        },
+    }
+}
+</script>

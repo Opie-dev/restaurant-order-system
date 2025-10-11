@@ -11,15 +11,14 @@
       x-data="{ 
           sidebarOpen: true, 
           sidebarCollapsed: false,
-          flash: null 
+          flash: null,
+        flashType: null 
       }" 
       x-init="
-          // Check initial screen size and set sidebar state
           if (window.innerWidth < 1024) {
               sidebarOpen = false;
           }
           
-          // Listen for window resize events
           window.addEventListener('resize', () => {
               if (window.innerWidth < 1024) {
                   sidebarOpen = false;
@@ -29,11 +28,11 @@
           });
           
           window.addEventListener('flash', e => {
-              flash = e.detail;
-              // Auto-dismiss after 3 seconds
+              flash = e.detail.message || e.detail;
+              flashType = e.detail.type || 'success';
               setTimeout(() => flash = null, 3000);
           });
-          // Close sidebar on mobile when clicking outside
+          
           $watch('sidebarOpen', value => {
               if (value && window.innerWidth < 1024) {
                   document.body.classList.add('overflow-hidden');
@@ -503,23 +502,55 @@
         </main>
     </div>
 
-    <!-- Flash notifications -->
+    
     <template x-if="flash">
-        <div class="fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg z-50" 
-             :class="flash.includes('Invalid') ? 'bg-red-500 text-white' : 'bg-green-500 text-white'"
-             x-text="flash" 
+        <div class="fixed bottom-4 right-4 text-white px-4 py-3 rounded-lg z-50 shadow-lg min-w-64"
+             :class="flashType === 'error' ? 'bg-red-600' : 'bg-black'"
+             x-data="{ 
+                 progress: 100,
+                 duration: 3000,
+                 startTime: Date.now()
+             }"
+             x-init="
+                 const timer = setInterval(() => {
+                     const elapsed = Date.now() - startTime;
+                     const remaining = Math.max(0, duration - elapsed);
+                     progress = (remaining / duration) * 100;
+                     if (remaining <= 0) {
+                         clearInterval(timer);
+                         flash = null;
+                     }
+                 }, 50);
+                 setTimeout(() => flash = null, duration);
+             "
              x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="transform translate-y-2 opacity-0"
-             x-transition:enter-end="transform translate-y-0 opacity-100"
+             x-transition:enter-start="opacity-0 transform translate-y-2"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
              x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="transform translate-y-0 opacity-100"
-             x-transition:leave-end="transform translate-y-2 opacity-0">
+             x-transition:leave-start="opacity-100 transform translate-y-0"
+             x-transition:leave-end="opacity-0 transform translate-y-2">
+            
+            <!-- Toast Content -->
+            <div class="flex items-center justify-between mb-2">
+                <span x-text="flash" class="text-sm font-medium"></span>
+                <button @click="flash = null" class="text-gray-300 hover:text-white ml-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="w-full rounded-full h-1" :class="flashType === 'error' ? 'bg-red-700' : 'bg-gray-700'">
+                <div class="bg-white h-1 rounded-full transition-all duration-50 ease-linear" 
+                     :style="`width: ${progress}%`"></div>
+            </div>
         </div>
     </template>
 
     @livewireScripts
-    
-    <script>
+</body>
+<script>
     function toggleFullscreen() {
         const fullscreenIcon = document.getElementById('fullscreen-icon');
         
@@ -553,5 +584,4 @@
         }
     });
     </script>
-</body>
 </html>

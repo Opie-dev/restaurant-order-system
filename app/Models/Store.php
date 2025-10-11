@@ -23,9 +23,11 @@ class Store extends Model
         'postal_code',
         'phone',
         'email',
+        'country_code',
         'logo_path',
         'cover_path',
         'settings',
+        'tax_rate',
         'is_active',
         'is_onboarding',
         'admin_id',
@@ -33,6 +35,7 @@ class Store extends Model
 
     protected $casts = [
         'settings' => 'array',
+        'tax_rate' => 'decimal:2',
         'is_active' => 'boolean',
         'is_onboarding' => 'boolean',
     ];

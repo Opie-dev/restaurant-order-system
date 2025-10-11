@@ -9,6 +9,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use App\Services\Admin\OnboardingService;
 
 #[Layout('layouts.admin')]
 class StoreMedia extends Component
@@ -16,7 +17,9 @@ class StoreMedia extends Component
     use WithFileUploads;
 
     public ?Store $currentStore = null;
+
     private $storeService;
+    private $onboardingService;
 
     #[Validate('nullable|image|max:2048')]
     public $logo;
@@ -45,12 +48,14 @@ class StoreMedia extends Component
 
     public function boot(): void
     {
-        $this->storeService = app(StoreService::class);
+        $this->storeService = new StoreService();
+        $this->currentStore = $this->storeService->getCurrentStore();
+        $this->onboardingService = new OnboardingService($this->currentStore);
     }
 
     public function mount(): void
     {
-        $this->currentStore = $this->storeService->getCurrentStore();
+
         if (!$this->currentStore) {
             $this->redirectRoute('admin.stores.select');
             return;
@@ -64,7 +69,7 @@ class StoreMedia extends Component
         $this->validate();
 
         if (!$this->currentStore) {
-            session()->flash('error', 'No store selected.');
+            $this->dispatch('flash', type: 'error', message: 'No store selected.');
             return;
         }
 
@@ -94,8 +99,7 @@ class StoreMedia extends Component
         $this->logo = null;
         $this->cover = null;
 
-        session()->flash('success', 'Store media updated successfully.');
-        $this->dispatch('media-saved');
+        $this->dispatch('flash', type: 'success', message: 'Store media updated successfully.');
     }
 
     public function updatedLogo(): void
@@ -111,7 +115,8 @@ class StoreMedia extends Component
         $this->currentStore->update(['logo_path' => $logoPath]);
         $this->logo_path = $logoPath;
         $this->logo = null;
-        $this->dispatch('media-saved');
+
+        $this->dispatch('flash', type: 'success', message: 'Store logo updated successfully.');
     }
 
     public function updatedCover(): void
@@ -127,7 +132,8 @@ class StoreMedia extends Component
         $this->currentStore->update(['cover_path' => $coverPath]);
         $this->cover_path = $coverPath;
         $this->cover = null;
-        $this->dispatch('media-saved');
+
+        $this->dispatch('flash', type: 'success', message: 'Store cover updated successfully.');
     }
 
 
@@ -142,7 +148,8 @@ class StoreMedia extends Component
         }
         $this->currentStore->update(['logo_path' => null]);
         $this->logo_path = null;
-        $this->dispatch('media-saved');
+
+        $this->dispatch('flash', type: 'success', message: 'Store logo deleted successfully.');
     }
 
     public function deleteCover(): void
@@ -155,10 +162,9 @@ class StoreMedia extends Component
         }
         $this->currentStore->update(['cover_path' => null]);
         $this->cover_path = null;
-        $this->dispatch('media-saved');
+
+        $this->dispatch('flash', type: 'success', message: 'Store cover deleted successfully.');
     }
-
-
 
     public function render()
     {

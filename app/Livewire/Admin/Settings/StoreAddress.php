@@ -56,8 +56,7 @@ class StoreAddress extends Component
             'postal_code' => $this->postal_code,
         ]);
 
-        session()->flash('success', 'Store address updated.');
-        $this->dispatch('address-saved');
+        $this->dispatch('flash', type: 'success', message: 'Store address updated.');
     }
 
     public function render()

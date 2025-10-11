@@ -236,7 +236,7 @@ class Dashboard extends Component
         $this->currentStore->refresh();
         $this->onboardingService = new OnboardingService($this->currentStore);
 
-        session()->flash('success', 'Onboarding completed! Welcome to your dashboard.');
+        $this->dispatch('flash', type: 'success', message: 'Onboarding completed! Welcome to your dashboard.');
     }
 
     public function getOrderStatusCountsProperty()

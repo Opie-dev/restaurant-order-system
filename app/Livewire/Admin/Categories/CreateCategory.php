@@ -58,7 +58,7 @@ class CreateCategory extends Component
             'store_id' => $this->storeId,
         ]);
 
-        session()->flash('success', 'Category created successfully.');
+        $this->dispatch('flash', type: 'success', message: 'Category created successfully.');
 
         // Check if store is in onboarding mode
         $currentStore = $this->storeService->getCurrentStore();

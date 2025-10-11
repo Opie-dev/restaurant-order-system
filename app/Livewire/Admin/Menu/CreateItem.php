@@ -170,7 +170,7 @@ class CreateItem extends Component
 
         $item->save();
 
-        session()->flash('success', 'Menu item created.');
+        $this->dispatch('flash', type: 'success', message: 'Menu item created.');
 
         // Check if store is in onboarding mode
         if ($this->currentStore->is_onboarding) {

@@ -172,7 +172,7 @@ class EditItem extends Component
         ]);
 
         $status = $this->menuItem->is_active ? 'activated' : 'deactivated';
-        session()->flash('success', "Menu item has been {$status} successfully.");
+        $this->dispatch('flash', type: 'success', message: "Menu item has been {$status} successfully.");
     }
 
     public function save(): void
@@ -241,7 +241,7 @@ class EditItem extends Component
 
         $this->menuItem->save();
 
-        session()->flash('success', 'Menu item saved.');
+        $this->dispatch('flash', type: 'success', message: 'Menu item saved.');
         $this->redirectRoute('admin.menu.index');
     }
 

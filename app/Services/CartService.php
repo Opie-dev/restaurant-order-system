@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\MenuItem;
+use App\Models\Store;
 use Illuminate\Support\Facades\Auth;
 
 class CartService
@@ -270,12 +271,20 @@ class CartService
             $subtotal += $line['qty'] * $line['unit_price'];
         }
 
-        $tax = $subtotal * 0.08; // 8% tax
+        // Get tax rate from store
+        $taxRate = 0.0;
+        if ($storeId) {
+            $store = Store::find($storeId);
+            $taxRate = $store ? (float) $store->tax_rate : 0.0;
+        }
+
+        $tax = $subtotal * ($taxRate / 100);
         $total = $subtotal + $tax;
 
         return [
             'subtotal' => $subtotal,
             'tax' => $tax,
+            'tax_rate' => $taxRate,
             'total' => $total,
         ];
     }

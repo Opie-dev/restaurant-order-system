@@ -262,7 +262,7 @@
                                 </div>
                                 @endif
                                 <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Tax (8%):</span>
+                                    <span class="text-gray-600">Tax ({{ number_format($order->tax_rate, 1) }}%):</span>
                                     <span class="text-gray-900 font-medium">RM{{ number_format($order->tax, 2) }}</span>
                                 </div>
                                 <div class="border-t border-gray-300 pt-2 mt-3">

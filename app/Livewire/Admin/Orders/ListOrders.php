@@ -59,39 +59,6 @@ class ListOrders extends Component
         return ['all', 'pending', 'preparing', 'delivering', 'completed', 'cancelled'];
     }
 
-    public function updateOrderStatus($orderId, $newStatus, $cancellationRemarks = null, $trackingUrl = null, $deliveryFee = null): void
-    {
-        $order = Order::where('store_id', $this->storeId)->findOrFail($orderId);
-
-        if (!$order->canTransitionTo($newStatus)) {
-            session()->flash('error', 'Invalid status transition from ' . $order->status . ' to ' . $newStatus);
-            $this->dispatch('flash', 'Invalid status transition from ' . $order->status . ' to ' . $newStatus);
-            return;
-        }
-
-        $updateData = ['status' => $newStatus];
-
-        // Add cancellation remarks if cancelling
-        if ($newStatus === Order::STATUS_CANCELLED && $cancellationRemarks) {
-            $updateData['cancellation_remarks'] = $cancellationRemarks;
-        }
-
-        if ($newStatus === Order::STATUS_DELIVERING) {
-            $updateData['tracking_url'] = $trackingUrl;
-            $updateData['delivery_fee'] = $deliveryFee;
-            // Add delivery fee to existing total
-            $updateData['total'] = $order->total + $deliveryFee;
-        }
-        $order->update($updateData);
-
-        $message = $newStatus === Order::STATUS_CANCELLED
-            ? 'Order cancelled successfully'
-            : 'Order status updated to ' . ucfirst($newStatus);
-
-        session()->flash('success', $message);
-        $this->dispatch('flash', $message);
-    }
-
     public function getOrdersProperty()
     {
         return Order::with(['user', 'items'])

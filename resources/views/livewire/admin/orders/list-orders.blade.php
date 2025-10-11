@@ -4,37 +4,6 @@
     cancellationRemarks: '',
     openRowId: null
 }">
-    <!-- Flash Messages -->
-    @if (session()->has('success'))
-        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    @if (session()->has('error'))
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
-                </div>
-            </div>
-        </div>
-    @endif
-
     <!-- Cancellation Modal -->
     <div x-show="showCancelModal" 
          x-transition:enter="transition ease-out duration-300"
@@ -105,7 +74,7 @@
                 <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                Pending Orders
+                Kitchen
             </a>
         </div>
     </div>
@@ -146,9 +115,9 @@
     </div>
 
     <!-- Orders Table -->
-    <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
         @if($this->orders->count() > 0)
-            <div class="overflow-x-auto">
+            <div class="">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -160,7 +129,6 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delivery Fee</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -200,53 +168,6 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-500">{{ $order->created_at->format('M j, Y g:i A') }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex items-center justify-end space-x-2">
-                                        @if(!$order->isCompleted())
-                                            <div x-data="{ open: false }" class="relative inline-block">
-                                            <button @click.stop="open = !open" class="inline-flex items-center px-3 py-2 bg-purple-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                                </svg>
-                                                <svg class="ml-1 h-4 w-4 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                                </svg>
-                                            </button>
-                                                <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10 border border-gray-200">
-                                                    <div class="py-2">
-                                                        <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
-                                                            Change Status To:
-                                                        </div>
-                                                        @foreach($order->getValidTransitions() as $transition)
-                                                            @if($transition === 'cancelled')
-                                                                <button 
-                                                                    @click="orderId = {{ $order->id }}; showCancelModal = true; open = false" 
-                                                                    class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors"
-                                                                >
-                                                                    Cancel Order
-                                                                </button>
-                                                            @elseif($transition === 'delivering')
-                                                                <button 
-                                                                    @click="orderId = {{ $order->id }}; open = false; $dispatch('open-tracking-modal', { id: {{ $order->id }} })" 
-                                                                    class="block w-full text-left px-4 py-2 text-sm text-purple-700 hover:bg-purple-50 transition-colors"
-                                                                >
-                                                                    Mark as Delivering
-                                                                </button>
-                                                            @else
-                                                                <button 
-                                                                    wire:click="updateOrderStatus({{ $order->id }}, '{{ $transition }}')" 
-                                                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                                                >
-                                                                    Mark as {{ ucfirst($transition) }}
-                                                                </button>
-                                                            @endif
-                                                        @endforeach
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
-                                    </div>
                                 </td>
                             </tr>
                             
@@ -417,30 +338,5 @@
                 <p class="mt-1 text-sm text-gray-500">No orders match your current filters.</p>
             </div>
         @endif
-    </div>
-
-    <!-- Tracking URL Modal (embedded to keep single root) -->
-    <div x-data="{ open: false, url: '', deliveryFee: '', orderId: null }" x-on:open-tracking-modal.window="open=true; orderId=$event.detail.id; url=''; deliveryFee=''" x-show="open" class="fixed inset-0 z-50 overflow-y-auto" style="display:none;">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="open = false"></div>
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">Set Tracking URL</h3>
-                    <p class="mt-1 text-sm text-gray-600">Provide a tracking link for this delivery.</p>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700">Tracking URL</label>
-                        <input type="url" x-model="url" placeholder="https://..." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm" />
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700">Delivery Fee</label>
-                        <input type="number" x-model="deliveryFee" placeholder="0.00" step="0.01" min="0" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm" />
-                    </div>
-                </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button @click="$wire.updateOrderStatus(orderId, 'delivering', null, url, deliveryFee); open=false; url=''; deliveryFee=''" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm">Confirm</button>
-                    <button @click="open=false; url=''; deliveryFee=''" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
-                </div>
-            </div>
-        </div>
     </div>
 </div>

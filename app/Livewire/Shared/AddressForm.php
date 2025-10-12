@@ -77,6 +77,7 @@ class AddressForm extends Component
 
         // Handle phone number - if it contains country code, extract just the number part
         $this->phone = $this->editingAddress->phone ?? '';
+        // Add + prefix to country_code for display (stored without +)
         $this->country_code = $this->editingAddress->country_code ?? CountryCodes::getByCode('+60')['code'];
         $this->line1 = $this->editingAddress->line1;
         $this->line2 = $this->editingAddress->line2 ?? '';
@@ -105,7 +106,7 @@ class AddressForm extends Component
             'label' => $this->addressLabel,
             'recipient_name' => $this->recipientName,
             'phone' => $this->phone,
-            'country_code' => $this->country_code ?? CountryCodes::getByCode('+60')['code'],
+            'country_code' => ltrim($this->country_code, '+'),
             'line1' => $this->line1,
             'line2' => $this->line2,
             'city' => $this->city,

@@ -10,7 +10,13 @@ class Authenticate extends Middleware
     protected function redirectTo(Request $request)
     {
         if (!$request->expectsJson()) {
-            return route('menu.store.login', [$request->store]);
+            // Check if we're in a store context
+            if ($request->route('store')) {
+                return route('menu.store.login', ['store' => $request->route('store')]);
+            }
+
+            // Fallback to home page if no store context
+            return route('home');
         }
     }
 }

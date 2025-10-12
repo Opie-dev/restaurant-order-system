@@ -134,7 +134,9 @@ class StoreDetails extends Component
             $this->postal_code = $this->currentStore->postal_code ?? '';
             $this->phone = $this->currentStore->phone ?? '';
             $this->email = $this->currentStore->email ?? '';
-            $this->country_code = $this->currentStore->country_code ?? CountryCodes::getByCode('+60')['code'];
+            // Add + prefix to country_code for display (stored without +)
+            $storedCountryCode = $this->currentStore->country_code ?? '60';
+            $this->country_code = '+' . ltrim($storedCountryCode, '+');
             $this->logo_path = $this->currentStore->logo_path;
             $this->cover_path = $this->currentStore->cover_path;
 
@@ -240,7 +242,7 @@ class StoreDetails extends Component
             'postal_code' => $this->postal_code,
             'phone' => $this->phone,
             'email' => $this->email,
-            'country_code' => $this->country_code,
+            'country_code' => ltrim($this->country_code, '+'),
         ]);
 
         $this->dispatch('flash', type: 'success', message: 'Store details updated successfully.');

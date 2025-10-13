@@ -30,8 +30,14 @@ use App\Livewire\Customer\OrderHistory as CustomerOrderHistory;
 use App\Livewire\Admin\Settings\StoreMedia as AdminStoreMedia;
 use App\Livewire\Admin\Settings\StoreAddress as AdminStoreAddress;
 use App\Livewire\Admin\Settings\StoreHours as AdminStoreHours;
+use Illuminate\Support\Facades\Auth;
 use App\Livewire\Welcome as WelcomePage;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\QrCodeController;
+use App\Livewire\Admin\Tables\ListTables;
+use App\Livewire\Admin\QrCodes\QrGenerator;
+use App\Livewire\Admin\Tables\TableForm;
+use App\Http\Controllers\Admin\AdminQrController;
 
 Route::get('/', WelcomePage::class)->name('home');
 
@@ -43,46 +49,60 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::redirect('/', '/admin/dashboard');
 
     // Store management routes (no store selection required)
-    Route::get('/stores/select', StoreSelector::class)->name('stores.select');
-    Route::get('/stores/create', CreateStore::class)->name('stores.create');
-
-    // Store selection handler
-    Route::post('/stores/select', function () {
-        $storeId = request('store_id');
-        $store = \Illuminate\Support\Facades\Auth::user()->stores()->find($storeId);
-
-        if ($store) {
-            session(['current_store_id' => $store->id]);
-            return redirect()->route('admin.dashboard')
-                ->with('success', "Switched to {$store->name}");
-        }
-
-        return redirect()->route('admin.stores.select')
-            ->with('error', 'Invalid store selected');
-    })->name('stores.select.post');
+    Route::prefix('stores')->name('stores.')->group(function (): void {
+        Route::get('/select', StoreSelector::class)->name('select');
+        Route::get('/create', CreateStore::class)->name('create');
+    });
 
     // All other admin routes require store selection
     Route::middleware('store.selected')->group(function (): void {
         Route::get('/dashboard', Dashboard::class)->name('dashboard');
 
-        Route::get('/menu', ListItems::class)->name('menu.index');
-        Route::get('/menu/create', CreateItem::class)->name('menu.create');
-        Route::get('/menu/{menuItem}/edit', EditItem::class)->whereNumber('menuItem')->name('menu.edit');
+        Route::prefix('menu')->name('menu.')->group(function (): void {
+            Route::get('/', ListItems::class)->name('index');
+            Route::get('/create', CreateItem::class)->name('create');
+            Route::get('/{menuItem}/edit', EditItem::class)->whereNumber('menuItem')->name('edit');
+        });
         // Preview route removed
 
-        Route::get('/categories', ListCategories::class)->name('categories.index');
-        Route::get('/categories/create', CreateCategory::class)->name('categories.create');
-        Route::get('/orders', ListOrders::class)->name('orders.index');
-        Route::get('/orders/pending', PendingOrders::class)->name('orders.pending');
-        Route::get('/customers', ListUsers::class)->name('customers.index');
-        Route::get('/customers/create', CreateUser::class)->name('customers.create');
-        Route::get('/customers/{customer}/manage', ManageCustomer::class)->name('customers.manage');
+        Route::prefix('categories')->name('categories.')->group(function (): void {
+            Route::get('/', ListCategories::class)->name('index');
+            Route::get('/create', CreateCategory::class)->name('create');
+        });
 
-        Route::get('/settings/store-details', StoreDetails::class)->name('settings.store-details');
-        Route::get('/settings/store-media', AdminStoreMedia::class)->name('settings.store-media');
-        Route::get('/settings/store-address', AdminStoreAddress::class)->name('settings.store-address');
-        Route::get('/settings/store-hours', AdminStoreHours::class)->name('settings.store-hours');
-        Route::get('/settings/security', Security::class)->name('settings.security');
+        Route::prefix('orders')->name('orders.')->group(function (): void {
+            Route::get('/', ListOrders::class)->name('index');
+            Route::get('/pending', PendingOrders::class)->name('pending');
+        });
+        // Kitchen display removed
+
+        Route::prefix('customers')->name('customers.')->group(function (): void {
+            Route::get('/', ListUsers::class)->name('index');
+            Route::get('/create', CreateUser::class)->name('create');
+            Route::get('/{customer}/manage', ManageCustomer::class)->name('manage');
+        });
+
+        Route::prefix('settings')->name('settings.')->group(function (): void {
+            Route::get('/store-details', StoreDetails::class)->name('store-details');
+            Route::get('/store-media', AdminStoreMedia::class)->name('store-media');
+            Route::get('/store-address', AdminStoreAddress::class)->name('store-address');
+            Route::get('/store-hours', AdminStoreHours::class)->name('store-hours');
+            Route::get('/security', Security::class)->name('security');
+        });
+
+        // Table management routes
+        // Route::prefix('tables')->name('tables.')->group(function (): void {
+        //     Route::get('/', ListTables::class)->name('index');
+        //     Route::get('/create', TableForm::class)->name('create');
+        //     Route::get('/{table}/edit', TableForm::class)->name('edit');
+        // });
+
+        // QR code management routes (essentials only)
+        // Route::prefix('qr-codes')->name('qr-codes.')->group(function (): void {
+        //     Route::get('/create', QrGenerator::class)->name('create');
+        //     Route::post('/generate-all', [AdminQrController::class, 'generateAll'])->name('generate-all');
+        // });
+
         Route::post('/logout', [AuthController::class, 'merchantLogout'])->name('logout');
     });
 });
@@ -105,6 +125,8 @@ Route::group([
     });
 });
 
+// Table QR code routes removed
+Route::get('/table/{qrCode}', [QrCodeController::class, 'redirect'])->name('table.menu');
 // Early access subscription page
 Route::get('/subscribe', Subscribe::class)->name('subscribe');
 Route::get('/stores', StoresShowcase::class)->name('stores.index');

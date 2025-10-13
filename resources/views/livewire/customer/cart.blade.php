@@ -1,6 +1,6 @@
 <div>
     <div class="@if($this->store->cover_image && !empty($this->lines)) fixed top-0 left-0 right-0 z-10 @else block @endif">
-        @include('livewire.customer._baner')
+        @include('livewire.customer._baner', ['tableNumber' => $tableNumber])
     </div>
     <div class="p-6">
         <div class="@if($this->store->cover_image && !empty($this->lines)) mt-[16rem] lg:mt-[20rem] @endif flex items-center justify-between">

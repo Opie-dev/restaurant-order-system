@@ -18,6 +18,7 @@ class ListOrders extends Component
 
     public string $search = '';
     public string $status = 'all';
+    public string $orderType = 'all';
     public ?int $user = null;
     private $storeService;
     public $storeId;
@@ -25,6 +26,7 @@ class ListOrders extends Component
     protected $queryString = [
         'search' => ['except' => ''],
         'status' => ['except' => 'pending'],
+        'orderType' => ['except' => 'all'],
     ];
 
     public function boot()
@@ -47,10 +49,16 @@ class ListOrders extends Component
         $this->resetPage();
     }
 
+    public function updatingOrderType(): void
+    {
+        $this->resetPage();
+    }
+
     public function clearFilters(): void
     {
         $this->search = '';
         $this->status = 'all';
+        $this->orderType = 'all';
         $this->resetPage();
     }
 
@@ -59,15 +67,30 @@ class ListOrders extends Component
         return ['all', 'pending', 'preparing', 'delivering', 'completed', 'cancelled'];
     }
 
+    public function getOrderTypesProperty(): array
+    {
+        return ['all', 'table', 'delivery', 'pickup'];
+    }
+
     public function getOrdersProperty()
     {
-        return Order::with(['user', 'items'])
+        return Order::with(['user', 'items', 'table'])
             ->where('store_id', $this->storeId)
             ->when(strlen($this->search) > 0, function ($q) {
-                $q->where('code', 'like', '%' . trim($this->search) . '%');
+                $q->where('code', 'like', '%' . trim($this->search) . '%')
+                    ->orWhere('table_number', 'like', '%' . trim($this->search) . '%');
             })
             ->when($this->status !== 'all', function ($q) {
                 $q->where('status', $this->status);
+            })
+            ->when($this->orderType !== 'all', function ($q) {
+                if ($this->orderType === 'table') {
+                    $q->whereNotNull('table_id');
+                } elseif ($this->orderType === 'delivery') {
+                    $q->where('delivery_fee', '>', 0);
+                } elseif ($this->orderType === 'pickup') {
+                    $q->whereNull('table_id')->where('delivery_fee', 0);
+                }
             })
             ->when($this->user !== null, function ($q) {
                 $q->where('user_id', $this->user);

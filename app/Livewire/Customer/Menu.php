@@ -18,6 +18,11 @@ class Menu extends Component
     public ?int $categoryId = null;
     public ?Store $store = null;
 
+    // Table context (from QR code)
+    public ?int $tableId = null;
+    public ?string $tableNumber = null;
+    public ?string $qrCode = null;
+
     protected CartService $cartService;
 
     public function boot(CartService $cartService)
@@ -28,6 +33,11 @@ class Menu extends Component
     public function mount(Request $request)
     {
         $this->store = $request->store;
+
+        // Check for table context from QR code
+        $this->tableId = session('current_table_id');
+        $this->tableNumber = session('current_table_number');
+        $this->qrCode = session('current_qr_code');
     }
 
     public array $config = [];

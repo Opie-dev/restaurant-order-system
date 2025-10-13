@@ -26,6 +26,12 @@ class Checkout extends Component
     public ?Store $store = null;
     public int $timeRemaining = 0;
     public bool $cartExpired = false;
+
+    // Table context (from QR code)
+    public ?int $tableId = null;
+    public ?string $tableNumber = null;
+    public ?string $qrCode = null;
+
     protected CartService $cartService;
 
     public function boot(CartService $cartService)
@@ -37,6 +43,11 @@ class Checkout extends Component
     public function mount(Request $request)
     {
         $this->store = $request->store;
+
+        // Check for table context from QR code
+        $this->tableId = session('current_table_id');
+        $this->tableNumber = session('current_table_number');
+        $this->qrCode = session('current_qr_code');
 
         // Check if cart is expired and clear if necessary
         if ($this->cartService->checkAndClearExpiredCart($this->store?->id)) {
@@ -178,6 +189,8 @@ class Checkout extends Component
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'store_id' => $this->store?->id,
+                'table_id' => $this->tableId,
+                'table_number' => $this->tableNumber,
                 'address_id' => $address?->id,
                 'code' => strtoupper(Str::random(6)),
                 'status' => Order::STATUS_PENDING,
@@ -231,6 +244,11 @@ class Checkout extends Component
                     'admin_email' => $this->store->admin?->email,
                     'error' => $emailException->getMessage()
                 ]);
+            }
+
+            // Clear table context after successful order
+            if ($this->tableId) {
+                session()->forget(['current_table_id', 'current_table_number', 'current_qr_code']);
             }
 
             // Show success message

@@ -70,6 +70,11 @@ class Store extends Model
         return $this->hasMany(Order::class);
     }
 
+    public function tables(): HasMany
+    {
+        return $this->hasMany(Table::class);
+    }
+
     /**
      * Check if the store is currently open based on opening hours
      */

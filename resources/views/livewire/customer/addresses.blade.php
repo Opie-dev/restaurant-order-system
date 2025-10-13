@@ -3,7 +3,7 @@
         <!-- Main Content Area -->
         <div class="flex-1 overflow-y-auto">
             <div class="fixed top-0 left-0 right-0 z-10">
-                @include('livewire.customer._baner')
+                @include('livewire.customer._baner', ['tableNumber' => $tableNumber])
             </div>
 
             <div class="mt-[10rem] lg:mt-[20rem]">

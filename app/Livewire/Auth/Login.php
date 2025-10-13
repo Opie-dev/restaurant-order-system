@@ -30,6 +30,7 @@ class Login extends Component
     public function mount(Request $request)
     {
         $this->store = $request->store;
+        
     }
 
     public function authenticate(): void

@@ -94,12 +94,12 @@
 
     <!-- Filters -->
     <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Search Orders</label>
                 <input type="text" 
                        wire:model.live.debounce.300ms="search" 
-                       placeholder="Search by order code..." 
+                       placeholder="Search by order code or table..." 
                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
             </div>
             <div>
@@ -108,6 +108,15 @@
                     <option value="all">All Statuses</option>
                     @foreach($this->statuses as $statusOption)
                         <option value="{{ $statusOption }}">{{ ucfirst($statusOption) }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Order Type</label>
+                <select wire:model.live="orderType" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    <option value="all">All Types</option>
+                    @foreach($this->orderTypes as $orderTypeOption)
+                        <option value="{{ $orderTypeOption }}">{{ ucfirst($orderTypeOption) }}</option>
                     @endforeach
                 </select>
             </div>
@@ -123,6 +132,8 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                            {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Table</th> --}}
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
@@ -140,6 +151,23 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">{{ $order->user?->name ?? 'Guest' }}</div>
+                                </td>
+                                {{-- <td class="px-6 py-4 whitespace-nowrap">
+                                    @if($order->table)
+                                        <div class="text-sm text-gray-900">
+                                            <div class="font-medium">Table {{ $order->table_number }}</div>
+                                            @if($order->table->location_description)
+                                                <div class="text-xs text-gray-500">{{ $order->table->location_description }}</div>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <span class="text-sm text-gray-400">-</span>
+                                    @endif
+                                </td> --}}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $order->order_type_color_class }}">
+                                        {{ $order->order_type_display }}
+                                    </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $order->getStatusColorClass() }}">
@@ -173,8 +201,26 @@
                             
                             <!-- Expandable Order Details -->
                             <tr id="details-{{ $order->id }}" x-show="openRowId === {{ $order->id }}" class="bg-gray-50">
-                                <td colspan="9" class="px-6 py-4">
+                                <td colspan="10" class="px-6 py-4">
                                     <div class="space-y-4">
+                                        <!-- Order Information -->
+                                        @if($order->table)
+                                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                                <div class="flex items-start">
+                                                    <svg class="w-4 h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                                    </svg>
+                                                    <div>
+                                                        <span class="text-sm font-medium text-blue-800">Table Order:</span>
+                                                        <div class="text-sm text-blue-700 mt-1">
+                                                            <div>Table {{ $order->table_number }} - {{ $order->table->location_description ?? 'Main Area' }}</div>
+                                                            <div class="text-xs text-blue-600 mt-1">Capacity: {{ $order->table->capacity }} people</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+
                                         <!-- Order Items -->
                                         <div>
                                             <h4 class="text-sm font-medium text-gray-900 mb-3">Order Items</h4>

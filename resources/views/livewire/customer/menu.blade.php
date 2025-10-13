@@ -2,7 +2,7 @@
     <!-- Main Content Area -->
     <div class="overflow-y-auto" id="menu-scroll">
         <div class="@if($this->items->isEmpty())  @else fixed  @endif top-0 left-0 right-0 z-10">
-            @include('livewire.customer._baner')
+            @include('livewire.customer._baner', ['tableNumber' => $tableNumber])
 
             <!-- Category Filters -->
             @php 

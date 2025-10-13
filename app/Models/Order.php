@@ -29,6 +29,8 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'store_id',
+        'table_id',
+        'table_number',
         'address_id',
         'code',
         'status',
@@ -69,6 +71,11 @@ class Order extends Model
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
+    }
+
+    public function table(): BelongsTo
+    {
+        return $this->belongsTo(Table::class);
     }
 
     public function items(): HasMany
@@ -150,5 +157,69 @@ class Order extends Model
             self::PAYMENT_STATUS_REFUNDED => 'bg-blue-100 text-blue-800',
             default => 'bg-gray-100 text-gray-800'
         };
+    }
+
+    /**
+     * Get order type (table, delivery, pickup)
+     */
+    public function getOrderTypeAttribute(): string
+    {
+        if ($this->table_id) {
+            return 'table';
+        } elseif ($this->delivery_fee > 0) {
+            return 'delivery';
+        } else {
+            return 'pickup';
+        }
+    }
+
+    /**
+     * Get order type display text
+     */
+    public function getOrderTypeDisplayAttribute(): string
+    {
+        return match ($this->order_type) {
+            'table' => "Table {$this->table_number}",
+            'delivery' => 'Delivery',
+            'pickup' => 'Pickup',
+            default => 'Unknown'
+        };
+    }
+
+    /**
+     * Get order type color class for UI
+     */
+    public function getOrderTypeColorClassAttribute(): string
+    {
+        return match ($this->order_type) {
+            'table' => 'bg-blue-100 text-blue-800',
+            'delivery' => 'bg-green-100 text-green-800',
+            'pickup' => 'bg-gray-100 text-gray-800',
+            default => 'bg-gray-100 text-gray-800'
+        };
+    }
+
+    /**
+     * Check if order is table-based
+     */
+    public function isTableOrder(): bool
+    {
+        return !is_null($this->table_id);
+    }
+
+    /**
+     * Check if order is delivery
+     */
+    public function isDeliveryOrder(): bool
+    {
+        return $this->delivery_fee > 0;
+    }
+
+    /**
+     * Check if order is pickup
+     */
+    public function isPickupOrder(): bool
+    {
+        return !$this->isTableOrder() && !$this->isDeliveryOrder();
     }
 }

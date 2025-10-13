@@ -1,6 +1,6 @@
 <div class="mx-auto px-6 py-8">
     <div class="fixed top-0 left-0 right-0 z-10">
-        @include('livewire.customer._baner')
+        @include('livewire.customer._baner', ['tableNumber' => $tableNumber])
     </div>
     <div class="mt-[10rem] lg:mt-[20rem]">
     <h1 class="text-2xl font-bold text-gray-900 mb-6">Checkout</h1>

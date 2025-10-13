@@ -256,7 +256,7 @@
                 <input wire:model.live.debounce.300ms="search" 
                         id="search" 
                         class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm" 
-                        placeholder="Search by order code..." 
+                        placeholder="Search by order code or table..." 
                         type="search">
             </div>
         </div>
@@ -280,6 +280,9 @@
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $order->getPaymentStatusColorClass() }}">
                                     {{ ucfirst($order->payment_status) }}
                                 </span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $order->order_type_color_class }}">
+                                    {{ $order->order_type_display }}
+                                </span>
                             </div>
                             <div class="flex items-center space-x-4 text-sm text-gray-500">
                                 <span>{{ $order->user?->name ?? 'Guest' }}</span>
@@ -287,6 +290,10 @@
                                 <span>{{ $order->created_at->format('M j, Y g:i A') }}</span>
                                 <span>•</span>
                                 <span>{{ $order->items->sum('qty') }} items</span>
+                                @if($order->table)
+                                    <span>•</span>
+                                    <span class="text-blue-600 font-medium">Table {{ $order->table_number }}</span>
+                                @endif
                                 @if($order->delivery_fee)
                                     <span>•</span>
                                     <span class="text-green-600 font-medium">Delivery: RM{{ number_format($order->delivery_fee, 2) }}</span>

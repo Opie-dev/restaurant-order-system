@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'store.selected' => \App\Http\Middleware\EnsureStoreSelected::class,
             'customer.only' => \App\Http\Middleware\EnsureCustomerRole::class,
             'resolve.store' => \App\Http\Middleware\ResolveStoreFromSlug::class,
+            'verify.qr' => \App\Http\Middleware\VerifyQrCode::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -134,6 +134,15 @@
                 <span x-show="sidebarOpen">Orders</span>
             </a>
 
+            {{-- <a href="{{ route('admin.tables.index') }}" 
+               class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.tables.*') || request()->routeIs('admin.qr-codes.*') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+               :title="sidebarOpen ? '' : 'Tables & QR Codes'">
+                <svg class="h-5 w-5 flex-shrink-0" :class="sidebarOpen ? 'mr-3' : 'mx-auto'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                <span x-show="sidebarOpen">Tables & QR Codes</span>
+            </a> --}}
+
             <a href="{{ route('admin.customers.index') }}" 
                class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.customers.*') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                :title="sidebarOpen ? '' : 'Customers'">

@@ -16,6 +16,11 @@ class OrderHistory extends Component
     public string $search = '';
     public ?Store $store = null;
 
+    // Table context (from QR code)
+    public ?int $tableId = null;
+    public ?string $tableNumber = null;
+    public ?string $qrCode = null;
+
     protected $queryString = [
         'status' => ['except' => 'all'],
         'search' => ['except' => ''],
@@ -24,6 +29,11 @@ class OrderHistory extends Component
     public function mount(Request $request)
     {
         $this->store = $request->store;
+
+        // Check for table context from QR code
+        $this->tableId = session('current_table_id');
+        $this->tableNumber = session('current_table_number');
+        $this->qrCode = session('current_qr_code');
     }
 
     public function getStatusesProperty(): array

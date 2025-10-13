@@ -124,10 +124,11 @@ class PendingOrders extends Component
 
     public function getPendingOrdersProperty()
     {
-        return Order::with(['user', 'items'])
+        return Order::with(['user', 'items', 'table'])
             ->whereIn('status', [Order::STATUS_PENDING, Order::STATUS_PREPARING, Order::STATUS_DELIVERING])
             ->when(strlen($this->search) > 0, function ($q) {
-                $q->where('code', 'like', '%' . trim($this->search) . '%');
+                $q->where('code', 'like', '%' . trim($this->search) . '%')
+                    ->orWhere('table_number', 'like', '%' . trim($this->search) . '%');
             })
             ->orderBy('created_at', 'desc')
             ->paginate(15);

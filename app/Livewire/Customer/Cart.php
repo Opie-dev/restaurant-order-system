@@ -18,6 +18,11 @@ class Cart extends Component
     public int $timeRemaining = 0;
     public bool $cartExpired = false;
 
+    // Table context (from QR code)
+    public ?int $tableId = null;
+    public ?string $tableNumber = null;
+    public ?string $qrCode = null;
+
     public function boot(CartService $cartService)
     {
         $this->cartService = $cartService;
@@ -26,6 +31,11 @@ class Cart extends Component
     public function mount(Request $request)
     {
         $this->store = $request->store;
+
+        // Check for table context from QR code
+        $this->tableId = session('current_table_id');
+        $this->tableNumber = session('current_table_number');
+        $this->qrCode = session('current_qr_code');
 
         // Check if cart is expired and clear if necessary
         if ($this->cartService->checkAndClearExpiredCart($this->store?->id)) {

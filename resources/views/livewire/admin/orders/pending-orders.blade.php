@@ -277,12 +277,12 @@
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $order->getStatusColorClass() }}">
                                     {{ ucfirst($order->status) }}
                                 </span>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $order->getPaymentStatusColorClass() }}">
+                                {{-- <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $order->getPaymentStatusColorClass() }}">
                                     {{ ucfirst($order->payment_status) }}
-                                </span>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $order->order_type_color_class }}">
+                                </span> --}}
+                                {{-- <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $order->order_type_color_class }}">
                                     {{ $order->order_type_display }}
-                                </span>
+                                </span> --}}
                             </div>
                             <div class="flex items-center space-x-4 text-sm text-gray-500">
                                 <span>{{ $order->user?->name ?? 'Guest' }}</span>

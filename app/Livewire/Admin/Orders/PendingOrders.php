@@ -6,6 +6,7 @@ use App\Models\Order;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Services\Admin\StoreService;
 
 #[Layout('layouts.admin')]
 class PendingOrders extends Component
@@ -24,9 +25,17 @@ class PendingOrders extends Component
     public ?string $lastOrderTimestamp = null;
     public int $newOrderCount = 0;
 
+    private $storeService;
+    public $store;
+
     protected $queryString = [
         'search' => ['except' => ''],
     ];
+
+    public function boot()
+    {
+        $this->storeService = new StoreService();
+    }
 
     public function updatingSearch(): void
     {
@@ -126,6 +135,7 @@ class PendingOrders extends Component
     {
         return Order::with(['user', 'items', 'table'])
             ->whereIn('status', [Order::STATUS_PENDING, Order::STATUS_PREPARING, Order::STATUS_DELIVERING])
+            ->where('store_id', $this->store->id)
             ->when(strlen($this->search) > 0, function ($q) {
                 $q->where('code', 'like', '%' . trim($this->search) . '%')
                     ->orWhere('table_number', 'like', '%' . trim($this->search) . '%');
@@ -136,17 +146,17 @@ class PendingOrders extends Component
 
     public function getPendingCountProperty(): int
     {
-        return Order::where('status', Order::STATUS_PENDING)->count();
+        return Order::where('status', Order::STATUS_PENDING)->where('store_id', $this->store->id)->count();
     }
 
     public function getPreparingCountProperty(): int
     {
-        return Order::where('status', Order::STATUS_PREPARING)->count();
+        return Order::where('status', Order::STATUS_PREPARING)->where('store_id', $this->store->id)->count();
     }
 
     public function getDeliveringCountProperty(): int
     {
-        return Order::where('status', Order::STATUS_DELIVERING)->count();
+        return Order::where('status', Order::STATUS_DELIVERING)->where('store_id', $this->store->id)->count();
     }
 
     // Real-time methods
@@ -154,6 +164,7 @@ class PendingOrders extends Component
     {
         if ($this->lastOrderTimestamp) {
             $newOrders = Order::whereIn('status', [Order::STATUS_PENDING, Order::STATUS_PREPARING, Order::STATUS_DELIVERING])
+                ->where('store_id', $this->store->id)
                 ->where('created_at', '>', $this->lastOrderTimestamp)
                 ->count();
 
@@ -179,6 +190,7 @@ class PendingOrders extends Component
     {
         // Initialize with current timestamp
         $this->lastOrderTimestamp = now()->toDateTimeString();
+        $this->store = $this->storeService->getCurrentStore();
     }
 
     // Removed ready/delivered count from pending page per new flow
